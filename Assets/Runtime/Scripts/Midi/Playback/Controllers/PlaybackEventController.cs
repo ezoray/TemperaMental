@@ -1,8 +1,9 @@
-using System;
 using System.Collections.Generic;
 using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Multimedia;
 using Tempera.Mental.Frames;
+using Tempera.Mental.Logs;
+using Tempera.Mental.Midi.Devices;
 using Tempera.Mental.Midi.Transforms;
 using UnityEngine;
 using UnityEngine.Events;
@@ -11,36 +12,40 @@ namespace Tempera.Mental.Midi.Playbacks
 {
     public class PlaybackEventController : MonoBehaviour
     {
+        [SerializeField] DeviceManager deviceManager;
         [SerializeField] PlaybackManager playbackManager;
         [SerializeField] TransformService midiTransformService;
         [SerializeField] FrameManager frameManager;
         [SerializeField] UnityEvent<string> onSetOutputDevice;
 
-        private void Start()
+
+        public void OnDeviceRemoved(string deviceName)
         {
-            try
+            // todo check device removed isn't the one being used
+            if(deviceName.Equals(playbackManager.OutputDeviceName))
             {
-                foreach (var device in OutputDevice.GetAll())
-                {
-                    Debug.Log("Device: " + device.Name);
-                } 
-
-                OutputDevice outputDevice = OutputDevice.GetByName("MidiView");
-                outputDevice.PrepareForEventsSending();
-
-                playbackManager.OutputDevice = outputDevice;
-
-                onSetOutputDevice?.Invoke(outputDevice.Name);
+                playbackManager.StopPlayback();
             }
-            catch(Exception ex)
+        }
+
+        public void OnDeviceAdded(string deviceName)
+        {
+
+        }
+
+        public void OnDeviceChanged(string deviceName)
+        {
+            LogMan.Log("OnDeviceChanged: " + deviceName);
+
+            if(deviceManager.TryGetOutputDevice(deviceName, out var outputDevice))
             {
-                Debug.LogError("PlaybackEventController error getting device: " + ex);
+                playbackManager.SetOutputDevice(outputDevice as OutputDevice);
             }
         }
 
         public void OnClickPlayMidiFile()
         {
-            Debug.Log("OnClickPlayMidiFile frames: " + frameManager.Frames.Count);
+            LogMan.Log("OnClickPlayMidiFile frames: " + frameManager.Frames.Count);
 
             List<Frame> frames = frameManager.Frames;
             MidiFile midiFile = midiTransformService.FromFramesToMidiFile(frames);

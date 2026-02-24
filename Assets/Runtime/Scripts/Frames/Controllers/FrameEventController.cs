@@ -12,7 +12,7 @@ namespace Tempera.Mental.Frames
 
         void Start()
         {
-            Debug.Log("Start");
+ 
         }
 
         public void OnClickDeleteFrame()

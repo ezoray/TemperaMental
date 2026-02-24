@@ -1,10 +1,8 @@
-using System;
 using System.Collections.Generic;
 using Tempera.Mental.Core;
 using Tempera.Mental.Utils;
 using UnityEngine;
 using UnityEngine.Events;
-using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 
 namespace Tempera.Mental.Frames
 {
