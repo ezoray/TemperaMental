@@ -2,77 +2,104 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Melanchall.DryWetMidi.Core;
+using SFB;
 using Tempera.Mental.Frames;
+using Tempera.Mental.Logs;
 using Tempera.Mental.Midi.Transforms;
 using UnityEngine;
 
 namespace Tempera.Mental.Midi.Core
 {
+    // todo loading and saving are currently blocking, use their async counterparts
     public class MidiEventController : MonoBehaviour
     {
         [SerializeField] FrameManager frameManager;
         [SerializeField] TransformService midiTransformService;
 
-
-        public void OnSliderSetBpmValue(float bpm)
-        {
-            Debug.Log("OnSliderSetBpmValue: " + bpm);
-
-            midiTransformService.SetBpm((int)bpm);
-        }
+        ExtensionFilter[] loadFileExtensions = new[] { new ExtensionFilter("Midi","mid", "midi") };
+        ExtensionFilter[] saveFileExtensions = new[] { new ExtensionFilter("Midi", "mid") };
 
         public void OnClickLoadMidiFileAndAppendFrames()
         {
-            Debug.Log("OnClickLoadMidiFileAndAppendFrames: " + Application.persistentDataPath);
+            Debug.Log("OnClickLoadMidiFileAndAppendFrames");
 
             try
             {
-                string fullPath = Path.Combine(Application.persistentDataPath, "demo.mid");
-                MidiFile midiFile = MidiFile.Read(fullPath);
+                string[] paths = StandaloneFileBrowser.OpenFilePanel("Open Midi File", "", loadFileExtensions, false);
 
-                List<Frame> frames = midiTransformService.FromMidiFileToFrames(midiFile);
+                if (paths != null && paths.Length > 0)
+                {
+                    if (!string.IsNullOrEmpty(paths[0]))
+                    {
+                        MidiFile midiFile = MidiFile.Read(paths[0]);
 
-                frameManager.AppendFrames(frames);
+                        List<Frame> frames = midiTransformService.FromMidiFileToFrames(midiFile);
+                        frameManager.AppendFrames(frames);
+
+                        LogMan.Log("File appended: " + paths[0]);
+                    }
+                }
             }
             catch (Exception ex)
             {
-                Debug.LogError("OnClickLoadMidiFileAndAppendFrames: " + ex);
+                LogMan.LogError(ex.Message);
             }
         }
 
         public void OnClickLoadMidiFileAsFrames()
         {
-            Debug.Log("OnClickLoadMidiFileAsFrames: " + Application.persistentDataPath);
+            Debug.Log("OnClickLoadMidiFileAsFrames");
 
             try
             {
-                string fullPath = Path.Combine(Application.persistentDataPath, "demo.mid");
-                MidiFile midiFile = MidiFile.Read(fullPath);
+                string[] paths = StandaloneFileBrowser.OpenFilePanel("Open Midi File", "", loadFileExtensions, false);
 
-                List<Frame> frames = midiTransformService.FromMidiFileToFrames(midiFile);
+                if (paths != null && paths.Length > 0)
+                {
+                    if (!string.IsNullOrEmpty(paths[0]))
+                    {
+                        MidiFile midiFile = MidiFile.Read(paths[0]);
 
-                frameManager.AddFrames(frames);
+                        List<Frame> frames = midiTransformService.FromMidiFileToFrames(midiFile);
+                        frameManager.AddFrames(frames);
+
+                        LogMan.Log("File loaded: " + paths[0]);
+                    }
+                }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                Debug.LogError("OnClickLoadMidiFileAsFrames: " + ex);
+                LogMan.LogError(ex.Message);
             }
         }
 
         public void OnClickSaveFramesAsMidiFile()
         {
-            Debug.Log("OnClickSaveFramesAsMidiFile: " + Application.persistentDataPath);
+            Debug.Log("OnClickSaveFramesAsMidiFile");
+
             try
             {
-                MidiFile midiFile = midiTransformService.FromFramesToMidiFile(frameManager.Frames);
+                string savePath = StandaloneFileBrowser.SaveFilePanel("Save Midi File", "", "", saveFileExtensions);
 
-                string fullPath = Path.Combine(Application.persistentDataPath, "demo.mid");
-                midiFile.Write(fullPath,true);
+                if(!string.IsNullOrEmpty(savePath))
+                {
+                    MidiFile midiFile = midiTransformService.FromFramesToMidiFile(frameManager.Frames);
+                    midiFile.Write(savePath, true);
+
+                    LogMan.Log("File saved: " + savePath);
+                }
+
             }
             catch (Exception ex)
             {
-                Debug.LogError("OnClickSaveFramesAsMidiFile: " + ex);
-            }     
+                LogMan.LogError(ex.Message);
+            }
+        }
+        public void OnSliderSetBpmValue(float bpm)
+        {
+            Debug.Log("OnSliderSetBpmValue: " + bpm);
+
+            midiTransformService.SetBpm((int)bpm);
         }
 
         public void OnClickConvertFramesToMidiFile()
