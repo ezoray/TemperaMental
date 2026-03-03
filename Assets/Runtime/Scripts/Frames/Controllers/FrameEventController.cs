@@ -6,54 +6,35 @@ namespace Tempera.Mental.Frames
     public class FrameEventController : MonoBehaviour
     {
         [SerializeField] Camera mainCamera;
-        [SerializeField] GridManager gridManager;
+        [SerializeField] FrameUiManager gridManager;
         [SerializeField] FrameManager frameManager;
 
 
-        void Start()
-        {
- 
-        }
+        public void OnClickEndFrame() => frameManager.GoToEndFrame();
 
-        public void OnClickDeleteFrame()
-        {
-            frameManager.DeleteFrame();
-        }
+        public void OnClickStartFrame() => frameManager.GoToStartFrame();
 
-        public void OnCLickClearAllFrames()
-        {
-            frameManager.ClearAllFrames();
-        }
+        public void OnClickDeleteFrame() => frameManager.DeleteFrame();
 
-        public void OnClickDuplicateFrame()
-        {
-            frameManager.DuplicateFrame();
-        }
+        public void OnCLickClearAllFrames() => frameManager.ClearAllFrames();
 
-        public void OnClickNextFrame()
-        {
-            frameManager.GoToNextFrame();
-        }
+        public void OnClickInsertFrame() => frameManager.InsertFrame();
 
-        public void OnClickPreviousFrame()
-        {
-            frameManager.GoToPreviousFrame();
-        }
+        public void OnClickPasteFrame() => frameManager.PasteOntoFrame();
 
-        public void OnClickChangeEmitter(int emitterId)
-        {
-            frameManager.SetEmitter(emitterId);
-        }
+        public void OnClickCopyFrame() => frameManager.CopyFrame();
 
-        public void OnClickNewFrame()
-        {
-            frameManager.AddFrame();
-        }
+        public void OnClickNextFrame() => frameManager.GoToNextFrame();
 
-        public void ActionOnFrameChanged(int newIndex)
-        {
-            frameManager.GoToFrame(newIndex);
-        }
+        public void OnClickPreviousFrame() => frameManager.GoToPreviousFrame();
+
+        public void OnClickChangeEmitter(int emitterId) => frameManager.SetEmitter(emitterId);
+
+        public void OnClickNewFrame() => frameManager.AddFrame();
+
+        public void ActionOnSelectedFrameChanged(int selectedFrame) => frameManager.GoToFrame(selectedFrame - 1);
+
+        public void ActionOnPlayingFrameChanged(int newIndex) => frameManager.GoToFrame(newIndex);
 
         public void OnMouseLeftClick(Vector2 mousePosition)
         {

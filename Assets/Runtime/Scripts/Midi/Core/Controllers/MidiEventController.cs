@@ -61,7 +61,7 @@ namespace Tempera.Mental.Midi.Core
                         MidiFile midiFile = MidiFile.Read(paths[0]);
 
                         List<Frame> frames = midiTransformService.FromMidiFileToFrames(midiFile);
-                        frameManager.AddFrames(frames);
+                        frameManager.SetFrames(frames);
 
                         LogMan.Log("File loaded: " + paths[0]);
                     }
