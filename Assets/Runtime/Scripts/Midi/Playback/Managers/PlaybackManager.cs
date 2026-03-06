@@ -13,17 +13,16 @@ namespace Tempera.Mental.Midi.Playbacks
     {
         OutputDevice outputDevice;
         string outputDeviceName;
-        int ticksPerFrame;
         private Playback playback;
-        private int lastFrameIndex = -1;
 
+        bool isFrameMarkerEvent;
+        int frameNumber;
         bool isPlaybackFinished;
 
         [Header("Events")]
         [SerializeField] UnityEvent<int> onFrameChanged;
         [SerializeField] UnityEvent onPlaybackFinished;
 
-        // todo use event markers and event callback to determine new frame and with current way playback is finished before switch to last frame
         private void Update()
         {
             if (isPlaybackFinished)
@@ -37,18 +36,11 @@ namespace Tempera.Mental.Midi.Playbacks
             {
                 if (playback == null || !playback.IsRunning) return;
 
-                ITimeSpan currentTime = playback.GetCurrentTime(TimeSpanType.Midi);
-                long currentTick = ((MidiTimeSpan)currentTime).TimeSpan;
-
-                // Compensate for the 5x speed workaround
-                long adjustedTick = (long)(currentTick / playback.Speed);
-
-                int currentFrame = (int)(adjustedTick / ticksPerFrame);
-
-                if (currentFrame != lastFrameIndex)
+                if(isFrameMarkerEvent)
                 {
-                    lastFrameIndex = currentFrame;
-                    onFrameChanged.Invoke(currentFrame);
+                    isFrameMarkerEvent = false;
+
+                    onFrameChanged?.Invoke(frameNumber);
                 }
             }
         }
@@ -130,7 +122,6 @@ namespace Tempera.Mental.Midi.Playbacks
                 {
                     LogMan.LogWarning("TryPlay playback in wrong state: " + GetPlaybackState());
                     ResetPlayback();
-                    return false;
                 }
 
                 ticksPerFrame = GetTicksPerQuarterNote(midiFile);
@@ -155,8 +146,15 @@ namespace Tempera.Mental.Midi.Playbacks
             }
         }
 
-        private void OnEventPlayed(object sender, MidiEventPlayedEventArgs e)
+        private void OnEventPlayed(object sender, MidiEventPlayedEventArgs eventArgs)
         {
+            if (eventArgs.Event is MarkerEvent marker)
+            {
+                if (int.TryParse(marker.Text, out frameNumber))
+                {
+                    isFrameMarkerEvent = true;
+                }
+            }
         }
 
         private void OnPlaybackFinished(object sender, EventArgs e)

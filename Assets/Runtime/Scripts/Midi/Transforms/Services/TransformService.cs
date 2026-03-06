@@ -53,10 +53,13 @@ namespace Tempera.Mental.Midi.Transforms
 
                     long frameTick = i * TICKS_PER_FRAME;
 
-                    if (i == 0)
-                        frameTick += initialTick; // first frame starts after initial clear
+                    // first frame starts after emitters cleared
+                    if (i == 0) frameTick += initialTick; 
 
-                    // Build current frame emitter -> positions
+                    // add a start of new frame marker into midi so we can detect this on playback to switch UI frames
+                    manager.Objects.Add(new TimedEvent(new MarkerEvent((i +1).ToString()), frameTick++));
+
+                    // build current frame emitter positions
                     Dictionary<byte, HashSet<byte>> currentFrameGroups = GroupByEmitter(sourceFrames[i]);
 
                     // remove emitters no longer active
@@ -68,7 +71,7 @@ namespace Tempera.Mental.Midi.Transforms
                         List<byte> toRemove = prevPixels.Except(currPixels).ToList();
                         if (toRemove.Count == 0) continue;
 
-                        // Select emitter once
+                        // select emitter once
                         manager.Objects.Add(new TimedEvent(
                             new ControlChangeEvent((SevenBitNumber)ACTIVATE_CC, (SevenBitNumber)emitter), frameTick++));
 
@@ -132,7 +135,7 @@ namespace Tempera.Mental.Midi.Transforms
 
         private Dictionary<byte, HashSet<byte>> GroupByEmitter(Frame frame)
         {
-            // Key is emitter id (0-3), value is set of grid indexes (0-63)
+            // key is emitter id (0-3), value is set of grid indexes (0-63)
             Dictionary<byte, HashSet<byte>> groups = new Dictionary<byte, HashSet<byte>>();
 
             // initialize empty sets for all 4 emitters
