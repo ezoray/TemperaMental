@@ -1,10 +1,11 @@
-using System.Collections.Generic;
 using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Multimedia;
+using Tempera.Mental.Core;
 using Tempera.Mental.Frames;
 using Tempera.Mental.Logs;
 using Tempera.Mental.Midi.Devices;
 using Tempera.Mental.Midi.Transforms;
+using Tempera.Mental.Ui.Playbacks;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -12,11 +13,14 @@ namespace Tempera.Mental.Midi.Playbacks
 {
     public class PlaybackEventController : MonoBehaviour
     {
+        [SerializeField] PlaybackUiManager playbackUiManager;
         [SerializeField] DeviceManager deviceManager;
         [SerializeField] PlaybackManager playbackManager;
-        [SerializeField] TransformService midiTransformService;
+        [SerializeField] TransformService transformService;
         [SerializeField] FrameManager frameManager;
-        [SerializeField] UnityEvent<string> onSetOutputDevice;
+        // [SerializeField] UnityEvent<string> onSetOutputDevice;
+
+        [SerializeField] UnityEvent<int> onFrameChanged;
 
 
         public void OnDeviceRemoved(string deviceName)
@@ -24,7 +28,7 @@ namespace Tempera.Mental.Midi.Playbacks
             // todo check device removed isn't the one being used
             if(deviceName.Equals(playbackManager.OutputDeviceName))
             {
-                playbackManager.StopPlayback();
+                playbackManager.TryStop();
             }
         }
 
@@ -43,14 +47,64 @@ namespace Tempera.Mental.Midi.Playbacks
             }
         }
 
-        public void OnClickPlayMidiFile()
+        public void ActionOnFrameChanged(int frame)
         {
-            LogMan.Log("OnClickPlayMidiFile frames: " + frameManager.Frames.Count);
+            LogMan.Log("ActionOnFrameChanged: " + frame);
 
-            List<Frame> frames = frameManager.Frames;
-            MidiFile midiFile = midiTransformService.FromFramesToMidiFile(frames);
+            onFrameChanged?.Invoke(frame);
+        }
 
-            playbackManager.PlayMidiFile(midiFile);
+        public void ActionOnPlaybackFinished()
+        {
+            LogMan.Log("ActionOnPlaybackFinished");
+            playbackUiManager.SetPlaybackUiState(PlaybackFlags.Stopped);
+        }
+
+        public void ActionOnPlaybackUiEvent(PlaybackEventType eventType)
+        {
+            PlaybackState playbackState = playbackManager.GetPlaybackState();
+
+            LogMan.Log($"ActionOnPlaybackUiEvent eventType: {eventType} playbackState: {playbackState}");
+
+            switch (eventType)
+            {
+                case PlaybackEventType.Play:
+                    if(playbackState == PlaybackState.Reset)
+                    {
+                        MidiFile midiFile = transformService.FromFramesToMidiFile(frameManager.Frames);
+                        playbackManager.TryPlay(midiFile);
+                        playbackUiManager.SetPlaybackUiState(PlaybackFlags.Playing);
+                    }
+                    else if(playbackState == PlaybackState.Paused)
+                    {
+                        if(playbackManager.TryResumePlay())
+                        {
+                            playbackUiManager.SetPlaybackUiState(PlaybackFlags.Playing);
+                        }
+                    }
+                    else
+                    {
+                        playbackUiManager.SetPlaybackUiState(PlaybackFlags.Stopped);
+                    }
+                    break;
+
+                case PlaybackEventType.Pause:
+                    if (playbackManager.TryPause())
+                    {
+                        playbackUiManager.SetPlaybackUiState(PlaybackFlags.Paused);
+                    }
+                    else
+                    {
+                        playbackUiManager.SetPlaybackUiState(PlaybackFlags.Stopped);
+                    }
+                    break;
+
+                case PlaybackEventType.Stop:
+                    playbackManager.TryStop();
+
+                    playbackUiManager.SetPlaybackUiState(PlaybackFlags.Stopped);
+                    break;
+            }
         }
 
         public void OnSelectBpm(int bpm)

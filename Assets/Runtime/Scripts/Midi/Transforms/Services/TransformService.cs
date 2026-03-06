@@ -4,6 +4,7 @@ using Melanchall.DryWetMidi.Common;
 using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Interaction;
 using Tempera.Mental.Frames;
+using Tempera.Mental.Logs;
 using UnityEngine;
 
 namespace Tempera.Mental.Midi.Transforms
@@ -13,54 +14,58 @@ namespace Tempera.Mental.Midi.Transforms
         const int ACTIVATE_CC = 10;
         const int PLACE_CC = 11;
         const int REMOVE_CC = 12;
+        const byte BLUE = 0;
+        const byte RED = 1;
+        const byte YELLOW = 2;
+        const byte GREEN = 3;
+        const int TICKS_PER_FRAME = 480;
 
         int bpm = 400;
-        int ticksPerFrame = 480;
 
 
         public MidiFile FromFramesToMidiFile(List<Frame> sourceFrames)
         {
-            var midiFile = new MidiFile();
-            midiFile.TimeDivision = new TicksPerQuarterNoteTimeDivision((short)ticksPerFrame);
+            MidiFile midiFile = new MidiFile();
+            midiFile.TimeDivision = new TicksPerQuarterNoteTimeDivision((short)TICKS_PER_FRAME);
 
-            var trackChunk = new TrackChunk();
+            TrackChunk trackChunk = new TrackChunk();
 
-            using (var manager = trackChunk.ManageTimedEvents())
+            using (TimedObjectsManager<TimedEvent> manager = trackChunk.ManageTimedEvents())
             {
                 long initialTick = 0;
 
-                // --- 0. INITIAL FULL CLEAR ---
+                // clear all emitters
                 initialTick = ClearAllEmitters(manager, initialTick);
 
-                // Track previous frame state: emitter -> positions
-                var previousFrameGroups = new Dictionary<byte, HashSet<byte>>()
+                // Track previous frame state, used to leave emitters that havent changed
+                Dictionary<byte, HashSet<byte>> previousFrameGroups = new Dictionary<byte, HashSet<byte>>()
                 {
-                    { 0, new HashSet<byte>() },
-                    { 1, new HashSet<byte>() },
-                    { 2, new HashSet<byte>() },
-                    { 3, new HashSet<byte>() }
+                    { BLUE, new HashSet<byte>() },
+                    { RED, new HashSet<byte>() },
+                    { YELLOW, new HashSet<byte>() },
+                    { GREEN, new HashSet<byte>() }
                 };
 
-                // --- 1. FRAME LOOP ---
+                // frame loop
                 for (int i = 0; i < sourceFrames.Count; i++)
                 {
-                    Debug.Log("Frame: " + i);
+                    LogMan.Log("Frame: " + i);
 
-                    long frameTick = i * ticksPerFrame;
+                    long frameTick = i * TICKS_PER_FRAME;
 
                     if (i == 0)
                         frameTick += initialTick; // first frame starts after initial clear
 
                     // Build current frame emitter -> positions
-                    var currentFrameGroups = GroupByEmitter(sourceFrames[i]);
+                    Dictionary<byte, HashSet<byte>> currentFrameGroups = GroupByEmitter(sourceFrames[i]);
 
-                    // --- 1A. OFF PASS: remove pixels that were on but are no longer active ---
-                    for (byte emitter = 0; emitter < 4; emitter++)
+                    // remove emitters no longer active
+                    for (byte emitter = BLUE; emitter <= GREEN; emitter++)
                     {
-                        var prevPixels = previousFrameGroups[emitter];
-                        var currPixels = currentFrameGroups[emitter];
+                        HashSet<byte> prevPixels = previousFrameGroups[emitter];
+                        HashSet<byte> currPixels = currentFrameGroups[emitter];
 
-                        var toRemove = prevPixels.Except(currPixels).ToList();
+                        List<byte> toRemove = prevPixels.Except(currPixels).ToList();
                         if (toRemove.Count == 0) continue;
 
                         // Select emitter once
@@ -74,31 +79,31 @@ namespace Tempera.Mental.Midi.Transforms
                         }
                     }
 
-                    // --- 1B. ON/UPDATE PASS: place new or changed pixels ---
-                    for (byte emitter = 0; emitter < 4; emitter++)
+                    // place new or changed emitters
+                    for (byte emitter = BLUE; emitter <= GREEN; emitter++)
                     {
-                        var prevPixels = previousFrameGroups[emitter];
-                        var currPixels = currentFrameGroups[emitter];
+                        HashSet<byte> prevPixels = previousFrameGroups[emitter];
+                        HashSet<byte> currPixels = currentFrameGroups[emitter];
 
-                        var toAdd = currPixels.Except(prevPixels).ToList();
+                        List<byte> toAdd = currPixels.Except(prevPixels).ToList();
                         if (toAdd.Count == 0) continue;
 
                         // Select emitter once
                         manager.Objects.Add(new TimedEvent(
                             new ControlChangeEvent((SevenBitNumber)ACTIVATE_CC, (SevenBitNumber)emitter), frameTick++));
 
-                        Debug.Log("Active Emitter Tick: " + (frameTick - 1));
+                        LogMan.Log("Active Emitter Tick: " + (frameTick - 1));
 
                         foreach (var pos in toAdd)
                         {
                             manager.Objects.Add(new TimedEvent(
                                 new ControlChangeEvent((SevenBitNumber)PLACE_CC, (SevenBitNumber)pos), frameTick++));
 
-                            Debug.Log($"Place Emitter Pos: {pos} Tick: " + (frameTick - 1));
+                            LogMan.Log($"Place Emitter Pos: {pos} Tick: " + (frameTick - 1));
                         }
                     }
 
-                    // --- 2. UPDATE previous frame for next iteration ---
+                    // set current frame as previous frame ready for next iteration
                     previousFrameGroups = currentFrameGroups.ToDictionary(kvp => kvp.Key, kvp => new HashSet<byte>(kvp.Value));
                 }
             }
@@ -111,7 +116,7 @@ namespace Tempera.Mental.Midi.Transforms
 
         private long ClearAllEmitters(TimedObjectsManager<TimedEvent> manager, long frameTickPosition)
         {
-            for (int i = 0; i < 4; i++)
+            for (int i = BLUE; i <= GREEN; i++)
             {
                 manager.Objects.Add(new TimedEvent(
                         new ControlChangeEvent((SevenBitNumber)ACTIVATE_CC, (SevenBitNumber)i),
@@ -127,21 +132,23 @@ namespace Tempera.Mental.Midi.Transforms
 
         private Dictionary<byte, HashSet<byte>> GroupByEmitter(Frame frame)
         {
-            // Key: EmitterID (0-3), Value: Set of Grid Indices (0-63)
-            var groups = new Dictionary<byte, HashSet<byte>>();
+            // Key is emitter id (0-3), value is set of grid indexes (0-63)
+            Dictionary<byte, HashSet<byte>> groups = new Dictionary<byte, HashSet<byte>>();
 
             // initialize empty sets for all 4 emitters
-            for (byte emitterId = 0; emitterId < 4; emitterId++)
+            for (byte emitterId = BLUE; emitterId <= GREEN; emitterId++)
                 groups[emitterId] = new HashSet<byte>();
 
             foreach (var emitterDetail in frame.Matrix.Values)
             {
                 byte id = (byte)emitterDetail.EmitterId;
 
+                // adjust position for correct cc value
+                // todo might be better to do this on creation rather than tilemap convenience as it is now
                 int flippedY = 7 - (int)emitterDetail.Position.y;
                 byte index = (byte)((emitterDetail.Position.x * 8) + flippedY);
 
-                groups[id].Add(index); // automatically no duplicates because HashSet
+                groups[id].Add(index); 
             }
 
             return groups;
@@ -150,26 +157,26 @@ namespace Tempera.Mental.Midi.Transforms
 
         public List<Frame> FromMidiFileToFrames(MidiFile midiFile)
         {
-            var frames = new List<Frame>();
-            // Get all timed events and group them by their "Frame" time
-            var timedEvents = midiFile.GetTimedEvents();
+            List<Frame> frames = new List<Frame>();
 
-            var tpqn = (midiFile.TimeDivision as TicksPerQuarterNoteTimeDivision)?.TicksPerQuarterNote ?? 480;
+            // Get all timed events and group them by their "frame" time
+            ICollection<TimedEvent> timedEvents = midiFile.GetTimedEvents();
 
-            Debug.Log("TPQN: " + tpqn);
+            short tpqn = (midiFile.TimeDivision as TicksPerQuarterNoteTimeDivision)?.TicksPerQuarterNote ?? TICKS_PER_FRAME;
 
-            // 2️⃣ Compute ticks per frame (adjust 1 quarter note per frame here if needed)
+            LogMan.Log("TPQN: " + tpqn);
+
+            // Compute ticks per frame (adjust 1 quarter note per frame here if needed)
             long foundTicksPerFrame = tpqn * 1;
 
             // We group events by their start tick (e.g., 0, 96, 192...)
-            var eventsByFrame = timedEvents.GroupBy(e => e.Time / foundTicksPerFrame)
-                                           .OrderBy(g => g.Key);
+            var eventsByFrame = timedEvents.GroupBy(e => e.Time / foundTicksPerFrame).OrderBy(g => g.Key);
 
             Dictionary<Vector3Int, EmitterDetail> frameBuffer = new Dictionary<Vector3Int, EmitterDetail>();
 
             foreach (var group in eventsByFrame)
             {
-                Debug.Log("NEW FRAME");
+                LogMan.Log("NEW FRAME");
 
                 Frame frame = new Frame();
                 byte currentEmitterId = 0;
@@ -180,20 +187,20 @@ namespace Tempera.Mental.Midi.Transforms
                     {
                         switch (cc.ControlNumber)
                         {
-                            case ACTIVATE_CC: // SELECT EMITTER
+                            case ACTIVATE_CC: // select emitter
                                 currentEmitterId = (byte)cc.ControlValue;
 
-                                Debug.Log("ACTIVATE_CC: " + cc.ControlValue);
+                                LogMan.Log("ACTIVATE_CC: " + cc.ControlValue);
                                 break;
 
-                            case PLACE_CC: // POSITION INDEX
+                            case PLACE_CC: // position index
                                 byte index = (byte)cc.ControlValue;
 
-                                // REVERSE MATH:
+                                // reverse math
                                 int x = index / 8;
                                 int y = 7 - (index % 8);
 
-                                // Create the emitter data
+                                // create the emitter data
                                 var emitter = new EmitterDetail
                                 {
                                     Position = new Vector3Int(x, y),
@@ -202,7 +209,7 @@ namespace Tempera.Mental.Midi.Transforms
 
                                 frameBuffer[new Vector3Int(x, y)] = emitter;
 
-                                Debug.Log("PLACE_CC: " + emitter.Position);
+                                LogMan.Log("PLACE_CC: " + emitter.Position);
                                 break;
 
                             case REMOVE_CC: // CLEAR
@@ -213,7 +220,7 @@ namespace Tempera.Mental.Midi.Transforms
 
                                 frameBuffer.Remove(removePos);
 
-                                Debug.Log("REMOVE_CC: " + removePos);
+                                LogMan.Log("REMOVE_CC: " + removePos);
                                 break;
                         }
                     }

@@ -11,12 +11,18 @@ namespace Tempera.Mental.Input
         [SerializeField] UnityEvent<Vector2> OnLeftClick;
         [SerializeField] UnityEvent<Vector2> OnRightClick;
 
+        bool isEnabled;
         private List<RaycastResult> raycastResults = new List<RaycastResult>();
 
 
+        private void Start()
+        {
+            isEnabled = true;
+        }
+
         public void OnMouseLeftClick(InputAction.CallbackContext context)
         {
-            if (!context.performed) return;
+            if (!isEnabled) return;
 
             Vector2 mousePosition = Mouse.current.position.ReadValue();
 
@@ -33,6 +39,8 @@ namespace Tempera.Mental.Input
 
         public void OnMouseRightClick(InputAction.CallbackContext context)
         {
+            if (!isEnabled) return;
+
             Vector2 mousePosition = Mouse.current.position.ReadValue();
 
             Debug.Log("InputManager OnMouseRightClick " + mousePosition);
@@ -64,6 +72,11 @@ namespace Tempera.Mental.Input
                 }
             }
             return false;
+        }
+
+        public void SetEnable(bool isEnabled)
+        {
+            this.isEnabled = isEnabled;
         }
     }
 }

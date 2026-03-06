@@ -1,112 +1,101 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using Melanchall.DryWetMidi.Core;
-using SFB;
 using Tempera.Mental.Frames;
 using Tempera.Mental.Logs;
+using Tempera.Mental.Midi.IO;
 using Tempera.Mental.Midi.Transforms;
+using Tempera.Mental.Utils;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace Tempera.Mental.Midi.Core
 {
-    // todo loading and saving are currently blocking, use their async counterparts
+    // hack loading and saving are currently blocking, use their async counterparts if need be
     public class MidiEventController : MonoBehaviour
     {
+        [SerializeField] MidiFileService midiFileService;
         [SerializeField] FrameManager frameManager;
-        [SerializeField] TransformService midiTransformService;
+        [SerializeField] TransformService transformService;
 
-        ExtensionFilter[] loadFileExtensions = new[] { new ExtensionFilter("Midi","mid", "midi") };
-        ExtensionFilter[] saveFileExtensions = new[] { new ExtensionFilter("Midi", "mid") };
+        [SerializeField] UnityEvent<int> onSetBpm;
 
-        public void OnClickLoadMidiFileAndAppendFrames()
+        public void OnClickAppendMidiFileAsFrames()
         {
-            Debug.Log("OnClickLoadMidiFileAndAppendFrames");
+            LogMan.Log("OnClickAppendMidiFileAsFrames");
 
             try
             {
-                string[] paths = StandaloneFileBrowser.OpenFilePanel("Open Midi File", "", loadFileExtensions, false);
-
-                if (paths != null && paths.Length > 0)
+                if(midiFileService.TryOpenMidiFile(out MidiFile midiFile))
                 {
-                    if (!string.IsNullOrEmpty(paths[0]))
-                    {
-                        MidiFile midiFile = MidiFile.Read(paths[0]);
 
-                        List<Frame> frames = midiTransformService.FromMidiFileToFrames(midiFile);
-                        frameManager.AppendFrames(frames);
+                    List<Frame> frames = transformService.FromMidiFileToFrames(midiFile);
+                    frameManager.AppendFrames(frames);
 
-                        LogMan.Log("File appended: " + paths[0]);
-                    }
+                    LogMan.Log("File appended");
                 }
             }
             catch (Exception ex)
             {
-                LogMan.LogError(ex.Message);
+                LogMan.LogError($"{ex}");
             }
         }
 
         public void OnClickLoadMidiFileAsFrames()
         {
-            Debug.Log("OnClickLoadMidiFileAsFrames");
+            LogMan.Log("OnClickLoadMidiFileAsFrames");
 
             try
             {
-                string[] paths = StandaloneFileBrowser.OpenFilePanel("Open Midi File", "", loadFileExtensions, false);
-
-                if (paths != null && paths.Length > 0)
+                if (midiFileService.TryOpenMidiFile(out MidiFile midiFile))
                 {
-                    if (!string.IsNullOrEmpty(paths[0]))
-                    {
-                        MidiFile midiFile = MidiFile.Read(paths[0]);
 
-                        List<Frame> frames = midiTransformService.FromMidiFileToFrames(midiFile);
-                        frameManager.SetFrames(frames);
+                    List<Frame> frames = transformService.FromMidiFileToFrames(midiFile);
+                    frameManager.SetFrames(frames);
 
-                        LogMan.Log("File loaded: " + paths[0]);
-                    }
+                    int bpm = MidiUtils.GetBpmFromMidiFile(midiFile);
+
+                    onSetBpm?.Invoke(bpm);
+
+                    LogMan.Log("File loaded");
                 }
             }
             catch (Exception ex)
             {
-                LogMan.LogError(ex.Message);
+                LogMan.LogError($"{ex}");
             }
         }
 
         public void OnClickSaveFramesAsMidiFile()
         {
-            Debug.Log("OnClickSaveFramesAsMidiFile");
+            LogMan.Log("OnClickSaveFramesAsMidiFile");
 
             try
             {
-                string savePath = StandaloneFileBrowser.SaveFilePanel("Save Midi File", "", "", saveFileExtensions);
-
-                if(!string.IsNullOrEmpty(savePath))
+                MidiFile midiFile = transformService.FromFramesToMidiFile(frameManager.Frames);
+                if(midiFileService.TrySaveMidiFile(midiFile))
                 {
-                    MidiFile midiFile = midiTransformService.FromFramesToMidiFile(frameManager.Frames);
-                    midiFile.Write(savePath, true);
-
-                    LogMan.Log("File saved: " + savePath);
+                    LogMan.Log("File saved");
                 }
-
             }
             catch (Exception ex)
             {
-                LogMan.LogError(ex.Message);
+                LogMan.LogError($"{ex}");
             }
         }
-        public void OnSliderSetBpmValue(float bpm)
-        {
-            Debug.Log("OnSliderSetBpmValue: " + bpm);
 
-            midiTransformService.SetBpm((int)bpm);
+        public void ActionOnBpmValueChange(int bpm)
+        {
+            Debug.Log("OnBpmValueChanged: " + bpm);
+
+            transformService.SetBpm(bpm);
         }
 
         public void OnClickConvertFramesToMidiFile()
         {
             try
             {
-                MidiFile midiFile = midiTransformService.FromFramesToMidiFile(frameManager.Frames);
+                MidiFile midiFile = transformService.FromFramesToMidiFile(frameManager.Frames);
             }
             catch (Exception ex)
             {
