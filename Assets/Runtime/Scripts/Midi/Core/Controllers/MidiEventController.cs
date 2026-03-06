@@ -72,7 +72,7 @@ namespace Tempera.Mental.Midi.Core
 
             try
             {
-                MidiFile midiFile = transformService.FromFramesToMidiFile(frameManager.Frames);
+                MidiFile midiFile = transformService.FromFramesToMidiFile(frameManager.GetFrames());
                 if(midiFileService.TrySaveMidiFile(midiFile))
                 {
                     LogMan.Log("File saved");
@@ -95,7 +95,7 @@ namespace Tempera.Mental.Midi.Core
         {
             try
             {
-                MidiFile midiFile = transformService.FromFramesToMidiFile(frameManager.Frames);
+                MidiFile midiFile = transformService.FromFramesToMidiFile(frameManager.GetFrames());
             }
             catch (Exception ex)
             {

@@ -23,7 +23,7 @@ namespace Tempera.Mental.Midi.Transforms
         int bpm = 400;
 
 
-        public MidiFile FromFramesToMidiFile(List<Frame> sourceFrames)
+        public MidiFile FromFramesToMidiFile(List<Frame> sourceFrames, int startFrame = 1)
         {
             MidiFile midiFile = new MidiFile();
             midiFile.TimeDivision = new TicksPerQuarterNoteTimeDivision((short)TICKS_PER_FRAME);
@@ -54,10 +54,10 @@ namespace Tempera.Mental.Midi.Transforms
                     long frameTick = i * TICKS_PER_FRAME;
 
                     // first frame starts after emitters cleared
-                    if (i == 0) frameTick += initialTick; 
+                    if (i == 0) frameTick += initialTick;
 
                     // add a start of new frame marker into midi so we can detect this on playback to switch UI frames
-                    manager.Objects.Add(new TimedEvent(new MarkerEvent((i +1).ToString()), frameTick++));
+                    manager.Objects.Add(new TimedEvent(new MarkerEvent((startFrame + i).ToString()), frameTick++));
 
                     // build current frame emitter positions
                     Dictionary<byte, HashSet<byte>> currentFrameGroups = GroupByEmitter(sourceFrames[i]);

@@ -12,7 +12,7 @@ namespace Tempera.Mental.Ui.Playbacks
         const int BPM_MIN = 1;
         const int BPM_MAX = 2000;
 
-        [Header("Assign in order: Play, Pause, Stop")]
+        [Header("Order: PlayPosition, Play, Pause, Stop")]
         [SerializeField] Button[] controlButtons;
 
         [SerializeField] TextMeshProUGUI bpmValue;
@@ -21,6 +21,11 @@ namespace Tempera.Mental.Ui.Playbacks
         [SerializeField] UnityEvent<int> onBpmValueChanged;
         [SerializeField] UnityEvent<PlaybackEventType> onPlaybackEvent;
 
+
+        public void OnClickPlayPosition()
+        {
+            onPlaybackEvent?.Invoke(PlaybackEventType.PlayPosition);
+        }
 
         public void OnClickStop()
         {

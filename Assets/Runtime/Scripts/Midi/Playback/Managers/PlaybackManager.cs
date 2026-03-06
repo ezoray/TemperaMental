@@ -23,19 +23,18 @@ namespace Tempera.Mental.Midi.Playbacks
         [SerializeField] UnityEvent<int> onFrameChanged;
         [SerializeField] UnityEvent onPlaybackFinished;
 
+        // todo this is adequate but a better solution is setting up a separate queue to prevent loss of events as they're triggered on the
+        // separate playback thread and Update may not run often enough to pick them up
         private void Update()
         {
             if (isPlaybackFinished)
             {
                 isPlaybackFinished = false;
-                ResetPlayback();
 
                 onPlaybackFinished?.Invoke();
             }
             else
             {
-                if (playback == null || !playback.IsRunning) return;
-
                 if(isFrameMarkerEvent)
                 {
                     isFrameMarkerEvent = false;
@@ -124,8 +123,6 @@ namespace Tempera.Mental.Midi.Playbacks
                     ResetPlayback();
                 }
 
-                ticksPerFrame = GetTicksPerQuarterNote(midiFile);
-
                 playback = midiFile.GetPlayback();
                 playback.OutputDevice = outputDevice;
 
@@ -163,6 +160,7 @@ namespace Tempera.Mental.Midi.Playbacks
             playback.EventPlayed -= OnEventPlayed;
 
             isPlaybackFinished = true;
+            ResetPlayback();
         }
 
          // --- NEW HELPER METHODS ---

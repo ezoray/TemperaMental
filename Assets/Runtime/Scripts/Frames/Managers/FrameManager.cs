@@ -56,7 +56,6 @@ namespace Tempera.Mental.Frames
             }
         }
 
-
         public void ClearAllFrames()
         {
             frames.Clear();
@@ -200,7 +199,7 @@ namespace Tempera.Mental.Frames
 
         public void AddEmitterAtPosition(Vector3Int cellPosition)
         {
-            Debug.Log("MatrixManager AddEmitterAtPosition: " + cellPosition);
+            LogMan.Log("MatrixManager AddEmitterAtPosition: " + cellPosition);
 
             currentFrame.AddEmitter(new EmitterDetail(cellPosition, currentEmitterId));
 
@@ -223,6 +222,21 @@ namespace Tempera.Mental.Frames
             GoToFrame(currentFrameIndex);
         }
 
-        public List<Frame> Frames { get => frames; }
+        public List<Frame> GetFramesFromCurrentPosition()
+        {
+            int count = frames.Count - currentFrameIndex;
+
+            return frames.GetRange(currentFrameIndex, count);
+        }
+
+        public int GetCurrentFrameNumber()
+        {
+            return currentFrameIndex + 1;
+        }
+
+        public List<Frame> GetFrames()
+        {
+            return frames;
+        }
     }
 }

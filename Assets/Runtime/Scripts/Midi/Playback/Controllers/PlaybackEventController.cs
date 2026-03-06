@@ -18,7 +18,6 @@ namespace Tempera.Mental.Midi.Playbacks
         [SerializeField] PlaybackManager playbackManager;
         [SerializeField] TransformService transformService;
         [SerializeField] FrameManager frameManager;
-        // [SerializeField] UnityEvent<string> onSetOutputDevice;
 
         [SerializeField] UnityEvent<int> onFrameChanged;
 
@@ -68,10 +67,31 @@ namespace Tempera.Mental.Midi.Playbacks
 
             switch (eventType)
             {
+                case PlaybackEventType.PlayPosition:
+                    if (playbackState == PlaybackState.Reset)
+                    {
+                        int startingFrameNumber = frameManager.GetCurrentFrameNumber();
+                        MidiFile midiFile = transformService.FromFramesToMidiFile(frameManager.GetFramesFromCurrentPosition(), startingFrameNumber);
+                        playbackManager.TryPlay(midiFile);
+                        playbackUiManager.SetPlaybackUiState(PlaybackFlags.Playing);
+                    }
+                    else if (playbackState == PlaybackState.Paused)
+                    {
+                        if (playbackManager.TryResumePlay())
+                        {
+                            playbackUiManager.SetPlaybackUiState(PlaybackFlags.Playing);
+                        }
+                    }
+                    else
+                    {
+                        playbackUiManager.SetPlaybackUiState(PlaybackFlags.Stopped);
+                    }
+                    break;
+
                 case PlaybackEventType.Play:
                     if(playbackState == PlaybackState.Reset)
                     {
-                        MidiFile midiFile = transformService.FromFramesToMidiFile(frameManager.Frames);
+                        MidiFile midiFile = transformService.FromFramesToMidiFile(frameManager.GetFrames());
                         playbackManager.TryPlay(midiFile);
                         playbackUiManager.SetPlaybackUiState(PlaybackFlags.Playing);
                     }
