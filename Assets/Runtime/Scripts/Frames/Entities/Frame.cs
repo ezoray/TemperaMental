@@ -21,22 +21,21 @@ namespace Tempera.Mental.Frames
             matrix = new Dictionary<Vector3Int, EmitterDetail>(otherFrame.Matrix);
         }
 
-        public void RemoveEmitter(Vector3Int position)
+        public bool CheckSameEmitterAtPosition(Vector3Int cellPosition, int currentEmitterId)
         {
-            if (matrix.ContainsKey(position))
-            {
-                matrix.Remove(position);
-            }
+            if (!matrix.TryGetValue(cellPosition, out var existingEmitterDetail)) return false;
+
+            return existingEmitterDetail.EmitterId == currentEmitterId;
+        }
+
+        public bool TryRemoveEmitter(Vector3Int position)
+        {
+            return matrix.Remove(position);
         }
 
         public void AddEmitter(EmitterDetail emitterDetail)
         {
-            if (matrix.ContainsKey(emitterDetail.Position))
-            {
-                matrix.Remove(emitterDetail.Position);
-            }
-
-            matrix.Add(emitterDetail.Position, emitterDetail);
+            matrix[emitterDetail.Position] = emitterDetail;
         }
 
         public Dictionary<Vector3Int, EmitterDetail> Matrix { get => matrix; }

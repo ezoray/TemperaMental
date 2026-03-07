@@ -8,68 +8,104 @@ namespace Tempera.Mental.Input
 {
     public class InputManager : MonoBehaviour
     {
-        [SerializeField] UnityEvent<Vector2> OnLeftClick;
-        [SerializeField] UnityEvent<Vector2> OnRightClick;
+        [SerializeField] float dragDelay = 0.15f; // seconds before "Drag" mode starts
+        [SerializeField] float dragDistanceThreshold = 10f; // pixels moved before "Drag" starts
+        [SerializeField] float processRate = 0.05f; // process drag logic every 50ms (20Hz)
 
         bool isEnabled;
+        bool isLeftPressed;
+        bool isRightPressed;
+
+        [SerializeField] UnityEvent<Vector2> onLeftClick;
+        [SerializeField] UnityEvent<Vector2> onRightClick;
+
         private List<RaycastResult> raycastResults = new List<RaycastResult>();
 
+        private void Start() => isEnabled = true;
 
-        private void Start()
+        float holdTimer;
+        Vector2 startMousePos;
+        float nextProcessTime;
+        bool isDragging;
+
+        private void Update()
         {
-            isEnabled = true;
+            if (!isEnabled || (!isLeftPressed && !isRightPressed)) return;
+
+            Vector2 currentMousePos = Mouse.current.position.ReadValue();
+            holdTimer += Time.deltaTime;
+
+            // determine if we've transitioned from a potential click to a definite drag
+            if (!isDragging)
+            {
+                float dist = Vector2.Distance(currentMousePos, startMousePos);
+                if (holdTimer > dragDelay || dist > dragDistanceThreshold)
+                {
+                    isDragging = true;
+                }
+            }
+
+            // only run the logic at the 'processRate' interval
+            if (isDragging && Time.time >= nextProcessTime)
+            {
+                HandleDrag(isLeftPressed ? onLeftClick : onRightClick);
+                nextProcessTime = Time.time + processRate;
+            }
         }
 
         public void OnMouseLeftClick(InputAction.CallbackContext context)
         {
-            if (!isEnabled) return;
+            if (context.started)
+            {
+                isLeftPressed = true;
+                holdTimer = 0;
+                isDragging = false;
+                startMousePos = Mouse.current.position.ReadValue();
+            }
+            else if (context.canceled)
+            {
+                // if released quickly without dragging, treat it as a single click
+                if (!isDragging) HandleDrag(onLeftClick);
+                isLeftPressed = false;
+            }
+        }
 
+
+        private void HandleDrag(UnityEvent<Vector2> actionEvent)
+        {
             Vector2 mousePosition = Mouse.current.position.ReadValue();
 
-//            Debug.Log("InputManager OnMouseLeftClick " + mousePosition);
+            if (IsInterfaceTouch(mousePosition)) return;
 
-            if (IsInterfaceTouch(mousePosition))
-            {
-       //         Debug.Log("Click blocked by UI");
-                return;
-            }
-
-            OnLeftClick?.Invoke(Mouse.current.position.ReadValue());
+            actionEvent?.Invoke(mousePosition);
         }
 
         public void OnMouseRightClick(InputAction.CallbackContext context)
         {
-            if (!isEnabled) return;
-
-            Vector2 mousePosition = Mouse.current.position.ReadValue();
-
-  //          Debug.Log("InputManager OnMouseRightClick " + mousePosition);
-
-            if (IsInterfaceTouch(mousePosition))
+            if (context.started)
             {
-      //          Debug.Log("Click blocked by UI");
-                return;
+                isRightPressed = true;
+                holdTimer = 0;
+                isDragging = false;
+                startMousePos = Mouse.current.position.ReadValue();
             }
-
-            OnRightClick?.Invoke(Mouse.current.position.ReadValue());
+            else if (context.canceled)
+            {
+                if (!isDragging) HandleDrag(onRightClick);
+                isRightPressed = false;
+            }
         }
 
         private bool IsInterfaceTouch(Vector2 mousePosition)
         {
             if (EventSystem.current == null) return false;
-
             PointerEventData eventData = new PointerEventData(EventSystem.current) { position = mousePosition };
-
             raycastResults.Clear();
             EventSystem.current.RaycastAll(eventData, raycastResults);
 
             foreach (var result in raycastResults)
             {
-                // Check for specific layer OR specific tags/components
-                if (result.gameObject.layer == LayerMask.NameToLayer("UI"))
-                {
-                    return true;
-                }
+                if (result.gameObject.layer == LayerMask.NameToLayer("UI")) return true;
             }
             return false;
         }
@@ -77,6 +113,7 @@ namespace Tempera.Mental.Input
         public void SetEnable(bool isEnabled)
         {
             this.isEnabled = isEnabled;
+            if (!isEnabled) { isLeftPressed = false; isRightPressed = false; }
         }
     }
 }

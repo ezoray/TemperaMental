@@ -158,18 +158,21 @@ namespace Tempera.Mental.Frames
 
         public void RemoveEmitterAtPosition(Vector3Int position)
         {
-            currentFrame.RemoveEmitter(position);
+            currentFrame.TryRemoveEmitter(position);
 
             OnRemoveEmitter?.Invoke(position);
         }
 
         public void AddEmitterAtPosition(Vector3Int cellPosition)
         {
-            LogMan.Log("MatrixManager AddEmitterAtPosition: " + cellPosition);
+            LogMan.Log("FrameManager AddEmitterAtPosition: " + cellPosition);
 
-            currentFrame.AddEmitter(new EmitterDetail(cellPosition, currentEmitterId));
+            if (!currentFrame.CheckSameEmitterAtPosition(cellPosition, currentEmitterId))
+            {
+                currentFrame.AddEmitter(new EmitterDetail(cellPosition, currentEmitterId));
 
-            OnAddEmitter?.Invoke(cellPosition, EmitterUtils.GetColor(currentEmitterId));
+                OnAddEmitter?.Invoke(cellPosition, EmitterUtils.GetColor(currentEmitterId));
+            }
         }
 
         public void GoToFrame(int frameNumber)

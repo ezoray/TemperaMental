@@ -215,11 +215,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bee4114aaaddb49d39cc32b638cd06e9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Tempera.Mental.Input.InputManager
-  OnLeftClick:
+  onLeftClick:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1362657596}
-        m_TargetAssemblyTypeName: Tempera.Mental.Matrix.MatrixEventController, Assembly-CSharp
+        m_TargetAssemblyTypeName: Tempera.Mental.Frames.FrameEventController, Assembly-CSharp
         m_MethodName: OnMouseLeftClick
         m_Mode: 0
         m_Arguments:
@@ -230,11 +230,11 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-  OnRightClick:
+  onRightClick:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1362657596}
-        m_TargetAssemblyTypeName: Tempera.Mental.Matrix.MatrixEventController, Assembly-CSharp
+        m_TargetAssemblyTypeName: Tempera.Mental.Frames.FrameEventController, Assembly-CSharp
         m_MethodName: OnMouseRightClick
         m_Mode: 0
         m_Arguments:
@@ -245,6 +245,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  dragDelay: 0.15
+  dragDistanceThreshold: 10
+  processRate: 0.05
 --- !u!4 &43681586
 Transform:
   m_ObjectHideFlags: 0
