@@ -47,12 +47,12 @@ namespace Tempera.Mental.Frames
             {
                 // deleted last frame
                 currentFrameIndex = frames.Count - 1;
-                GoToFrame(currentFrameIndex);
+                GoToFrameByIndex(currentFrameIndex);
             }
             else
             {
                 // deleted in-between frame
-                GoToFrame(currentFrameIndex);
+                GoToFrameByIndex(currentFrameIndex);
             }
         }
 
@@ -84,27 +84,7 @@ namespace Tempera.Mental.Frames
             LogMan.Log($"Frame {currentFrameIndex + 1} copied!");
         }
 
-        public void DuplicateFrame()
-        {
-            Frame frame = new Frame(currentFrame);
-
-            frames.Add(frame);
-            currentFrame = frame;
-            currentFrameIndex = frames.Count - 1;
-
-            OnChangeFrame?.Invoke(GetFrameDetail(frame));
-        }
-
-        public void GoToFrame(int newIndex)
-        {
-            if (newIndex >= frames.Count) return;
-            
-            currentFrameIndex = newIndex;            
-            currentFrame = frames[currentFrameIndex];
-
-            OnChangeFrame?.Invoke(GetFrameDetail(currentFrame));
-        }
-
+    
         public void GoToNextFrame()
         {
             if(currentFrameIndex +1 <= frames.Count -1)
@@ -140,10 +120,9 @@ namespace Tempera.Mental.Frames
             LogMan.Log($"Appended {newFrames.Count} frames. Total frames: {frames.Count}");
 
             currentFrameIndex = frames.Count - newFrames.Count;
-            GoToFrame(currentFrameIndex);
+            GoToFrameByIndex(currentFrameIndex);
         }
 
-        // todo create clear frame action
         public void SetFrames(List<Frame> newFrames)
         {
             if (newFrames == null || newFrames.Count == 0)
@@ -158,8 +137,7 @@ namespace Tempera.Mental.Frames
             currentFrameIndex = 0;
             currentFrame = frames[currentFrameIndex];
 
-            OnChangeFrame?.Invoke(GetFrameDetail(currentFrame));
-            
+            OnChangeFrame?.Invoke(GetFrameDetail(currentFrame));            
         }
 
         public void AddFrame()
@@ -173,24 +151,12 @@ namespace Tempera.Mental.Frames
             OnChangeFrame?.Invoke(GetFrameDetail(frame));
         }
 
-        private VisualFrameDetail GetFrameDetail(Frame frame)
-        {
-            emitterDetails.Clear();
-
-            foreach (var emitterDetail in frame.Matrix.Values)
-            {
-                emitterDetails.Add(new VisualEmitterDetail(emitterDetail.Position, EmitterUtils.GetColor(emitterDetail.EmitterId)));
-            }
-
-            return new VisualFrameDetail(currentFrameIndex + 1, frames.Count, emitterDetails);
-        }
-
         public void SetEmitter(int emitterId)
         {
             currentEmitterId = emitterId;
         }
 
-        public void RemoveEmitterFromCell(Vector3Int position)
+        public void RemoveEmitterAtPosition(Vector3Int position)
         {
             currentFrame.RemoveEmitter(position);
 
@@ -206,12 +172,17 @@ namespace Tempera.Mental.Frames
             OnAddEmitter?.Invoke(cellPosition, EmitterUtils.GetColor(currentEmitterId));
         }
 
+        public void GoToFrame(int frameNumber)
+        {
+            GoToFrameByIndex(frameNumber - 1);
+        }
+
         public void GoToStartFrame()
         {
             if (frames.Count == 0) return;
 
             currentFrameIndex = 0;
-            GoToFrame(currentFrameIndex);
+            GoToFrameByIndex(currentFrameIndex);
         }
 
         public void GoToEndFrame()
@@ -219,7 +190,7 @@ namespace Tempera.Mental.Frames
             if (frames.Count == 0) return;
 
             currentFrameIndex = frames.Count - 1;
-            GoToFrame(currentFrameIndex);
+            GoToFrameByIndex(currentFrameIndex);
         }
 
         public List<Frame> GetFramesFromCurrentPosition()
@@ -238,5 +209,28 @@ namespace Tempera.Mental.Frames
         {
             return frames;
         }
+
+        private VisualFrameDetail GetFrameDetail(Frame frame)
+        {
+            emitterDetails.Clear();
+
+            foreach (var emitterDetail in frame.Matrix.Values)
+            {
+                emitterDetails.Add(new VisualEmitterDetail(emitterDetail.Position, EmitterUtils.GetColor(emitterDetail.EmitterId)));
+            }
+
+            return new VisualFrameDetail(currentFrameIndex + 1, frames.Count, emitterDetails);
+        }
+
+        private void GoToFrameByIndex(int newIndex)
+        {
+            if (newIndex >= frames.Count) return;
+
+            currentFrameIndex = newIndex;
+            currentFrame = frames[currentFrameIndex];
+
+            OnChangeFrame?.Invoke(GetFrameDetail(currentFrame));
+        }
+
     }
 }

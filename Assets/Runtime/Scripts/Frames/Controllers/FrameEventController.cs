@@ -32,13 +32,13 @@ namespace Tempera.Mental.Frames
 
         public void OnClickNewFrame() => frameManager.AddFrame();
 
-        public void ActionOnSelectedFrameChanged(int selectedFrame) => frameManager.GoToFrame(selectedFrame - 1);
+        public void ActionOnSelectedFrameChanged(int selectedFrame) => frameManager.GoToFrame(selectedFrame);
 
-        public void ActionOnPlayingFrameChanged(int newIndex) => frameManager.GoToFrame(newIndex);
+        public void ActionOnPlayingFrameChanged(int newFrame) => frameManager.GoToFrame(newFrame);
 
         public void OnMouseLeftClick(Vector2 mousePosition)
         {
-            Debug.Log("MatrixEventController OnMouseLeftClick " + mousePosition);
+     //       Debug.Log("MatrixEventController OnMouseLeftClick " + mousePosition);
 
             Vector3 worldPoint = mainCamera.ScreenToWorldPoint(mousePosition);
 
@@ -50,13 +50,13 @@ namespace Tempera.Mental.Frames
 
         public void OnMouseRightClick(Vector2 mousePosition)
         {
-            Debug.Log("MatrixEventController OnMouseRightClick " + mousePosition);
+      //      Debug.Log("MatrixEventController OnMouseRightClick " + mousePosition);
 
             Vector3 worldPoint = mainCamera.ScreenToWorldPoint(mousePosition);
 
             if (gridManager.TryGetCellPositionInGrid(worldPoint, out var cellPosition))
             {
-                frameManager.RemoveEmitterFromCell(cellPosition);
+                frameManager.RemoveEmitterAtPosition(cellPosition);
             }
         }
     }
