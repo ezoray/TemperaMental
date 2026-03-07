@@ -11,6 +11,7 @@ namespace Tempera.Mental.Midi.Transforms
 {
     public class TransformService : MonoBehaviour
     {
+        const int MICROSECONDS_PER_MINUTE = 60_000_000;
         const int ACTIVATE_CC = 10;
         const int PLACE_CC = 11;
         const int REMOVE_CC = 12;
@@ -30,13 +31,11 @@ namespace Tempera.Mental.Midi.Transforms
 
             TrackChunk trackChunk = new TrackChunk();
 
+            long microsecondsPerQuarterNote = MICROSECONDS_PER_MINUTE / bpm;
+            trackChunk.Events.Add(new SetTempoEvent(microsecondsPerQuarterNote));
+
             using (TimedObjectsManager<TimedEvent> manager = trackChunk.ManageTimedEvents())
             {
-                long initialTick = 0;
-
-                // clear all emitters
-                initialTick = ClearAllEmitters(manager, initialTick);
-
                 // Track previous frame state, used to leave emitters that havent changed
                 Dictionary<byte, HashSet<byte>> previousFrameGroups = new Dictionary<byte, HashSet<byte>>()
                 {
@@ -49,15 +48,18 @@ namespace Tempera.Mental.Midi.Transforms
                 // frame loop
                 for (int i = 0; i < sourceFrames.Count; i++)
                 {
-                    LogMan.Log("Frame: " + i);
+             //       LogMan.Log("Frame: " + i);
 
                     long frameTick = i * TICKS_PER_FRAME;
 
-                    // first frame starts after emitters cleared
-                    if (i == 0) frameTick += initialTick;
-
                     // add a start of new frame marker into midi so we can detect this on playback to switch UI frames
                     manager.Objects.Add(new TimedEvent(new MarkerEvent((startFrame + i).ToString()), frameTick++));
+
+                    // clear any placed emitters before first frame drawing
+                    if (i == 0)
+                    {
+                        frameTick = ClearAllEmitters(manager, frameTick);
+                    }
 
                     // build current frame emitter positions
                     Dictionary<byte, HashSet<byte>> currentFrameGroups = GroupByEmitter(sourceFrames[i]);
@@ -95,14 +97,14 @@ namespace Tempera.Mental.Midi.Transforms
                         manager.Objects.Add(new TimedEvent(
                             new ControlChangeEvent((SevenBitNumber)ACTIVATE_CC, (SevenBitNumber)emitter), frameTick++));
 
-                        LogMan.Log("Active Emitter Tick: " + (frameTick - 1));
+                 //       LogMan.Log("Active Emitter Tick: " + (frameTick - 1));
 
                         foreach (var pos in toAdd)
                         {
                             manager.Objects.Add(new TimedEvent(
                                 new ControlChangeEvent((SevenBitNumber)PLACE_CC, (SevenBitNumber)pos), frameTick++));
 
-                            LogMan.Log($"Place Emitter Pos: {pos} Tick: " + (frameTick - 1));
+              //              LogMan.Log($"Place Emitter Pos: {pos} Tick: " + (frameTick - 1));
                         }
                     }
 
@@ -112,7 +114,7 @@ namespace Tempera.Mental.Midi.Transforms
             }
 
             midiFile.Chunks.Add(trackChunk);
-            midiFile.ReplaceTempoMap(TempoMap.Create(Tempo.FromBeatsPerMinute(bpm)));
+      //      midiFile.ReplaceTempoMap(TempoMap.Create(Tempo.FromBeatsPerMinute(bpm)));
 
             return midiFile;
         }

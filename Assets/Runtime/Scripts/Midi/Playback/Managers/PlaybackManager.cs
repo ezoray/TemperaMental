@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Interaction;
 using Melanchall.DryWetMidi.Multimedia;
@@ -15,30 +16,34 @@ namespace Tempera.Mental.Midi.Playbacks
         string outputDeviceName;
         private Playback playback;
 
-        bool isFrameMarkerEvent;
-        int frameNumber;
         bool isPlaybackFinished;
 
-        [Header("Events")]
+        private ConcurrentQueue<int> frameQueue;
+
         [SerializeField] UnityEvent<int> onFrameChanged;
         [SerializeField] UnityEvent onPlaybackFinished;
 
-        // todo this is adequate but a better solution is setting up a separate queue to prevent loss of events as they're triggered on the
-        // separate playback thread and Update may not run often enough to pick them up
+        private void OnEnable()
+        {
+            frameQueue = new ConcurrentQueue<int>();
+        }
+
         private void Update()
         {
             if (isPlaybackFinished)
             {
                 isPlaybackFinished = false;
 
+                playback.Finished -= OnPlaybackFinished;
+                playback.EventPlayed -= OnEventPlayed;
+                ResetPlayback();
+
                 onPlaybackFinished?.Invoke();
             }
             else
             {
-                if(isFrameMarkerEvent)
+                while (frameQueue.TryDequeue(out int frameNumber))
                 {
-                    isFrameMarkerEvent = false;
-
                     onFrameChanged?.Invoke(frameNumber);
                 }
             }
@@ -126,7 +131,7 @@ namespace Tempera.Mental.Midi.Playbacks
                 playback = midiFile.GetPlayback();
                 playback.OutputDevice = outputDevice;
 
-                playback.Speed = 5.0; // todo investigate where the bug is that makes this required
+            //    playback.Speed = 5.0; // todo investigate where the bug is that makes this required
 
                 playback.Finished += OnPlaybackFinished;
                 playback.EventPlayed += OnEventPlayed;
@@ -147,21 +152,16 @@ namespace Tempera.Mental.Midi.Playbacks
         {
             if (eventArgs.Event is MarkerEvent marker)
             {
-                if (int.TryParse(marker.Text, out frameNumber))
+                if (int.TryParse(marker.Text, out var frameNumber))
                 {
-                    isFrameMarkerEvent = true;
+                    frameQueue.Enqueue(frameNumber);
                 }
             }
         }
 
-        // todo set flag only here, move the rest to Update for safety
         private void OnPlaybackFinished(object sender, EventArgs e)
         {
-            playback.Finished -= OnPlaybackFinished;
-            playback.EventPlayed -= OnEventPlayed;
-
             isPlaybackFinished = true;
-            ResetPlayback();
         }
 
          // --- NEW HELPER METHODS ---

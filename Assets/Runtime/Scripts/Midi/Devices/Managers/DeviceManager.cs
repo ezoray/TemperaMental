@@ -59,6 +59,11 @@ namespace Tempera.Mental.Midi.Devices
             }
         }
 
+        public bool TryGetOutputDevice(string deviceName, out OutputDevice outputDevice)
+        {
+            return outputDevices.TryGetValue(deviceName, out outputDevice);
+        }
+
         private void UpdateAvailableDevices()
         {
             try
@@ -134,11 +139,6 @@ namespace Tempera.Mental.Midi.Devices
             LogMan.Log("OnDeviceAdded Device: " + eventArgs.Device.Name);
 
             isDeviceChange = true;
-        }
-
-        public bool TryGetOutputDevice(string deviceName, out OutputDevice outputDevice)
-        {
-            return outputDevices.TryGetValue(deviceName, out outputDevice);
         }
 
         private void OnDisable()

@@ -65,8 +65,6 @@ namespace Tempera.Mental.Ui.Playbacks
             {
                 bpmSlider.value = newBpm;
                 bpmValue.text = newBpm.ToString();
-
-                onBpmValueChanged?.Invoke(newBpm);
             }
         }
 
@@ -78,8 +76,6 @@ namespace Tempera.Mental.Ui.Playbacks
             {
                 bpmSlider.value = newBpm;
                 bpmValue.text = newBpm.ToString();
-
-                onBpmValueChanged?.Invoke(newBpm);
             }
         }
 

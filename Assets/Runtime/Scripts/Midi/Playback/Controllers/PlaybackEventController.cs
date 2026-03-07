@@ -31,11 +31,6 @@ namespace Tempera.Mental.Midi.Playbacks
             }
         }
 
-        public void OnDeviceAdded(string deviceName)
-        {
-
-        }
-
         public void OnDeviceChanged(string deviceName)
         {
             LogMan.Log("OnDeviceChanged: " + deviceName);
