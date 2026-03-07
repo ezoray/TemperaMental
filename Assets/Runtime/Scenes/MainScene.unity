@@ -4792,7 +4792,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 806095546}
         m_TargetAssemblyTypeName: Tempera.Mental.UI.Devices.DeviceUiManager, Assembly-CSharp
-        m_MethodName: OnValueChanged
+        m_MethodName: OnDropdownValueChanged
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -6226,12 +6226,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bcc2a2a98df484f1fab29d5641c3b64c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Tempera.Mental.Midi.Devices.DeviceManager
-  onDevicesAvailable:
+  onDevicesUpdated:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 806095546}
         m_TargetAssemblyTypeName: Tempera.Mental.UI.Devices.DeviceUiManager, Assembly-CSharp
-        m_MethodName: OnDeviceListAvailable
+        m_MethodName: ActionOnDevicesUpdated
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -6241,6 +6241,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  onPrimaryDeviceFound:
+    m_PersistentCalls:
+      m_Calls: []
   onDeviceAdded:
     m_PersistentCalls:
       m_Calls:

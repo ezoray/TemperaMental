@@ -26,11 +26,11 @@ namespace Tempera.Mental.Input
 
             Vector2 mousePosition = Mouse.current.position.ReadValue();
 
-            Debug.Log("InputManager OnMouseLeftClick " + mousePosition);
+//            Debug.Log("InputManager OnMouseLeftClick " + mousePosition);
 
             if (IsInterfaceTouch(mousePosition))
             {
-                Debug.Log("Click blocked by UI");
+       //         Debug.Log("Click blocked by UI");
                 return;
             }
 
@@ -43,11 +43,11 @@ namespace Tempera.Mental.Input
 
             Vector2 mousePosition = Mouse.current.position.ReadValue();
 
-            Debug.Log("InputManager OnMouseRightClick " + mousePosition);
+  //          Debug.Log("InputManager OnMouseRightClick " + mousePosition);
 
             if (IsInterfaceTouch(mousePosition))
             {
-                Debug.Log("Click blocked by UI");
+      //          Debug.Log("Click blocked by UI");
                 return;
             }
 

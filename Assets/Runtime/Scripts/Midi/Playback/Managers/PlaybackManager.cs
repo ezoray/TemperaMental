@@ -133,7 +133,7 @@ namespace Tempera.Mental.Midi.Playbacks
 
                 playback.Start();
 
-                return true; // seems too early to use playback.IsRunning
+                return true; // too early to use playback.IsRunning
             }
             catch (Exception ex)
             {
@@ -154,6 +154,7 @@ namespace Tempera.Mental.Midi.Playbacks
             }
         }
 
+        // todo set flag only here, move the rest to Update for safety
         private void OnPlaybackFinished(object sender, EventArgs e)
         {
             playback.Finished -= OnPlaybackFinished;

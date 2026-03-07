@@ -20,7 +20,7 @@ namespace Tempera.Mental.UI.Devices
             onDeviceChanged?.Invoke(device);
         }
 
-        public void OnDeviceAdded(string newItem)
+        public void ActionOnDeviceAdded(string newItem)
         {
             if (!deviceNames.Contains(newItem))
             {
@@ -59,11 +59,11 @@ namespace Tempera.Mental.UI.Devices
             deviceDropdown.RefreshShownValue();
         }
 
-        public void OnDeviceListAvailable(List<string> devices)
+        public void ActionOnDevicesUpdated(List<string> devices)
         {
             foreach (var device in devices)
             {
-                LogMan.Log("OnDeviceListAvailable: " + device);
+                LogMan.Log("ActionOnDevicesUpdated: " + device);
             }
 
             if (devices.Count > 0)
