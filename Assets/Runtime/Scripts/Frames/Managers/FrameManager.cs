@@ -18,8 +18,8 @@ namespace Tempera.Mental.Frames
 
         List<VisualEmitterDetail> emitterDetails;
 
-        [SerializeField] UnityEvent<Vector3Int,Color> OnAddEmitter;
-        [SerializeField] UnityEvent<Vector3Int> OnRemoveEmitter;
+        [SerializeField] UnityEvent<Vector2Int,Color> OnAddEmitter;
+        [SerializeField] UnityEvent<Vector2Int> OnRemoveEmitter;
         [SerializeField] UnityEvent<VisualFrameDetail> OnChangeFrame;
 
         private void Awake()
@@ -156,14 +156,14 @@ namespace Tempera.Mental.Frames
             currentEmitterId = emitterId;
         }
 
-        public void RemoveEmitterAtPosition(Vector3Int position)
+        public void RemoveEmitterAtPosition(Vector2Int position)
         {
             currentFrame.TryRemoveEmitter(position);
 
             OnRemoveEmitter?.Invoke(position);
         }
 
-        public void AddEmitterAtPosition(Vector3Int cellPosition)
+        public void AddEmitterAtPosition(Vector2Int cellPosition)
         {
             LogMan.Log("FrameManager AddEmitterAtPosition: " + cellPosition);
 
@@ -219,7 +219,8 @@ namespace Tempera.Mental.Frames
 
             foreach (var emitterDetail in frame.Matrix.Values)
             {
-                emitterDetails.Add(new VisualEmitterDetail(emitterDetail.Position, EmitterUtils.GetColor(emitterDetail.EmitterId)));
+                emitterDetails.Add(new VisualEmitterDetail(new Vector3Int(emitterDetail.Position.x, emitterDetail.Position.y),
+                    EmitterUtils.GetColor(emitterDetail.EmitterId)));
             }
 
             return new VisualFrameDetail(currentFrameIndex + 1, frames.Count, emitterDetails);

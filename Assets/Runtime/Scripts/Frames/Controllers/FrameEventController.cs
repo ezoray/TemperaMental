@@ -44,7 +44,7 @@ namespace Tempera.Mental.Frames
 
             if(gridManager.TryGetCellPositionInGrid(worldPoint, out var cellPosition))
             {
-                frameManager.AddEmitterAtPosition(cellPosition);
+                frameManager.AddEmitterAtPosition(new Vector2Int(cellPosition.x, cellPosition.y));
             }
         }
 
@@ -56,7 +56,7 @@ namespace Tempera.Mental.Frames
 
             if (gridManager.TryGetCellPositionInGrid(worldPoint, out var cellPosition))
             {
-                frameManager.RemoveEmitterAtPosition(cellPosition);
+                frameManager.RemoveEmitterAtPosition(new Vector2Int(cellPosition.x, cellPosition.y));
             }
         }
     }

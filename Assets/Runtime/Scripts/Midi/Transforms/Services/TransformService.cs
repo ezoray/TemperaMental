@@ -177,7 +177,7 @@ namespace Tempera.Mental.Midi.Transforms
             // We group events by their start tick (e.g., 0, 96, 192...)
             var eventsByFrame = timedEvents.GroupBy(e => e.Time / foundTicksPerFrame).OrderBy(g => g.Key);
 
-            Dictionary<Vector3Int, EmitterDetail> frameBuffer = new Dictionary<Vector3Int, EmitterDetail>();
+            Dictionary<Vector2Int, EmitterDetail> frameBuffer = new Dictionary<Vector2Int, EmitterDetail>();
 
             foreach (var group in eventsByFrame)
             {
@@ -208,11 +208,11 @@ namespace Tempera.Mental.Midi.Transforms
                                 // create the emitter data
                                 var emitter = new EmitterDetail
                                 {
-                                    Position = new Vector3Int(x, y),
+                                    Position = new Vector2Int(x, y),
                                     EmitterId = currentEmitterId
                                 };
 
-                                frameBuffer[new Vector3Int(x, y)] = emitter;
+                                frameBuffer[new Vector2Int(x, y)] = emitter;
 
                                 LogMan.Log("PLACE_CC: " + emitter.Position);
                                 break;
@@ -221,7 +221,7 @@ namespace Tempera.Mental.Midi.Transforms
                                 byte removeIndex = (byte)cc.ControlValue;
                                 int rx = removeIndex / 8;
                                 int ry = 7 - (removeIndex % 8);
-                                var removePos = new Vector3Int(rx, ry);
+                                var removePos = new Vector2Int(rx, ry);
 
                                 frameBuffer.Remove(removePos);
 

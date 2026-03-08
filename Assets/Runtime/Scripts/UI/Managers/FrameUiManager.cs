@@ -48,15 +48,15 @@ namespace Tempera.Mental.UI
             frameText.text = $"{frameDetail.FrameNumber} / {frameDetail.FrameTotal}";
         }
 
-        public void ActionOnRemoveEmitter(Vector3Int position)
+        public void ActionOnRemoveEmitter(Vector2Int position)
         {
-            emitterTilemapManager.RemoveTile(position);
+            emitterTilemapManager.RemoveTile(new Vector3Int(position.x, position.y));
         }
 
 
-        public void ActionOnAddEmitter(Vector3Int position, Color color)
+        public void ActionOnAddEmitter(Vector2Int position, Color color)
         {
-            emitterTilemapManager.AddTile(position, color);
+            emitterTilemapManager.AddTile(new Vector3Int(position.x, position.y), color);
         }
     }
 }

@@ -124,12 +124,12 @@ namespace Tempera.Mental.Midi.Transforms
                                 // Create the emitter data
                                 var emitter = new EmitterDetail
                                 {
-                                    Position = new Vector3Int(x, y),
+                                    Position = new Vector2Int(x, y),
                                     EmitterId = currentEmitterId
                                 };
 
                                 // Add to frame (using x_y as key to match your dictionary structure)
-                                frame.Matrix[new Vector3Int(x, y)] = emitter;
+                                frame.Matrix[new Vector2Int(x, y)] = emitter;
                                 break;
 
                             case 12: // CLEAR

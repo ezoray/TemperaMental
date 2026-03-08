@@ -30,13 +30,9 @@ namespace Tempera.Mental.UI
 
         public void AddTile(Vector3Int position, Color color)
         {
-            // 1. Place the tile at the coordinate
             emitterTilemap.SetTile(position, tile);
 
-            // 2. Remove the "Lock Color" flag so we can apply a custom color
             emitterTilemap.SetTileFlags(position, TileFlags.None);
-
-            // 3. Apply your specific emitter color
             emitterTilemap.SetColor(position, color);
         }
     }

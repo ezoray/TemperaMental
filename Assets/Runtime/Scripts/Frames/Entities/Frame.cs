@@ -6,11 +6,11 @@ namespace Tempera.Mental.Frames
 {
     public class Frame
     {
-        Dictionary<Vector3Int, EmitterDetail> matrix;
+        Dictionary<Vector2Int, EmitterDetail> matrix;
 
         public Frame()
         {
-            matrix = new Dictionary<Vector3Int, EmitterDetail>();
+            matrix = new Dictionary<Vector2Int, EmitterDetail>();
         }
 
         public Frame(Frame otherFrame)
@@ -18,17 +18,17 @@ namespace Tempera.Mental.Frames
             // Pass the old dictionary into the new one's constructor.
             // Because EmitterDetail is a struct, this performs a "Value Copy"
             // for every entry automatically.
-            matrix = new Dictionary<Vector3Int, EmitterDetail>(otherFrame.Matrix);
+            matrix = new Dictionary<Vector2Int, EmitterDetail>(otherFrame.Matrix);
         }
 
-        public bool CheckSameEmitterAtPosition(Vector3Int cellPosition, int currentEmitterId)
+        public bool CheckSameEmitterAtPosition(Vector2Int cellPosition, int currentEmitterId)
         {
             if (!matrix.TryGetValue(cellPosition, out var existingEmitterDetail)) return false;
 
             return existingEmitterDetail.EmitterId == currentEmitterId;
         }
 
-        public bool TryRemoveEmitter(Vector3Int position)
+        public bool TryRemoveEmitter(Vector2Int position)
         {
             return matrix.Remove(position);
         }
@@ -38,6 +38,6 @@ namespace Tempera.Mental.Frames
             matrix[emitterDetail.Position] = emitterDetail;
         }
 
-        public Dictionary<Vector3Int, EmitterDetail> Matrix { get => matrix; }
+        public Dictionary<Vector2Int, EmitterDetail> Matrix { get => matrix; }
     }
 }
