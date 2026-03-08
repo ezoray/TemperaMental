@@ -1,5 +1,5 @@
-using System;
 using Tempera.Mental.Core;
+using Tempera.Mental.Logs;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
@@ -14,6 +14,9 @@ namespace Tempera.Mental.UI
         [SerializeField] TextMeshProUGUI frameText;
         [SerializeField] Slider frameSlider;
 
+        // background highlight image for selected colour
+        [SerializeField] RectTransform selectionRing;
+
         BoundsInt gridBounds = new BoundsInt(0, 0, 0, 8, 8, 1);
 
         [SerializeField] UnityEvent<int> onFrameNumberChanged;
@@ -23,18 +26,27 @@ namespace Tempera.Mental.UI
             baseTilemapManager.FillBackground(gridBounds);
         }
 
-        public void OnFrameNumberChanged(float frameNumber)
-        {
-            onFrameNumberChanged?.Invoke((int)frameNumber);
-        }
-
         public bool TryGetCellPositionInGrid(Vector3 worldPoint, out Vector3Int cellPosition)
         {
-            Debug.Log("GridManager TryGetCellPositionInGrid " + worldPoint);
+       //     Debug.Log("GridManager TryGetCellPositionInGrid " + worldPoint);
 
             cellPosition = baseTilemapManager.BaseTilemap.WorldToCell(worldPoint);
 
             return gridBounds.Contains(cellPosition);
+        }
+
+        // move highlight image to behind selected colour button
+        public void OnClickSelectColor(Button button)
+        {
+            RectTransform buttonRect = button.GetComponent<RectTransform>();
+
+            selectionRing.position = buttonRect.position;
+        }
+
+        // frame slider
+        public void OnFrameNumberChanged(float frameNumber)
+        {
+            onFrameNumberChanged?.Invoke((int)frameNumber);
         }
 
         public void ActionOnChangeFrame(VisualFrameDetail frameDetail)
