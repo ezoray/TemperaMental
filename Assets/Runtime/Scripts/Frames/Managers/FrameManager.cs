@@ -18,9 +18,9 @@ namespace Tempera.Mental.Frames
 
         List<VisualEmitterDetail> emitterDetails;
 
-        [SerializeField] UnityEvent<Vector2Int,Color> OnAddEmitter;
-        [SerializeField] UnityEvent<Vector2Int> OnRemoveEmitter;
-        [SerializeField] UnityEvent<VisualFrameDetail> OnChangeFrame;
+        [SerializeField] UnityEvent<Vector2Int,Color> onAddEmitter;
+        [SerializeField] UnityEvent<Vector2Int> onRemoveEmitter;
+        [SerializeField] UnityEvent<VisualFrameDetail> onFrameChange;
 
         private void Awake()
         {
@@ -56,17 +56,23 @@ namespace Tempera.Mental.Frames
             }
         }
 
-        public void ClearAllFrames()
+        public void DeleteAllFrames()
         {
             frames.Clear();
             AddFrame();
+        }
+
+        public void ClearFrame()
+        {
+            currentFrame.ClearEmitters();
+            onFrameChange?.Invoke(GetFrameDetail(currentFrame));
         }
 
         public void InsertFrame()
         {
             frames.Insert(++currentFrameIndex, new Frame());
 
-            OnChangeFrame?.Invoke(GetFrameDetail(frames[currentFrameIndex]));
+            onFrameChange?.Invoke(GetFrameDetail(frames[currentFrameIndex]));
         }
 
         public void PasteOntoFrame()
@@ -74,7 +80,7 @@ namespace Tempera.Mental.Frames
             if (copiedFrame == null) return;
 
             frames[currentFrameIndex] = copiedFrame;
-            OnChangeFrame?.Invoke(GetFrameDetail(copiedFrame));
+            onFrameChange?.Invoke(GetFrameDetail(copiedFrame));
             LogMan.Log($"Frame pasted");
         }
 
@@ -92,7 +98,7 @@ namespace Tempera.Mental.Frames
                 currentFrameIndex++;
                 currentFrame = frames[currentFrameIndex];
 
-                OnChangeFrame?.Invoke(GetFrameDetail(currentFrame));
+                onFrameChange?.Invoke(GetFrameDetail(currentFrame));
             }
         }
 
@@ -103,7 +109,7 @@ namespace Tempera.Mental.Frames
                 currentFrameIndex--;
                 currentFrame = frames[currentFrameIndex];
 
-                OnChangeFrame?.Invoke(GetFrameDetail(currentFrame));
+                onFrameChange?.Invoke(GetFrameDetail(currentFrame));
             }
         }
 
@@ -137,7 +143,7 @@ namespace Tempera.Mental.Frames
             currentFrameIndex = 0;
             currentFrame = frames[currentFrameIndex];
 
-            OnChangeFrame?.Invoke(GetFrameDetail(currentFrame));            
+            onFrameChange?.Invoke(GetFrameDetail(currentFrame));            
         }
 
         public void AddFrame()
@@ -148,7 +154,7 @@ namespace Tempera.Mental.Frames
             currentFrame = frame;
             currentFrameIndex = frames.Count -1;
 
-            OnChangeFrame?.Invoke(GetFrameDetail(frame));
+            onFrameChange?.Invoke(GetFrameDetail(frame));
         }
 
         public void SetEmitter(int emitterId)
@@ -160,7 +166,7 @@ namespace Tempera.Mental.Frames
         {
             currentFrame.TryRemoveEmitter(position);
 
-            OnRemoveEmitter?.Invoke(position);
+            onRemoveEmitter?.Invoke(position);
         }
 
         public void AddEmitterAtPosition(Vector2Int cellPosition)
@@ -171,7 +177,7 @@ namespace Tempera.Mental.Frames
             {
                 currentFrame.AddEmitter(new EmitterDetail(cellPosition, currentEmitterId));
 
-                OnAddEmitter?.Invoke(cellPosition, EmitterUtils.GetColor(currentEmitterId));
+                onAddEmitter?.Invoke(cellPosition, EmitterUtils.GetColor(currentEmitterId));
             }
         }
 
@@ -233,8 +239,7 @@ namespace Tempera.Mental.Frames
             currentFrameIndex = newIndex;
             currentFrame = frames[currentFrameIndex];
 
-            OnChangeFrame?.Invoke(GetFrameDetail(currentFrame));
+            onFrameChange?.Invoke(GetFrameDetail(currentFrame));
         }
-
     }
 }

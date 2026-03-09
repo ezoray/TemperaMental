@@ -62,7 +62,7 @@ namespace Tempera.Mental.Midi.Playbacks
                 if (state == PlaybackState.Playing || state == PlaybackState.Paused)
                 {
                     // todo currently we generate the frames to midifile each time Play is hit even if there have been no changes
-                    // this is convenient but can cause logic problems and playback.Stop is essentially a pause
+                    // this is convenient but can cause logic problems and playback.Stop is actually a pause
                     ResetPlayback();
                     return true;
                 }

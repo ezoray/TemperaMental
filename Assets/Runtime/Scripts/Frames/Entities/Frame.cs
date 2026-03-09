@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -15,10 +14,12 @@ namespace Tempera.Mental.Frames
 
         public Frame(Frame otherFrame)
         {
-            // Pass the old dictionary into the new one's constructor.
-            // Because EmitterDetail is a struct, this performs a "Value Copy"
-            // for every entry automatically.
             matrix = new Dictionary<Vector2Int, EmitterDetail>(otherFrame.Matrix);
+        }
+
+        public void ClearEmitters()
+        {
+            matrix.Clear();
         }
 
         public bool CheckSameEmitterAtPosition(Vector2Int cellPosition, int currentEmitterId)

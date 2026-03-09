@@ -16,7 +16,9 @@ namespace Tempera.Mental.Frames
 
         public void OnClickDeleteFrame() => frameManager.DeleteFrame();
 
-        public void OnCLickClearAllFrames() => frameManager.ClearAllFrames();
+        public void OnClickDeleteAllFrames() => frameManager.DeleteAllFrames();
+
+        public void OnClickClearFrame() => frameManager.ClearFrame();
 
         public void OnClickInsertFrame() => frameManager.InsertFrame();
 
