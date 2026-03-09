@@ -48,6 +48,11 @@ namespace Tempera.Mental.Midi.Playbacks
             onFrameChanged?.Invoke(frame);
         }
 
+        public void ActionOnLoopStateChanged(bool isLooping)
+        {
+            playbackManager.SetLoopState(isLooping);
+        }
+
         public void ActionOnPlaybackFinished()
         {
             LogMan.Log("ActionOnPlaybackFinished");

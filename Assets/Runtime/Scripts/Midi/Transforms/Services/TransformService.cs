@@ -21,8 +21,10 @@ namespace Tempera.Mental.Midi.Transforms
         const byte GREEN = 3;
         const int TICKS_PER_FRAME = 480;
 
-        int bpm = 400;
+        const string FRAME_NO = "FRAME_NO_";
+        const string END_OF_FRAME = "FRAME_END";
 
+        int bpm = 400;
 
         public MidiFile FromFramesToMidiFile(List<Frame> sourceFrames, int startFrame = 1)
         {
@@ -51,9 +53,10 @@ namespace Tempera.Mental.Midi.Transforms
              //       LogMan.Log("Frame: " + i);
 
                     long frameTick = i * TICKS_PER_FRAME;
+                    long frameEndTick = (i + 1) * TICKS_PER_FRAME;
 
                     // add a start of new frame marker into midi so we can detect this on playback to switch UI frames
-                    manager.Objects.Add(new TimedEvent(new MarkerEvent((startFrame + i).ToString()), frameTick++));
+                    manager.Objects.Add(new TimedEvent(new MarkerEvent($"{FRAME_NO}{startFrame + i}"), frameTick++));
 
                     // clear any placed emitters before first frame drawing
                     if (i == 0)
@@ -107,6 +110,8 @@ namespace Tempera.Mental.Midi.Transforms
               //              LogMan.Log($"Place Emitter Pos: {pos} Tick: " + (frameTick - 1));
                         }
                     }
+
+                    manager.Objects.Add(new TimedEvent(new MarkerEvent(END_OF_FRAME), frameEndTick));
 
                     // set current frame as previous frame ready for next iteration
                     previousFrameGroups = currentFrameGroups.ToDictionary(kvp => kvp.Key, kvp => new HashSet<byte>(kvp.Value));

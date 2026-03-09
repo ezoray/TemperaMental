@@ -12,11 +12,15 @@ namespace Tempera.Mental.Midi.Playbacks
 {
     public class PlaybackManager : MonoBehaviour
     {
+        const string FRAME_NO = "FRAME_NO_";
+        const string END_OF_FRAME = "FRAME_END";
+
         OutputDevice outputDevice;
         string outputDeviceName;
         private Playback playback;
 
         bool isPlaybackFinished;
+        bool isLooping;
 
         private ConcurrentQueue<int> frameQueue;
 
@@ -57,7 +61,9 @@ namespace Tempera.Mental.Midi.Playbacks
 
                 if (state == PlaybackState.Playing || state == PlaybackState.Paused)
                 {
-                    playback.Stop();
+                    // todo currently we generate the frames to midifile each time Play is hit even if there have been no changes
+                    // this is convenient but can cause logic problems and playback.Stop is essentially a pause
+                    ResetPlayback();
                     return true;
                 }
                 else
@@ -131,7 +137,7 @@ namespace Tempera.Mental.Midi.Playbacks
                 playback = midiFile.GetPlayback();
                 playback.OutputDevice = outputDevice;
 
-            //    playback.Speed = 5.0; // todo investigate where the bug is that makes this required
+                playback.Loop = isLooping;
 
                 playback.Finished += OnPlaybackFinished;
                 playback.EventPlayed += OnEventPlayed;
@@ -152,31 +158,23 @@ namespace Tempera.Mental.Midi.Playbacks
         {
             if (eventArgs.Event is MarkerEvent marker)
             {
-                if (int.TryParse(marker.Text, out var frameNumber))
+                string text = marker.Text;
+
+                if (text.StartsWith(FRAME_NO))
                 {
-                    frameQueue.Enqueue(frameNumber);
+                    string numberPart = text.Replace(FRAME_NO, "");
+
+                    if (int.TryParse(numberPart, out var frameNumber))
+                    {
+                        frameQueue.Enqueue(frameNumber);
+                    }
                 }
             }
         }
-
         private void OnPlaybackFinished(object sender, EventArgs e)
         {
             isPlaybackFinished = true;
         }
-
-         // --- NEW HELPER METHODS ---
-
-        //private void ResetHardware()
-        //{
-        //    if (outputDevice == null) return;
-
-        //    // CC 12 / 127 is your Clear command
-        //    outputDevice.SendEvent(new ControlChangeEvent(
-        //        (SevenBitNumber)12,
-        //        (SevenBitNumber)127));
-
-        //    Debug.Log("Hardware Reset: Sent CC 12");
-        //}
 
         public int GetTicksPerQuarterNote(MidiFile midiFile)
         {
@@ -224,7 +222,17 @@ namespace Tempera.Mental.Midi.Playbacks
             playback?.Dispose();
         }
 
-    
+        public void SetLoopState(bool isLooping)
+        {
+            LogMan.Log("SetLoopState : " + isLooping);
+
+            this.isLooping = isLooping;
+
+            if (GetPlaybackState() != PlaybackState.Reset)
+            {
+                playback.Loop = isLooping;
+            }
+        }
 
         public string OutputDeviceName { get => outputDeviceName; }
     }

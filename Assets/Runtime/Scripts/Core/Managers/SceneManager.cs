@@ -7,6 +7,11 @@ namespace Tempera.Mental.Core
     {
         [SerializeField] InputManager inputManager;
 
+        private void Start()
+        {
+            Application.targetFrameRate = 60;
+        }
+
         public void SetInputEnable(bool isEnabled)
         {
             inputManager.SetEnable(isEnabled);

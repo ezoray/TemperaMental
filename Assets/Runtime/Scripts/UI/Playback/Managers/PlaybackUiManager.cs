@@ -18,13 +18,25 @@ namespace Tempera.Mental.Ui.Playbacks
         [SerializeField] TextMeshProUGUI bpmValue;
         [SerializeField] Slider bpmSlider;
 
+        bool isLooping;
+
         [SerializeField] UnityEvent<int> onBpmValueChanged;
         [SerializeField] UnityEvent<PlaybackEventType> onPlaybackEvent;
+        [SerializeField] UnityEvent<bool> onLoopStateChanged;
 
 
         public void OnClickPlayPosition()
         {
             onPlaybackEvent?.Invoke(PlaybackEventType.PlayPosition);
+        }
+
+        public void OnClickSetLoopState()
+        {
+            isLooping = !isLooping;
+
+            onLoopStateChanged?.Invoke(isLooping);
+
+            // todo indicate looping on/off
         }
 
         public void OnClickStop()
