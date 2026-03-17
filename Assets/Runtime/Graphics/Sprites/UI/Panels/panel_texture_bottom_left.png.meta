@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: df666e737ab42448bba714e5bb971eab
+guid: 7bb58e54dcd054765bcbdac1d7db282d
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 8031027213765239518
-    second: tempera2_0
+      213: 3445131887754996690
+    second: panel_texture_bottom_left_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: tempera2_0
+      name: panel_texture_bottom_left_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 695
-        height: 939
+        width: 85
+        height: 100
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ed2e8f163b0f37f60800000000000000
-      internalID: 8031027213765239518
+      spriteID: 2dbe106e2319fcf20800000000000000
+      internalID: 3445131887754996690
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      tempera2_0: 8031027213765239518
+      panel_texture_bottom_left_0: 3445131887754996690
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

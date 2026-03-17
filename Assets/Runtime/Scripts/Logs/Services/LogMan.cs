@@ -5,6 +5,10 @@ namespace Tempera.Mental.Logs
 {
     public class LogMan : MonoBehaviour
     {
+        const string INFO = "#6ACA6A";
+        const string WARN = "#CACA6A";
+        const string ERROR = "#E01306";
+
         public static LogMan Instance;
         public TextMeshProUGUI logDisplay;
 
@@ -15,17 +19,17 @@ namespace Tempera.Mental.Logs
 
         public static void Log(string message)
         {
-            ProcessLog(message, "white", LogType.Log);
+            ProcessLog(message, INFO, LogType.Log);
         }
 
         public static void LogWarning(string message)
         {
-            ProcessLog(message, "yellow", LogType.Warning);
+            ProcessLog(message, WARN, LogType.Warning);
         }
 
         public static void LogError(string message)
         {
-            ProcessLog(message, "red", LogType.Error);
+            ProcessLog(message, ERROR, LogType.Error);
         }
 
         private static void ProcessLog(string message, string colorHex, LogType type)

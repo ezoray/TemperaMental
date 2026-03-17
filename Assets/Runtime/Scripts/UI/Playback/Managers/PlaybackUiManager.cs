@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
-namespace Tempera.Mental.Ui.Playbacks
+namespace Tempera.Mental.UI.Playbacks
 {
     public class PlaybackUiManager : MonoBehaviour
     {
@@ -15,8 +15,9 @@ namespace Tempera.Mental.Ui.Playbacks
         [Header("Order: PlayPosition, Play, Pause, Stop")]
         [SerializeField] Button[] controlButtons;
 
-        [SerializeField] TextMeshProUGUI bpmValue;
         [SerializeField] Slider bpmSlider;
+        [SerializeField] TextMeshProUGUI bpmText;
+        [SerializeField] TextMeshProUGUI loopText;
 
         bool isLooping;
 
@@ -36,7 +37,7 @@ namespace Tempera.Mental.Ui.Playbacks
 
             onLoopStateChanged?.Invoke(isLooping);
 
-            // todo indicate looping on/off
+            loopText.text = isLooping ? "ON" : "OFF";
         }
 
         public void OnClickStop()
@@ -76,7 +77,7 @@ namespace Tempera.Mental.Ui.Playbacks
             if (newBpm <= BPM_MAX)
             {
                 bpmSlider.value = newBpm;
-                bpmValue.text = newBpm.ToString();
+                bpmText.text = newBpm.ToString();
             }
         }
 
@@ -87,20 +88,20 @@ namespace Tempera.Mental.Ui.Playbacks
             if (newBpm >= BPM_MIN)
             {
                 bpmSlider.value = newBpm;
-                bpmValue.text = newBpm.ToString();
+                bpmText.text = newBpm.ToString();
             }
         }
 
         public void OnBpmSliderValueChanged(float bpm)
         {
-            bpmValue.text = bpm.ToString();
+            bpmText.text = bpm.ToString();
 
             onBpmValueChanged?.Invoke((int)bpm);
         }
 
         public void ActionOnSetBPM(int bpm)
         {
-            bpmValue.text = bpm.ToString();
+            bpmText.text = bpm.ToString();
             bpmSlider.value = bpm;
         }
     }
