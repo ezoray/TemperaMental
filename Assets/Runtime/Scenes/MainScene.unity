@@ -1834,52 +1834,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &294203155
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 294203157}
-  - component: {fileID: 294203156}
-  m_Layer: 0
-  m_Name: BaseTilemapManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &294203156
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 294203155}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c2f99d9d262b44db2bf96f447de7ecd5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Tempera.Mental.MatrixTilemapManager
-  baseTilemap: {fileID: 110228686}
-  tile: {fileID: 11400000, guid: 532cc3c61fb5f422b83de7bda7582713, type: 2}
---- !u!4 &294203157
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 294203155}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 849915435}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &302310978
 GameObject:
   m_ObjectHideFlags: 0
@@ -1924,7 +1878,7 @@ Transform:
   m_Children:
   - {fileID: 110228684}
   - {fileID: 1373230299}
-  m_Father: {fileID: 1814786751}
+  m_Father: {fileID: 1164451988}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &326903443
 GameObject:
@@ -5101,8 +5055,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a0fad8d0a3aaf4cae9b1d09ab5d670d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Tempera.Mental.UI.GridManager
-  baseTilemapManager: {fileID: 294203156}
-  emitterTilemapManager: {fileID: 2030544276}
   frameText: {fileID: 1352273670}
   frameSlider: {fileID: 1309759012}
   selectionRing: {fileID: 691874080}
@@ -5133,9 +5085,7 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 294203157}
-  - {fileID: 2030544275}
+  m_Children: []
   m_Father: {fileID: 1814786751}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &883754003 stripped
@@ -6134,6 +6084,115 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1143660884}
   m_CullTransparentMesh: 1
+--- !u!1 &1164451987
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1164451988}
+  m_Layer: 0
+  m_Name: Grid
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1164451988
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1164451987}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 302310980}
+  - {fileID: 1166318855}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1166318854
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1166318855}
+  - component: {fileID: 1166318856}
+  - component: {fileID: 1166318858}
+  - component: {fileID: 1166318857}
+  m_Layer: 0
+  m_Name: GridManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1166318855
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1166318854}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1164451988}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1166318856
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1166318854}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc24f172b2c894b19856a5cdfc19b5ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Tempera.Mental.GridManager
+  baseTilemapManager: {fileID: 0}
+  emitterTilemapManager: {fileID: 0}
+--- !u!114 &1166318857
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1166318854}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 04cec94562d4247329c038dfa0b20a18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Tempera.Mental.Grid.EmitterTilemapManager
+  emitterTilemap: {fileID: 1373230301}
+  tile: {fileID: 11400000, guid: 71fc95487f51140718576fc2a9465f39, type: 2}
+--- !u!114 &1166318858
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1166318854}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2f99d9d262b44db2bf96f447de7ecd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Tempera.Mental.Grid.BaseTilemapManager
+  baseTilemap: {fileID: 110228686}
+  tile: {fileID: 11400000, guid: 532cc3c61fb5f422b83de7bda7582713, type: 2}
 --- !u!1001 &1168689430
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7438,8 +7497,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Tempera.Mental.Grid.GridEventController
   mainCamera: {fileID: 1553216987}
-  gridManager: {fileID: 849915434}
+  gridManager: {fileID: 0}
   frameManager: {fileID: 1457006301}
+  frameUiManager: {fileID: 0}
 --- !u!4 &1362657597
 Transform:
   m_ObjectHideFlags: 0
@@ -7854,8 +7914,8 @@ MonoBehaviour:
   onAddEmitter:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 849915434}
-        m_TargetAssemblyTypeName: Tempera.Mental.UI.FrameUiManager, Assembly-CSharp
+      - m_Target: {fileID: 1166318856}
+        m_TargetAssemblyTypeName: Tempera.Mental.Grid.GridManager, Assembly-CSharp
         m_MethodName: ActionOnAddEmitter
         m_Mode: 0
         m_Arguments:
@@ -7869,8 +7929,8 @@ MonoBehaviour:
   onRemoveEmitter:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 849915434}
-        m_TargetAssemblyTypeName: Tempera.Mental.UI.FrameUiManager, Assembly-CSharp
+      - m_Target: {fileID: 1166318856}
+        m_TargetAssemblyTypeName: Tempera.Mental.Grid.GridManager, Assembly-CSharp
         m_MethodName: ActionOnRemoveEmitter
         m_Mode: 0
         m_Arguments:
@@ -7884,6 +7944,18 @@ MonoBehaviour:
   onFrameChange:
     m_PersistentCalls:
       m_Calls:
+      - m_Target: {fileID: 1166318856}
+        m_TargetAssemblyTypeName: Tempera.Mental.Grid.GridManager, Assembly-CSharp
+        m_MethodName: ActionOnChangeFrame
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
       - m_Target: {fileID: 849915434}
         m_TargetAssemblyTypeName: Tempera.Mental.UI.FrameUiManager, Assembly-CSharp
         m_MethodName: ActionOnChangeFrame
@@ -8090,9 +8162,9 @@ Camera:
   m_NormalizedViewPortRect:
     serializedVersion: 2
     x: 0
-    y: 0
-    width: 1
-    height: 1
+    y: 0.09583334
+    width: 1.0166667
+    height: 1.0166668
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 60
@@ -9464,7 +9536,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 302310980}
   - {fileID: 849915435}
   - {fileID: 806095547}
   - {fileID: 1244920276}
@@ -10707,52 +10778,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 645e4b2724ce340edbe6c0109b4073d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Tempera.Mental.UI.DimmableTextButton
---- !u!1 &2030544274
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2030544275}
-  - component: {fileID: 2030544276}
-  m_Layer: 0
-  m_Name: EmitterTilemapManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &2030544275
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2030544274}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 849915435}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2030544276
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2030544274}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 04cec94562d4247329c038dfa0b20a18, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Tempera.Mental.UI.EmitterTilemapManager
-  emitterTilemap: {fileID: 1373230301}
-  tile: {fileID: 11400000, guid: 71fc95487f51140718576fc2a9465f39, type: 2}
 --- !u!1 &2045701836
 GameObject:
   m_ObjectHideFlags: 0
@@ -11530,3 +11555,4 @@ SceneRoots:
   - {fileID: 1001891066}
   - {fileID: 2069221093}
   - {fileID: 1799877661}
+  - {fileID: 1164451988}

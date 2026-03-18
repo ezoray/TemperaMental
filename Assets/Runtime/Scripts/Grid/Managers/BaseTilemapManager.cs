@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-namespace Tempera.Mental.UI
+namespace Tempera.Mental.Grid
 {
     public class BaseTilemapManager : MonoBehaviour
     {

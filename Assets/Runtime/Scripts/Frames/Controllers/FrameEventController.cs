@@ -1,3 +1,4 @@
+using Tempera.Mental.Grid;
 using Tempera.Mental.UI;
 using UnityEngine;
 
@@ -6,8 +7,9 @@ namespace Tempera.Mental.Frames
     public class FrameEventController : MonoBehaviour
     {
         [SerializeField] Camera mainCamera;
-        [SerializeField] FrameUiManager gridManager;
+        [SerializeField] GridManager gridManager;
         [SerializeField] FrameManager frameManager;
+        [SerializeField] FrameUiManager frameUiManager;
 
 
         public void OnClickEndFrame() => frameManager.GoToEndFrame();
