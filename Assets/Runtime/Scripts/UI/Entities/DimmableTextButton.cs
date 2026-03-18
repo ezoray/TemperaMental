@@ -18,7 +18,7 @@ namespace Tempera.Mental.UI
         {
             base.DoStateTransition(state, instant);
 
-            if(state == SelectionState.Normal | state == SelectionState.Disabled) {
+            if(state == SelectionState.Normal || state == SelectionState.Disabled) {
 
                 float targetAlpha = (state == SelectionState.Disabled) ? DISABLED_ALPHA : 1f;
 

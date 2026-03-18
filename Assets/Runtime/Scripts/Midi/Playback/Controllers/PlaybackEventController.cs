@@ -22,23 +22,16 @@ namespace Tempera.Mental.Midi.Playbacks
         [SerializeField] UnityEvent<int> onFrameChanged;
 
 
-        public void OnDeviceRemoved(string deviceName)
+        public void ActionOnDeviceRemoved()
         {
-            // todo check device removed isn't the one being used
-            if(deviceName.Equals(playbackManager.OutputDeviceName))
-            {
-                playbackManager.TryStop();
-            }
+            playbackManager.TryStop();
         }
 
-        public void OnDeviceChanged(string deviceName)
+        public void ActionOnDeviceChanged(OutputDevice device)
         {
-            LogMan.Log("OnDeviceChanged: " + deviceName);
+            LogMan.Log("OnDeviceChanged: " + device.Name);
 
-            if(deviceManager.TryGetOutputDevice(deviceName, out var outputDevice))
-            {
-                playbackManager.SetOutputDevice(outputDevice as OutputDevice);
-            }
+            playbackManager.SetOutputDevice(device);
         }
 
         public void ActionOnFrameChanged(int frame)

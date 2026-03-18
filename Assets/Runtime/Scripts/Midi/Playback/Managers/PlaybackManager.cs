@@ -19,7 +19,7 @@ namespace Tempera.Mental.Midi.Playbacks
         string outputDeviceName;
         private Playback playback;
 
-        bool isPlaybackFinished;
+        volatile bool isPlaybackFinished;
         bool isLooping;
 
         private ConcurrentQueue<int> frameQueue;
@@ -139,6 +139,7 @@ namespace Tempera.Mental.Midi.Playbacks
 
                 playback.Loop = isLooping;
 
+                playback.ErrorOccurred += OnPlaybackError;
                 playback.Finished += OnPlaybackFinished;
                 playback.EventPlayed += OnEventPlayed;
 
@@ -171,8 +172,17 @@ namespace Tempera.Mental.Midi.Playbacks
                 }
             }
         }
+
         private void OnPlaybackFinished(object sender, EventArgs e)
         {
+            isPlaybackFinished = true;
+        }
+
+        private void OnPlaybackError(object sender, PlaybackErrorOccurredEventArgs e)
+        {
+            LogMan.LogError($"Playback error: {e.Site}, {e.Exception.Message}");
+            ResetPlayback();
+
             isPlaybackFinished = true;
         }
 

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Melanchall.DryWetMidi.Multimedia;
@@ -9,151 +10,142 @@ namespace Tempera.Mental.Midi.Devices
 {
     public class DeviceManager : MonoBehaviour
     {
-        Dictionary<string, OutputDevice> outputDevices;
-        List<string> deviceNames;
+        const string PRIMARY_DEVICE = "MidiView";
 
+        List<string> connectedDevices;
+        OutputDevice currentDevice;
+
+        bool isInitialSync;
+        volatile bool isDeviceChange;
+
+        [SerializeField] UnityEvent<string> onAutoSelectDevice;
+        [SerializeField] UnityEvent<OutputDevice> onDeviceSelected;
+        [SerializeField] UnityEvent onCurrentDeviceRemoved;
         [SerializeField] UnityEvent<List<string>> onDevicesUpdated;
-        [SerializeField] UnityEvent<string> onPrimaryDeviceFound;
-        [SerializeField] UnityEvent<string> onDeviceAdded;
-        [SerializeField] UnityEvent<string> onDeviceRemoved;
 
-        bool isDeviceChange;
 
         private void OnEnable()
         {
-            DevicesWatcher.Instance.DeviceAdded += OnDeviceAdded;
-            DevicesWatcher.Instance.DeviceRemoved += OnDeviceRemoved;
-
-            outputDevices = new Dictionary<string, OutputDevice>();
-            deviceNames = new List<string>();
+            connectedDevices = new List<string>();
+            isInitialSync = true;
         }
 
         private void Start()
         {
-            try
-            {
-                UpdateAvailableDevices();
-                SetPrimaryDeviceAsFirstDevice();
+            DevicesWatcher.Instance.DeviceAdded += OnDeviceChange;
+            DevicesWatcher.Instance.DeviceRemoved += OnDeviceChange;
 
-                onDevicesUpdated?.Invoke(deviceNames);
-
-                if (deviceNames.Contains("Tempera"))
-                {
-                    LogMan.Log("Tempera found on Startup. Triggering initial selection.");
-                    onPrimaryDeviceFound?.Invoke("Tempera");
-                }
-            }
-            catch(System.Exception ex)
-            {
-                LogMan.LogError("Error getting device list: " + ex);
-            }
+            SyncDeviceList();
         }
 
         // DevicesWatcher runs on a separate thread so signal a device change to pick up in Update
         private void Update()
         {
+            // todo don't poll so often
             if(isDeviceChange)
             {
                 isDeviceChange = false;
-                UpdateAvailableDevices();                
+
+                SyncDeviceList();    
             }
         }
 
-        public bool TryGetOutputDevice(string deviceName, out OutputDevice outputDevice)
-        {
-            return outputDevices.TryGetValue(deviceName, out outputDevice);
-        }
-
-        private void UpdateAvailableDevices()
+        public OutputDevice GetOutputDevice(string deviceName)
         {
             try
             {
-                // 1. Get a fresh snapshot of what the OS sees right now
-                List<OutputDevice> currentDevices = OutputDevice.GetAll().ToList();
-                deviceNames = currentDevices.Select(d => d.Name).ToList();
-
-                // remove disconnected devices
-                List<string> namesToRemove = outputDevices.Keys
-                    .Where(name => !deviceNames.Contains(name))
-                    .ToList();
-
-                foreach (string name in namesToRemove)
-                {
-                    LogMan.Log("Device disconnected " + name);
-
-                    // Critically important: Close the handle before removing from dict
-                    outputDevices[name]?.Dispose();
-                    outputDevices.Remove(name);
-
-                    onDeviceRemoved?.Invoke(name);
-                }
-
-                // --- STEP B: ADD NEWLY CONNECTED DEVICES ---
-                foreach (var device in currentDevices)
-                {
-                    // If we don't have it in our dict yet, it's new!
-                    if (!outputDevices.ContainsKey(device.Name))
-                    {
-                        LogMan.Log("New device detected: " + device.Name);
-
-                        // Add to dictionary
-                        outputDevices.Add(device.Name, device);
-
-                        onDeviceAdded?.Invoke(device.Name);
-                    }
-                    else
-                    {
-                        device.Dispose();
-                    }
-                }
-
-                SetPrimaryDeviceAsFirstDevice();
-                onDevicesUpdated?.Invoke(deviceNames);
+                return OutputDevice.GetByName(deviceName);
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
-                LogMan.LogError("Error updating device list: " + ex);
-            }        
+                LogMan.LogError($"Could not open device: {ex.Message}");
+                return null;
+            }
         }
 
-
-        private void SetPrimaryDeviceAsFirstDevice()
+        private void SyncDeviceList()
         {
-            deviceNames.Sort((a, b) =>
+            try
             {
-                if (a == "Tempera") return -1;
-                if (b == "Tempera") return 1;
-                return a.CompareTo(b);
-            });
+                List<string> hardware = OutputDevice.GetAll().Select(d => d.Name).ToList();
+                List<string> removed = connectedDevices.Except(hardware).ToList();
+
+                foreach (var name in removed)
+                {
+                    if (currentDevice != null && currentDevice.Name == name)
+                    {
+                        currentDevice.Dispose();
+                        currentDevice = null;
+                        onCurrentDeviceRemoved?.Invoke();
+                    }
+                }
+
+                connectedDevices = hardware;
+
+                onDevicesUpdated?.Invoke(connectedDevices);
+
+                if (isInitialSync)
+                {
+                    isInitialSync = false;
+
+                    HandleInitialSelection();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogMan.LogError(ex.Message);
+            }
         }
 
-        private void OnDeviceRemoved(object sender, DeviceAddedRemovedEventArgs eventArgs)
+        private void HandleInitialSelection()
         {
-            LogMan.Log("OnDeviceRemoved");
+            if (connectedDevices.Count == 0) return;
+
+            string target = connectedDevices.Contains(PRIMARY_DEVICE)
+                ? PRIMARY_DEVICE
+                : connectedDevices[0];
+
+            ActionOnDeviceSelected(target);
+
+            onAutoSelectDevice?.Invoke(target);
+        }
+
+        private void OnDeviceChange(object sender, DeviceAddedRemovedEventArgs eventArgs)
+        {
+            LogMan.Log("OnDeviceChange Device: " + eventArgs.Device);
 
             isDeviceChange = true;
         }
 
-        private void OnDeviceAdded(object sender, DeviceAddedRemovedEventArgs eventArgs)
+        public void ActionOnDeviceSelected(string deviceName)
         {
-            LogMan.Log("OnDeviceAdded Device: " + eventArgs.Device.Name);
+            try
+            {
+                if (currentDevice != null)
+                {
+                    currentDevice.Dispose();
+                    currentDevice = null;
+                }
 
-            isDeviceChange = true;
+                currentDevice = OutputDevice.GetByName(deviceName);
+
+                onDeviceSelected?.Invoke(currentDevice);
+
+                LogMan.Log($"Device {deviceName} successfully opened.");
+            }
+            catch (Exception ex)
+            {
+                LogMan.LogError($"Failed to select device {deviceName}: {ex.Message}");
+            }
         }
 
         private void OnDisable()
         {
             if (DevicesWatcher.Instance != null)
             {
-                DevicesWatcher.Instance.DeviceAdded -= OnDeviceAdded;
-                DevicesWatcher.Instance.DeviceRemoved -= OnDeviceRemoved;
+                DevicesWatcher.Instance.DeviceAdded -= OnDeviceChange;
+                DevicesWatcher.Instance.DeviceRemoved -= OnDeviceChange;
             }
-
-            foreach (OutputDevice device in outputDevices.Values)
-            {
-                device?.Dispose();
-            }
-            outputDevices.Clear();
         }
     }
 }

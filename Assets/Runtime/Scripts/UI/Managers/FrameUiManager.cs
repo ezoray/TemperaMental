@@ -1,5 +1,4 @@
 using Tempera.Mental.Core;
-using Tempera.Mental.Logs;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
