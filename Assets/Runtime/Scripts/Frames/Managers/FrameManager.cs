@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Tempera.Mental.Core;
 using Tempera.Mental.Logs;
@@ -27,8 +26,6 @@ namespace Tempera.Mental.Frames
             frames = new List<Frame>();
             emitterDetails = new List<VisualEmitterDetail>();
 
-            currentEmitterId = 0;
-
             AddFrame();
         }
 
@@ -36,24 +33,15 @@ namespace Tempera.Mental.Frames
         {
             if (frames.Count == 0) return;
 
+            if (frames.Count == 1)
+            {
+                ClearFrame();
+                return;
+            }
+
             frames.RemoveAt(currentFrameIndex);
 
-            if (frames.Count == 0)
-            {
-                // deleted only existing frame
-                AddFrame();
-            }
-            else if (currentFrameIndex >= frames.Count)
-            {
-                // deleted last frame
-                currentFrameIndex = frames.Count - 1;
-                GoToFrameByIndex(currentFrameIndex);
-            }
-            else
-            {
-                // deleted in-between frame
-                GoToFrameByIndex(currentFrameIndex);
-            }
+            SetCurrentFrame(currentFrameIndex);
         }
 
         public void DeleteAllFrames()
@@ -65,52 +53,65 @@ namespace Tempera.Mental.Frames
         public void ClearFrame()
         {
             currentFrame.ClearEmitters();
-            onFrameChange?.Invoke(GetFrameDetail(currentFrame));
+
+            NotifyFrameChanged();
+        }
+
+        public void DuplicateFrame()
+        {
+            InsertFrameAt(currentFrameIndex + 1, new Frame(frames[currentFrameIndex]));
         }
 
         public void InsertFrame()
         {
-            frames.Insert(++currentFrameIndex, new Frame());
+            LogMan.Log("InsertFrame");
 
-            onFrameChange?.Invoke(GetFrameDetail(frames[currentFrameIndex]));
+            InsertFrameAt(currentFrameIndex + 1, new Frame());
         }
 
         public void PasteOntoFrame()
         {
             if (copiedFrame == null) return;
 
-            frames[currentFrameIndex] = copiedFrame;
-            onFrameChange?.Invoke(GetFrameDetail(copiedFrame));
-            LogMan.Log($"Frame pasted");
+            frames[currentFrameIndex] = new Frame(copiedFrame);
+            SetCurrentFrame(currentFrameIndex);
+
+            LogMan.Log("Frame pasted");
         }
 
         public void CopyFrame()
         {
-            copiedFrame = new Frame(frames[currentFrameIndex]);
-            LogMan.Log($"Frame {currentFrameIndex + 1} copied!");
+            copiedFrame = new Frame(currentFrame);
+            LogMan.Log($"Frame {currentFrameIndex + 1} copied");
         }
-
     
         public void GoToNextFrame()
         {
-            if(currentFrameIndex +1 <= frames.Count -1)
-            {
-                currentFrameIndex++;
-                currentFrame = frames[currentFrameIndex];
-
-                onFrameChange?.Invoke(GetFrameDetail(currentFrame));
-            }
+            SetCurrentFrame(currentFrameIndex +1);
         }
 
         public void GoToPreviousFrame()
         {
-            if (currentFrameIndex > 0)
-            {
-                currentFrameIndex--;
-                currentFrame = frames[currentFrameIndex];
+            SetCurrentFrame(currentFrameIndex - 1);
+        }
 
-                onFrameChange?.Invoke(GetFrameDetail(currentFrame));
-            }
+        public void GoToFrame(int frameNumber)
+        {
+            SetCurrentFrame(frameNumber - 1);
+        }
+
+        public void GoToStartFrame()
+        {
+            if (frames.Count == 0) return;
+
+            SetCurrentFrame(0);
+        }
+
+        public void GoToEndFrame()
+        {
+            if (frames.Count == 0) return;
+
+            SetCurrentFrame(frames.Count - 1);
         }
 
         public void AppendFrames(List<Frame> newFrames)
@@ -125,8 +126,7 @@ namespace Tempera.Mental.Frames
 
             LogMan.Log($"Appended {newFrames.Count} frames. Total frames: {frames.Count}");
 
-            currentFrameIndex = frames.Count - newFrames.Count;
-            GoToFrameByIndex(currentFrameIndex);
+            SetCurrentFrame(frames.Count - newFrames.Count);
         }
 
         public void SetFrames(List<Frame> newFrames)
@@ -137,24 +137,10 @@ namespace Tempera.Mental.Frames
                 return;
             }
  
-            this.frames = newFrames;
+            this.frames = new List<Frame>(newFrames);
             emitterDetails.Clear();
 
-            currentFrameIndex = 0;
-            currentFrame = frames[currentFrameIndex];
-
-            onFrameChange?.Invoke(GetFrameDetail(currentFrame));            
-        }
-
-        public void AddFrame()
-        {
-            Frame frame = new Frame();
-
-            frames.Add(frame);
-            currentFrame = frame;
-            currentFrameIndex = frames.Count -1;
-
-            onFrameChange?.Invoke(GetFrameDetail(frame));
+            SetCurrentFrame(0);           
         }
 
         public void SetEmitter(int emitterId)
@@ -164,9 +150,10 @@ namespace Tempera.Mental.Frames
 
         public void RemoveEmitterAtPosition(Vector2Int position)
         {
-            currentFrame.TryRemoveEmitter(position);
-
-            onRemoveEmitter?.Invoke(position);
+            if (currentFrame.TryRemoveEmitter(position))
+            {
+                onRemoveEmitter?.Invoke(position);
+            }
         }
 
         public void AddEmitterAtPosition(Vector2Int cellPosition)
@@ -181,28 +168,7 @@ namespace Tempera.Mental.Frames
             }
         }
 
-        public void GoToFrame(int frameNumber)
-        {
-            GoToFrameByIndex(frameNumber - 1);
-        }
-
-        public void GoToStartFrame()
-        {
-            if (frames.Count == 0) return;
-
-            currentFrameIndex = 0;
-            GoToFrameByIndex(currentFrameIndex);
-        }
-
-        public void GoToEndFrame()
-        {
-            if (frames.Count == 0) return;
-
-            currentFrameIndex = frames.Count - 1;
-            GoToFrameByIndex(currentFrameIndex);
-        }
-
-        public List<Frame> GetFramesFromCurrentPosition()
+        public IReadOnlyList<Frame> GetFramesFromCurrentPosition()
         {
             int count = frames.Count - currentFrameIndex;
 
@@ -214,7 +180,7 @@ namespace Tempera.Mental.Frames
             return currentFrameIndex + 1;
         }
 
-        public List<Frame> GetFrames()
+        public IReadOnlyList<Frame> GetFrames()
         {
             return frames;
         }
@@ -232,13 +198,37 @@ namespace Tempera.Mental.Frames
             return new VisualFrameDetail(currentFrameIndex + 1, frames.Count, emitterDetails);
         }
 
-        private void GoToFrameByIndex(int newIndex)
+        private void SetCurrentFrame(int index)
         {
-            if (newIndex >= frames.Count) return;
+            int newIndex = Mathf.Clamp(index, 0, frames.Count - 1);
 
+            currentFrame = frames[newIndex];
             currentFrameIndex = newIndex;
-            currentFrame = frames[currentFrameIndex];
 
+            NotifyFrameChanged();
+        }
+
+        private void AddFrame()
+        {
+            if (frames.Count == 0)
+            {
+                frames.Add(new Frame());
+                SetCurrentFrame(0);
+            }
+            else
+            {
+                InsertFrameAt(currentFrameIndex + 1, new Frame());
+            }
+        }
+
+        private void InsertFrameAt(int index, Frame frame)
+        {
+            frames.Insert(index, frame);
+            SetCurrentFrame(index);
+        }
+
+        private void NotifyFrameChanged()
+        {
             onFrameChange?.Invoke(GetFrameDetail(currentFrame));
         }
     }

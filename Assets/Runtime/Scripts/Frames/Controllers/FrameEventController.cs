@@ -22,7 +22,7 @@ namespace Tempera.Mental.Frames
 
         public void OnClickClearFrame() => frameManager.ClearFrame();
 
-        public void OnClickInsertFrame() => frameManager.InsertFrame();
+        public void OnClickDuplicateFrame() => frameManager.DuplicateFrame();
 
         public void OnClickPasteFrame() => frameManager.PasteOntoFrame();
 
@@ -34,7 +34,7 @@ namespace Tempera.Mental.Frames
 
         public void OnClickChangeEmitter(int emitterId) => frameManager.SetEmitter(emitterId);
 
-        public void OnClickNewFrame() => frameManager.AddFrame();
+        public void OnClickNewFrame() => frameManager.InsertFrame();
 
         public void ActionOnSelectedFrameChanged(int selectedFrame) => frameManager.GoToFrame(selectedFrame);
 

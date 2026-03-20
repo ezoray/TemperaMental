@@ -26,7 +26,7 @@ namespace Tempera.Mental.Midi.Transforms
 
         int bpm = 400;
 
-        public MidiFile FromFramesToMidiFile(List<Frame> sourceFrames, int startFrame = 1)
+        public MidiFile FromFramesToMidiFile(IReadOnlyList<Frame> sourceFrames, int startFrame = 1)
         {
             MidiFile midiFile = new MidiFile();
             midiFile.TimeDivision = new TicksPerQuarterNoteTimeDivision((short)TICKS_PER_FRAME);
