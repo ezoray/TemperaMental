@@ -29,7 +29,7 @@ namespace Tempera.Mental.Midi.IO
             }
             catch (Exception ex)
             {
-                LogMan.LogError($"Failed to save MIDI: {ex}");
+                LogMan.LogError($"Failed to save midi file: {ex}");
                 return false;
             }
         }
@@ -52,7 +52,7 @@ namespace Tempera.Mental.Midi.IO
             }
             catch (Exception ex)
             {
-                LogMan.LogError($"Failed to load MIDI: {ex}");
+                LogMan.LogError($"Failed to load midi file: {ex}");
                 return false;
             }
         }

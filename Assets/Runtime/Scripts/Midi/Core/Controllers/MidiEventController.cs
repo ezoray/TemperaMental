@@ -27,7 +27,6 @@ namespace Tempera.Mental.Midi.Core
             {
                 if(midiFileService.TryOpenMidiFile(out MidiFile midiFile))
                 {
-
                     List<Frame> frames = transformService.FromMidiFileToFrames(midiFile);
                     frameManager.AppendFrames(frames);
 

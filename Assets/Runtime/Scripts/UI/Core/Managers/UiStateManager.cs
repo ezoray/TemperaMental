@@ -33,7 +33,7 @@ namespace Tempera.Mental.UI.Core
                     break;
 
                 case PlaybackState.Paused:
-                    ApplyState(UiState.All);
+                    ApplyState(UiState.Playback);
                     break;
             }
         }

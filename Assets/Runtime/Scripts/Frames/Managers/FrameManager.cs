@@ -15,7 +15,9 @@ namespace Tempera.Mental.Frames
         int currentEmitterId;
         Frame copiedFrame;
 
-        List<VisualEmitterDetail> emitterDetails;
+        // reusable lists
+        List<EmitterDetail> emitterDetails;
+        List<VisualEmitterDetail> visualEmitterDetails;
 
         [SerializeField] UnityEvent<Vector2Int,Color> onAddEmitter;
         [SerializeField] UnityEvent<Vector2Int> onRemoveEmitter;
@@ -24,7 +26,8 @@ namespace Tempera.Mental.Frames
         private void Awake()
         {
             frames = new List<Frame>();
-            emitterDetails = new List<VisualEmitterDetail>();
+            emitterDetails = new List<EmitterDetail>();
+            visualEmitterDetails = new List<VisualEmitterDetail>();
 
             AddFrame();
         }
@@ -138,7 +141,7 @@ namespace Tempera.Mental.Frames
             }
  
             this.frames = new List<Frame>(newFrames);
-            emitterDetails.Clear();
+            visualEmitterDetails.Clear();
 
             SetCurrentFrame(0);           
         }
@@ -187,15 +190,17 @@ namespace Tempera.Mental.Frames
 
         private VisualFrameDetail GetFrameDetail(Frame frame)
         {
-            emitterDetails.Clear();
+            visualEmitterDetails.Clear();
 
-            foreach (var emitterDetail in frame.Matrix.Values)
+            frame.ListActiveEmitters(emitterDetails);
+
+            foreach (var emitterDetail in emitterDetails)
             {
-                emitterDetails.Add(new VisualEmitterDetail(new Vector3Int(emitterDetail.Position.x, emitterDetail.Position.y),
+                visualEmitterDetails.Add(new VisualEmitterDetail(new Vector3Int(emitterDetail.Position.x, emitterDetail.Position.y),
                     EmitterUtils.GetColor(emitterDetail.EmitterId)));
             }
 
-            return new VisualFrameDetail(currentFrameIndex + 1, frames.Count, emitterDetails);
+            return new VisualFrameDetail(currentFrameIndex + 1, frames.Count, visualEmitterDetails);
         }
 
         private void SetCurrentFrame(int index)
