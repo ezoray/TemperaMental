@@ -11,17 +11,10 @@ namespace Tempera.Mental.UI.Playbacks
         const int BPM_MIN = 1;
         const int BPM_MAX = 2000;
 
-        const string LOOP_ON = "ON";
-        const string LOOP_OFF = "OFF";
-
         [Header("Order: PlayPosition, Play, Pause, Stop")]
         [SerializeField] Button[] controlButtons;
 
         [SerializeField] Slider bpmSlider;
-        [SerializeField] TextMeshProUGUI bpmText;
-        [SerializeField] TextMeshProUGUI loopText;
-
-        [SerializeField] UnityEvent<int> onBpmValueChanged;
 
         public void OnClickIncrementBpm()
         {
@@ -30,7 +23,6 @@ namespace Tempera.Mental.UI.Playbacks
             if (newBpm <= BPM_MAX)
             {
                 bpmSlider.value = newBpm;
-                bpmText.text = newBpm.ToString();
             }
         }
 
@@ -41,26 +33,12 @@ namespace Tempera.Mental.UI.Playbacks
             if (newBpm >= BPM_MIN)
             {
                 bpmSlider.value = newBpm;
-                bpmText.text = newBpm.ToString();
             }
-        }
-
-        public void OnBpmSliderValueChanged(float bpm)
-        {
-            bpmText.text = bpm.ToString();
-
-            onBpmValueChanged?.Invoke((int)bpm);
         }
 
         public void ActionOnSetBpm(int bpm)
         {
-            bpmText.text = bpm.ToString();
             bpmSlider.value = bpm;
-        }
-
-        public void ActionOnLoopStateChanged(bool isLooping)
-        {
-            loopText.text = isLooping ? LOOP_ON : LOOP_OFF;
         }
 
         public void ActionOnPlaybackStateChanged(PlaybackState playbackState)

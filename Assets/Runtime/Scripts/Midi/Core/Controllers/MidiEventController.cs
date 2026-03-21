@@ -83,13 +83,6 @@ namespace Tempera.Mental.Midi.Core
             }
         }
 
-        public void ActionOnBpmValueChange(int bpm)
-        {
-            Debug.Log("OnBpmValueChanged: " + bpm);
-
-            transformService.SetBpm(bpm);
-        }
-
         public void OnClickConvertFramesToMidiFile()
         {
             try
@@ -100,6 +93,13 @@ namespace Tempera.Mental.Midi.Core
             {
                 Debug.LogError("MidiEventController OnClickConvertFramesToMidiFile: " + ex);
             }
+        }
+
+        public void ActionOnBpmValueChange(float bpm)
+        {
+            Debug.Log("OnBpmValueChanged: " + bpm);
+
+            transformService.SetBpm((int)bpm);
         }
     }
 }

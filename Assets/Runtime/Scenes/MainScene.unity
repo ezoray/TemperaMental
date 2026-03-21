@@ -3848,9 +3848,8 @@ MonoBehaviour:
   onLoopStateChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1244920275}
-        m_TargetAssemblyTypeName: Tempera.Mental.UI.Playbacks.PlaybackUiManager,
-          Assembly-CSharp
+      - m_Target: {fileID: 597592033}
+        m_TargetAssemblyTypeName: Tempera.Mental.UI.Display.DisplayUIManager, Assembly-CSharp
         m_MethodName: ActionOnLoopStateChanged
         m_Mode: 0
         m_Arguments:
@@ -3875,6 +3874,53 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1799877661}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &597592032
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 597592034}
+  - component: {fileID: 597592033}
+  m_Layer: 0
+  m_Name: DisplayUIManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &597592033
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 597592032}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a6cb96750a361418da20b2d37b129fa3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Tempera.Mental.UI.Display.DisplayUIManager
+  bpmText: {fileID: 1599832658}
+  frameText: {fileID: 1352273670}
+  loopText: {fileID: 1697593385}
+--- !u!4 &597592034
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 597592032}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1814786751}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &599287502
 GameObject:
@@ -5002,7 +5048,7 @@ GameObject:
   - component: {fileID: 806095547}
   - component: {fileID: 806095546}
   m_Layer: 0
-  m_Name: DeviceUiManager
+  m_Name: DeviceUIManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5098,7 +5144,7 @@ GameObject:
   - component: {fileID: 849915435}
   - component: {fileID: 849915434}
   m_Layer: 0
-  m_Name: FrameUiManager
+  m_Name: FrameUIManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5116,24 +5162,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a0fad8d0a3aaf4cae9b1d09ab5d670d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Tempera.Mental.UI.GridManager
-  frameText: {fileID: 1352273670}
   frameSlider: {fileID: 1309759012}
   selectionRing: {fileID: 691874080}
-  onFrameNumberChanged:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1362657596}
-        m_TargetAssemblyTypeName: Tempera.Mental.Frames.FrameEventController, Assembly-CSharp
-        m_MethodName: ActionOnSelectedFrameChanged
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
 --- !u!4 &849915435
 Transform:
   m_ObjectHideFlags: 0
@@ -5806,7 +5836,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: OnClickBpmMinus
+      value: OnClickDecrementBpm
       objectReference: {fileID: 0}
     - target: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
@@ -6044,7 +6074,7 @@ GameObject:
   - component: {fileID: 1135178757}
   - component: {fileID: 1135178756}
   m_Layer: 5
-  m_Name: FrameLabel
+  m_Name: FramesLabel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6678,7 +6708,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: OnClickBpmPlus
+      value: OnClickIncrementBpm
       objectReference: {fileID: 0}
     - target: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
@@ -7247,7 +7277,7 @@ GameObject:
   - component: {fileID: 1244920276}
   - component: {fileID: 1244920275}
   m_Layer: 0
-  m_Name: PlaybackUiManager
+  m_Name: PlaybackUIManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7271,39 +7301,6 @@ MonoBehaviour:
   - {fileID: 106106552}
   - {fileID: 2029683082}
   bpmSlider: {fileID: 2048262895}
-  bpmText: {fileID: 1599832658}
-  loopText: {fileID: 1697593385}
-  onBpmValueChanged:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1899363811}
-        m_TargetAssemblyTypeName: Tempera.Mental.Midi.Core.MidiEventController, Assembly-CSharp
-        m_MethodName: ActionOnBpmValueChange
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  onPlaybackEvent:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1561101351}
-        m_TargetAssemblyTypeName: Tempera.Mental.Midi.Playbacks.PlaybackEventController,
-          Assembly-CSharp
-        m_MethodName: ActionOnPlaybackUiEvent
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
 --- !u!4 &1244920276
 Transform:
   m_ObjectHideFlags: 0
@@ -7409,9 +7406,9 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 849915434}
-        m_TargetAssemblyTypeName: Tempera.Mental.UI.FrameUiManager, Assembly-CSharp
-        m_MethodName: OnFrameNumberChanged
+      - m_Target: {fileID: 1362657596}
+        m_TargetAssemblyTypeName: Tempera.Mental.Frames.FrameEventController, Assembly-CSharp
+        m_MethodName: ActionOnSelectedFrameChanged
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -7706,7 +7703,6 @@ MonoBehaviour:
   mainCamera: {fileID: 1553216987}
   gridManager: {fileID: 1166318856}
   frameManager: {fileID: 1457006301}
-  frameUiManager: {fileID: 849915434}
 --- !u!4 &1362657597
 Transform:
   m_ObjectHideFlags: 0
@@ -8164,8 +8160,20 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
       - m_Target: {fileID: 849915434}
-        m_TargetAssemblyTypeName: Tempera.Mental.UI.FrameUiManager, Assembly-CSharp
-        m_MethodName: ActionOnChangeFrame
+        m_TargetAssemblyTypeName: Tempera.Mental.UI.Frames.FrameUiManager, Assembly-CSharp
+        m_MethodName: ActionOnFrameChanged
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 597592033}
+        m_TargetAssemblyTypeName: Tempera.Mental.UI.Display.DisplayUIManager, Assembly-CSharp
+        m_MethodName: ActionOnFrameChanged
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -9728,6 +9736,7 @@ Transform:
   - {fileID: 806095547}
   - {fileID: 1244920276}
   - {fileID: 114619601}
+  - {fileID: 597592034}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1815143415
@@ -10209,9 +10218,22 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1244920275}
-        m_TargetAssemblyTypeName: Tempera.Mental.Ui.Playbacks.PlaybackUiManager,
+        m_TargetAssemblyTypeName: Tempera.Mental.UI.Playbacks.PlaybackUiManager,
           Assembly-CSharp
-        m_MethodName: ActionOnSetBPM
+        m_MethodName: ActionOnSetBpm
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1244920275}
+        m_TargetAssemblyTypeName: Tempera.Mental.UI.Playbacks.PlaybackUiManager,
+          Assembly-CSharp
+        m_MethodName: ActionOnSetBpm
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -11159,10 +11181,21 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1244920275}
-        m_TargetAssemblyTypeName: Tempera.Mental.Ui.Playbacks.PlaybackUiManager,
-          Assembly-CSharp
-        m_MethodName: OnBpmSliderValueChanged
+      - m_Target: {fileID: 1899363811}
+        m_TargetAssemblyTypeName: Tempera.Mental.Midi.Core.MidiEventController, Assembly-CSharp
+        m_MethodName: ActionOnBpmValueChange
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 597592033}
+        m_TargetAssemblyTypeName: Tempera.Mental.UI.Display.DisplayUIManager, Assembly-CSharp
+        m_MethodName: ActionOnBpmChanged
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
