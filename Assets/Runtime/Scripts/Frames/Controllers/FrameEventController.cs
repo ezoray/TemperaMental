@@ -1,5 +1,4 @@
 using Tempera.Mental.Grid;
-using Tempera.Mental.UI;
 using UnityEngine;
 
 namespace Tempera.Mental.Frames
@@ -9,7 +8,6 @@ namespace Tempera.Mental.Frames
         [SerializeField] Camera mainCamera;
         [SerializeField] GridManager gridManager;
         [SerializeField] FrameManager frameManager;
-        [SerializeField] FrameUiManager frameUiManager;
 
 
         public void OnClickEndFrame() => frameManager.GoToEndFrame();

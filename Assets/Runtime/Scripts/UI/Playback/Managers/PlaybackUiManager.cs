@@ -1,5 +1,4 @@
 using Tempera.Mental.Core;
-using Tempera.Mental.Logs;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
@@ -12,6 +11,9 @@ namespace Tempera.Mental.UI.Playbacks
         const int BPM_MIN = 1;
         const int BPM_MAX = 2000;
 
+        const string LOOP_ON = "ON";
+        const string LOOP_OFF = "OFF";
+
         [Header("Order: PlayPosition, Play, Pause, Stop")]
         [SerializeField] Button[] controlButtons;
 
@@ -19,58 +21,9 @@ namespace Tempera.Mental.UI.Playbacks
         [SerializeField] TextMeshProUGUI bpmText;
         [SerializeField] TextMeshProUGUI loopText;
 
-        bool isLooping;
-
         [SerializeField] UnityEvent<int> onBpmValueChanged;
-        [SerializeField] UnityEvent<PlaybackEventType> onPlaybackEvent;
-        [SerializeField] UnityEvent<bool> onLoopStateChanged;
 
-
-        public void OnClickPlayPosition()
-        {
-            onPlaybackEvent?.Invoke(PlaybackEventType.PlayPosition);
-        }
-
-        public void OnClickSetLoopState()
-        {
-            isLooping = !isLooping;
-
-            onLoopStateChanged?.Invoke(isLooping);
-
-            loopText.text = isLooping ? "ON" : "OFF";
-        }
-
-        public void OnClickStop()
-        {
-            onPlaybackEvent?.Invoke(PlaybackEventType.Stop);
-        }
-
-        public void OnClickPause()
-        {
-            onPlaybackEvent?.Invoke(PlaybackEventType.Pause);
-        }
-
-        public void OnClickPlay()
-        {
-            onPlaybackEvent?.Invoke(PlaybackEventType.Play);
-        }
-
-        public void SetPlaybackUiState(PlaybackFlags playbackFlags)
-        {
-            LogMan.Log("PlaybackFlags: " + playbackFlags);
-
-            for (int i = 0; i < controlButtons.Length; i++)
-            {
-                if (controlButtons[i] == null) continue;
-
-                int bit = 1 << i;
-
-                bool isEnabled = ((int)playbackFlags & bit) != 0;
-                controlButtons[i].interactable = isEnabled;
-            }
-        }
-
-        public void OnClickBpmPlus()
+        public void OnClickIncrementBpm()
         {
             int newBpm = (int)bpmSlider.value +1;
 
@@ -81,7 +34,7 @@ namespace Tempera.Mental.UI.Playbacks
             }
         }
 
-        public void OnClickBpmMinus()
+        public void OnClickDecrementBpm()
         {
             int newBpm = (int)bpmSlider.value -1;
 
@@ -99,10 +52,43 @@ namespace Tempera.Mental.UI.Playbacks
             onBpmValueChanged?.Invoke((int)bpm);
         }
 
-        public void ActionOnSetBPM(int bpm)
+        public void ActionOnSetBpm(int bpm)
         {
             bpmText.text = bpm.ToString();
             bpmSlider.value = bpm;
+        }
+
+        public void ActionOnLoopStateChanged(bool isLooping)
+        {
+            loopText.text = isLooping ? LOOP_ON : LOOP_OFF;
+        }
+
+        public void ActionOnPlaybackStateChanged(PlaybackState playbackState)
+        {
+            switch (playbackState)
+            {
+                case PlaybackState.Idle:
+                    ApplyState(PlaybackFlags.Stopped);
+                    break;
+
+                case PlaybackState.Playing:
+                    ApplyState(PlaybackFlags.Playing);
+                    break;
+
+                case PlaybackState.Paused:
+                    ApplyState(PlaybackFlags.Paused);
+                    break;
+            }
+        }
+
+        private void ApplyState(PlaybackFlags playbackFlags)
+        {
+            for (int i = 0; i < controlButtons.Length; i++)
+            {
+                bool isEnabled = ((int)playbackFlags & (1 << i)) != 0;
+
+                controlButtons[i].interactable = isEnabled;
+            }
         }
     }
 }

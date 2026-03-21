@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
-namespace Tempera.Mental.UI
+namespace Tempera.Mental.UI.Frames
 {
     public class FrameUiManager : MonoBehaviour
     {

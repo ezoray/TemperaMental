@@ -1,12 +1,9 @@
-using UnityEngine;
-
 namespace Tempera.Mental.Core
 {
     public enum PlaybackState
     {
-        Reset,
-        Playing,
-        Paused,
-        Stopped
+        Idle,       // no playback object exists
+        Playing,    // actively running
+        Paused,     // stopped mid-way through
     }
 }

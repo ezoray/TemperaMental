@@ -1,128 +1,76 @@
-using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Multimedia;
 using Tempera.Mental.Core;
 using Tempera.Mental.Frames;
-using Tempera.Mental.Logs;
 using Tempera.Mental.Midi.Devices;
 using Tempera.Mental.Midi.Transforms;
-using Tempera.Mental.UI.Playbacks;
 using UnityEngine;
-using UnityEngine.Events;
 
 namespace Tempera.Mental.Midi.Playbacks
 {
     public class PlaybackEventController : MonoBehaviour
     {
-        [SerializeField] PlaybackUiManager playbackUiManager;
         [SerializeField] DeviceManager deviceManager;
         [SerializeField] PlaybackManager playbackManager;
         [SerializeField] TransformService transformService;
         [SerializeField] FrameManager frameManager;
 
-        [SerializeField] UnityEvent<int> onFrameChanged;
-
-
         public void ActionOnDeviceRemoved()
         {
-            playbackManager.TryStop();
+            playbackManager.Reset();
         }
 
         public void ActionOnDeviceChanged(OutputDevice device)
         {
-            LogMan.Log("OnDeviceChanged: " + device.Name);
-
             playbackManager.SetOutputDevice(device);
         }
 
-        public void ActionOnFrameChanged(int frame)
+        public void OnClickChangeLoopState()    
         {
-            LogMan.Log("ActionOnFrameChanged: " + frame);
-
-            onFrameChanged?.Invoke(frame);
+            playbackManager.ChangeLoopState();
         }
 
-        public void ActionOnLoopStateChanged(bool isLooping)
+        public void OnClickStop()
         {
-            playbackManager.SetLoopState(isLooping);
+            playbackManager.Reset();
         }
 
-        public void ActionOnPlaybackFinished()
+        public void OnClickPause()
         {
-            LogMan.Log("ActionOnPlaybackFinished");
-            playbackUiManager.SetPlaybackUiState(PlaybackFlags.Stopped);
+            playbackManager.Pause();
         }
 
-        public void ActionOnPlaybackUiEvent(PlaybackEventType eventType)
+        public void OnClickPlay()
         {
-            PlaybackState playbackState = playbackManager.GetPlaybackState();
+            playbackManager.Play(transformService.FromFramesToMidiFile(frameManager.GetFrames()));
+        }
 
-            LogMan.Log($"ActionOnPlaybackUiEvent eventType: {eventType} playbackState: {playbackState}");
+        public void OnClickPlayPosition()
+        {
+            int startingFrameNumber = frameManager.GetCurrentFrameNumber();
+            playbackManager.Play(transformService.FromFramesToMidiFile(frameManager.GetFramesFromCurrentPosition(), startingFrameNumber));
+        }
 
+        public void ActionOnPlaybackUiEvent(PlaybackUIEvent eventType)
+        {
             switch (eventType)
             {
-                case PlaybackEventType.PlayPosition:
-                    if (playbackState == PlaybackState.Reset)
-                    {
-                        int startingFrameNumber = frameManager.GetCurrentFrameNumber();
-                        MidiFile midiFile = transformService.FromFramesToMidiFile(frameManager.GetFramesFromCurrentPosition(), startingFrameNumber);
-                        playbackManager.TryPlay(midiFile);
-                        playbackUiManager.SetPlaybackUiState(PlaybackFlags.Playing);
-                    }
-                    else if (playbackState == PlaybackState.Paused)
-                    {
-                        if (playbackManager.TryResumePlay())
-                        {
-                            playbackUiManager.SetPlaybackUiState(PlaybackFlags.Playing);
-                        }
-                    }
-                    else
-                    {
-                        playbackUiManager.SetPlaybackUiState(PlaybackFlags.Stopped);
-                    }
+                case PlaybackUIEvent.PlayPosition:
+                    int startingFrameNumber = frameManager.GetCurrentFrameNumber();
+                    playbackManager.Play(transformService.FromFramesToMidiFile(frameManager.GetFramesFromCurrentPosition(), startingFrameNumber));
                     break;
 
-                case PlaybackEventType.Play:
-                    if(playbackState == PlaybackState.Reset)
-                    {
-                        MidiFile midiFile = transformService.FromFramesToMidiFile(frameManager.GetFrames());
-                        playbackManager.TryPlay(midiFile);
-                        playbackUiManager.SetPlaybackUiState(PlaybackFlags.Playing);
-                    }
-                    else if(playbackState == PlaybackState.Paused)
-                    {
-                        if(playbackManager.TryResumePlay())
-                        {
-                            playbackUiManager.SetPlaybackUiState(PlaybackFlags.Playing);
-                        }
-                    }
-                    else
-                    {
-                        playbackUiManager.SetPlaybackUiState(PlaybackFlags.Stopped);
-                    }
+                case PlaybackUIEvent.Play:
+                    playbackManager.Play(transformService.FromFramesToMidiFile(frameManager.GetFrames()));
                     break;
 
-                case PlaybackEventType.Pause:
-                    if (playbackManager.TryPause())
-                    {
-                        playbackUiManager.SetPlaybackUiState(PlaybackFlags.Paused);
-                    }
-                    else
-                    {
-                        playbackUiManager.SetPlaybackUiState(PlaybackFlags.Stopped);
-                    }
+                case PlaybackUIEvent.Pause:
+                    playbackManager.Pause();              
                     break;
 
-                case PlaybackEventType.Stop:
-                    playbackManager.TryStop();
-
-                    playbackUiManager.SetPlaybackUiState(PlaybackFlags.Stopped);
+                case PlaybackUIEvent.Stop:
+                    playbackManager.Reset();
                     break;
             }
-        }
-
-        public void OnSelectBpm(int bpm)
-        {
-
         }
     }
 }

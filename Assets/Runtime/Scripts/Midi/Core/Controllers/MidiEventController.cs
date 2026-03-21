@@ -11,7 +11,6 @@ using UnityEngine.Events;
 
 namespace Tempera.Mental.Midi.Core
 {
-    // hack loading and saving are currently blocking, use their async counterparts if need be
     public class MidiEventController : MonoBehaviour
     {
         [SerializeField] MidiFileService midiFileService;

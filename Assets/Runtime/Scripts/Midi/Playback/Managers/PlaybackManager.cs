@@ -12,8 +12,7 @@ namespace Tempera.Mental.Midi.Playbacks
 {
     public class PlaybackManager : MonoBehaviour
     {
-        const string FRAME_NO = "FRAME_NO_";
-        const string END_OF_FRAME = "FRAME_END";
+        const string FRAME_NO_PREFIX = "FRAME_NO_";
 
         OutputDevice outputDevice;
         string outputDeviceName;
@@ -25,7 +24,8 @@ namespace Tempera.Mental.Midi.Playbacks
         private ConcurrentQueue<int> frameQueue;
 
         [SerializeField] UnityEvent<int> onFrameChanged;
-        [SerializeField] UnityEvent onPlaybackFinished;
+        [SerializeField] UnityEvent<PlaybackState> onPlaybackStateChanged;
+        [SerializeField] UnityEvent<bool> onLoopStateChanged;
 
         private void OnEnable()
         {
@@ -42,7 +42,7 @@ namespace Tempera.Mental.Midi.Playbacks
                 playback.EventPlayed -= OnEventPlayed;
                 ResetPlayback();
 
-                onPlaybackFinished?.Invoke();
+                onPlaybackStateChanged?.Invoke(PlaybackState.Idle);
             }
             else
             {
@@ -53,106 +53,99 @@ namespace Tempera.Mental.Midi.Playbacks
             }
         }
 
-        public bool TryStop()
+        public void Reset()
         {
             try
             {
                 PlaybackState state = GetPlaybackState();
 
-                if (state == PlaybackState.Playing || state == PlaybackState.Paused)
+                if (state != PlaybackState.Playing && state != PlaybackState.Paused)
                 {
-                    // todo currently we generate the frames to midifile each time Play is hit even if there have been no changes
-                    // this is convenient but can cause logic problems and playback.Stop is actually a pause
-                    ResetPlayback();
-                    return true;
+                    LogMan.LogWarning("Reset playback, wrong state: " + state);
+                    return;
                 }
-                else
-                {
-                    LogMan.LogWarning("TryStop playback in wrong state: " + state);
-                    return false;
-                }
+
+                ResetPlayback();
+
+                onPlaybackStateChanged?.Invoke(PlaybackState.Idle);
+
             }
             catch (Exception ex)
             {
-                LogMan.LogError("TryPause: " + ex);
-                return false;
-            }        
+                LogMan.LogError("Reset failed: " + ex);
+            }
         }
 
-        public bool TryPause()
+        public void Pause()
         {
             try
             {
                 if (GetPlaybackState() != PlaybackState.Playing)
                 {
-                    LogMan.LogError("TryPause playback in wrong state: " + GetPlaybackState());
-                    return false;
+                    LogMan.LogError("Pause playback, wrong state: " + GetPlaybackState());
+                    return;
                 }
 
+                // calling stop pauses playback
                 playback.Stop();
-                return true;
+
+                onPlaybackStateChanged?.Invoke(PlaybackState.Paused);
             }
 
             catch (Exception ex)
             {
-                LogMan.LogError("TryPause: " + ex); 
-                return false;
+                LogMan.LogError("Pause failed: " + ex); 
             }              
         }
 
-        public bool TryResumePlay()
+        public void Play(MidiFile midiFile)
         {
             try
             {
-                PlaybackState state = GetPlaybackState();
+                PlaybackState playbackState = GetPlaybackState();
 
-                if (state != PlaybackState.Paused)
+                if (playbackState != PlaybackState.Paused)
                 {
-                    LogMan.LogWarning("TryResumePlay playback in wrong state: " + GetPlaybackState());
-                    return false;
+                    ResetPlayback();
+
+                    playback = midiFile.GetPlayback();
+                    playback.OutputDevice = outputDevice;
+
+                    playback.Loop = isLooping;
+
+                    playback.ErrorOccurred += OnPlaybackError;
+                    playback.Finished += OnPlaybackFinished;
+                    playback.EventPlayed += OnEventPlayed;
                 }
 
                 playback.Start();
-                return true;
+
+                onPlaybackStateChanged?.Invoke(PlaybackState.Playing);
             }
             catch (Exception ex)
             {
-                LogMan.LogError("TryResumePlay: " + ex);
-                return false;
+                LogMan.LogError("Play failed: " + ex);
+                ResetPlayback();
             }
         }
 
-        public bool TryPlay(MidiFile midiFile)
+        public void ChangeLoopState()
         {
-            try
+            isLooping = !isLooping;
+
+            if (GetPlaybackState() != PlaybackState.Idle)
             {
-                PlaybackState state = GetPlaybackState();
-
-                if (state != PlaybackState.Reset)
-                {
-                    LogMan.LogWarning("TryPlay playback in wrong state: " + GetPlaybackState());
-                    ResetPlayback();
-                }
-
-                playback = midiFile.GetPlayback();
-                playback.OutputDevice = outputDevice;
-
                 playback.Loop = isLooping;
-
-                playback.ErrorOccurred += OnPlaybackError;
-                playback.Finished += OnPlaybackFinished;
-                playback.EventPlayed += OnEventPlayed;
-
-                playback.Start();
-
-                return true; // too early to use playback.IsRunning
             }
-            catch (Exception ex)
-            {
-                LogMan.LogError("TryPlay: " + ex);
-                ResetPlayback();
-                return false;
-            }
+
+            onLoopStateChanged?.Invoke(isLooping);
+        }
+
+        public void SetOutputDevice(OutputDevice outputDevice)
+        {
+            this.outputDevice = outputDevice;
+            outputDeviceName = outputDevice.Name;
+            outputDevice.PrepareForEventsSending();
         }
 
         private void OnEventPlayed(object sender, MidiEventPlayedEventArgs eventArgs)
@@ -161,9 +154,9 @@ namespace Tempera.Mental.Midi.Playbacks
             {
                 string text = marker.Text;
 
-                if (text.StartsWith(FRAME_NO))
+                if (text.StartsWith(FRAME_NO_PREFIX))
                 {
-                    string numberPart = text.Replace(FRAME_NO, "");
+                    string numberPart = text.Replace(FRAME_NO_PREFIX, "");
 
                     if (int.TryParse(numberPart, out var frameNumber))
                     {
@@ -181,30 +174,20 @@ namespace Tempera.Mental.Midi.Playbacks
         private void OnPlaybackError(object sender, PlaybackErrorOccurredEventArgs e)
         {
             LogMan.LogError($"Playback error: {e.Site}, {e.Exception.Message}");
-            ResetPlayback();
 
             isPlaybackFinished = true;
         }
 
-        public int GetTicksPerQuarterNote(MidiFile midiFile)
+        private PlaybackState GetPlaybackState()
         {
-            if (midiFile.TimeDivision is TicksPerQuarterNoteTimeDivision timeDivision)
+            if (playback == null || !playback.IsRunning)
             {
-                return timeDivision.TicksPerQuarterNote;
+                long tick = playback?.GetCurrentTime<MidiTimeSpan>().TimeSpan ?? 0;
+
+                return tick > 0 ? PlaybackState.Paused : PlaybackState.Idle;
             }
-            return 480;
-        }
 
-        public PlaybackState GetPlaybackState()
-        {
-            if (playback == null) return PlaybackState.Reset;
-
-            if (playback.IsRunning) return PlaybackState.Playing;
-
-            // Use .TimeSpan to get the 'long' tick value
-            long currentTick = playback.GetCurrentTime<MidiTimeSpan>().TimeSpan;
-
-            return (currentTick == 0) ? PlaybackState.Stopped : PlaybackState.Paused;
+            return PlaybackState.Playing;
         }
 
         private void ResetPlayback()
@@ -217,31 +200,9 @@ namespace Tempera.Mental.Midi.Playbacks
             }
         }
 
-        public void SetOutputDevice(OutputDevice outputDevice)
-        {
-            LogMan.Log("SetOutputDevice : " + outputDevice.Name);
-
-            this.outputDevice = outputDevice;
-            outputDeviceName = outputDevice.Name;
-            outputDevice.PrepareForEventsSending();
-        }
-
         private void OnDestroy()
         {
-            //            ResetHardware(); // Safety clear
-            playback?.Dispose();
-        }
-
-        public void SetLoopState(bool isLooping)
-        {
-            LogMan.Log("SetLoopState : " + isLooping);
-
-            this.isLooping = isLooping;
-
-            if (GetPlaybackState() != PlaybackState.Reset)
-            {
-                playback.Loop = isLooping;
-            }
+            ResetPlayback();
         }
 
         public string OutputDeviceName { get => outputDeviceName; }
