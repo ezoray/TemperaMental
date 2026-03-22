@@ -1,10 +1,10 @@
 using System.Collections.Generic;
-using Tempera.Mental.Logs;
+using TemperaMental.Logs;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace Tempera.Mental.UI.Devices
+namespace TemperaMental.UI.Devices
 {
     public class DeviceUiManager : MonoBehaviour
     {

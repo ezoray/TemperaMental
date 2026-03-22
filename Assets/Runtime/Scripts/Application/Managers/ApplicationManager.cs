@@ -1,20 +1,15 @@
-using Tempera.Mental.Input;
+using TemperaMental.Applications.Config;
+using TemperaMental.Input;
 using UnityEngine;
 
-namespace Tempera.Mental.Applications
+namespace TemperaMental.Applications
 {
     public class ApplicationManager : MonoBehaviour
     {
-        [SerializeField] InputManager inputManager;
-
+  
         private void Start()
         {
-            Application.targetFrameRate = 60;
-        }
-
-        public void SetInputEnable(bool isEnabled)
-        {
-            inputManager.SetEnable(isEnabled);
+            Application.targetFrameRate = ConfigRegistry.App.FrameRate;
         }
     }
 }

@@ -1,15 +1,15 @@
 using System;
 using System.Collections.Generic;
 using Melanchall.DryWetMidi.Core;
-using Tempera.Mental.Frames;
-using Tempera.Mental.Logs;
-using Tempera.Mental.Midi.IO;
-using Tempera.Mental.Midi.Transforms;
-using Tempera.Mental.Utils;
+using TemperaMental.Frames;
+using TemperaMental.Logs;
+using TemperaMental.Midi.IO;
+using TemperaMental.Midi.Transforms;
+using TemperaMental.Utils;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace Tempera.Mental.Midi.Core
+namespace TemperaMental.Midi.Core
 {
     public class MidiEventController : MonoBehaviour
     {
@@ -21,8 +21,6 @@ namespace Tempera.Mental.Midi.Core
 
         public void OnClickAppendMidiFileAsFrames()
         {
-            LogMan.Log("OnClickAppendMidiFileAsFrames");
-
             try
             {
                 if(midiFileService.TryOpenMidiFile(out MidiFile midiFile))
@@ -41,8 +39,6 @@ namespace Tempera.Mental.Midi.Core
 
         public void OnClickLoadMidiFileAsFrames()
         {
-            LogMan.Log("OnClickLoadMidiFileAsFrames");
-
             try
             {
                 if (midiFileService.TryOpenMidiFile(out MidiFile midiFile))
@@ -66,8 +62,6 @@ namespace Tempera.Mental.Midi.Core
 
         public void OnClickSaveFramesAsMidiFile()
         {
-            LogMan.Log("OnClickSaveFramesAsMidiFile");
-
             try
             {
                 MidiFile midiFile = transformService.FromFramesToMidiFile(frameManager.GetFrames());
@@ -90,14 +84,12 @@ namespace Tempera.Mental.Midi.Core
             }
             catch (Exception ex)
             {
-                Debug.LogError("MidiEventController OnClickConvertFramesToMidiFile: " + ex);
+                LogMan.LogError($"{ex}");
             }
         }
 
-        public void ActionOnBpmValueChange(float bpm)
+        public void ActionOnBpmValueChanged(float bpm)
         {
-            Debug.Log("OnBpmValueChanged: " + bpm);
-
             transformService.SetBpm((int)bpm);
         }
     }

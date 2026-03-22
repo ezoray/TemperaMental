@@ -1,13 +1,14 @@
 using UnityEngine;
 using TMPro;
+using TemperaMental.Applications.Config;
 
-namespace Tempera.Mental.Logs
+namespace TemperaMental.Logs
 {
     public class LogMan : MonoBehaviour
     {
-        const string INFO = "#6ACA6A";
-        const string WARN = "#CACA6A";
-        const string ERROR = "#E01306";
+        static string info;
+        static string warn;
+        static string error;
 
         public static LogMan Instance;
         public TextMeshProUGUI logDisplay;
@@ -15,21 +16,25 @@ namespace Tempera.Mental.Logs
         void Awake()
         {
             Instance = this;
+
+            info = ConfigRegistry.Logging.ColorInfo;
+            warn = ConfigRegistry.Logging.ColorWarn;
+            error = ConfigRegistry.Logging.ColorError;
         }
 
         public static void Log(string message)
         {
-            ProcessLog(message, INFO, LogType.Log);
+            ProcessLog(message, info, LogType.Log);
         }
 
         public static void LogWarning(string message)
         {
-            ProcessLog(message, WARN, LogType.Warning);
+            ProcessLog(message, warn, LogType.Warning);
         }
 
         public static void LogError(string message)
         {
-            ProcessLog(message, ERROR, LogType.Error);
+            ProcessLog(message, error, LogType.Error);
         }
 
         private static void ProcessLog(string message, string colorHex, LogType type)

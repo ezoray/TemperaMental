@@ -3,33 +3,53 @@ using System.Linq;
 using Melanchall.DryWetMidi.Common;
 using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Interaction;
-using Tempera.Mental.Frames;
-using Tempera.Mental.Logs;
+using TemperaMental.Applications.Config;
+using TemperaMental.Frames;
+using TemperaMental.Logs;
 using UnityEngine;
 
-namespace Tempera.Mental.Midi.Transforms
+namespace TemperaMental.Midi.Transforms
 {
     public class TransformService : MonoBehaviour
     {
+        const string END_OF_SEQUENCE = "SEQ_END";
         const int MICROSECONDS_PER_MINUTE = 60_000_000;
-        const int TICKS_PER_FRAME = 480;
 
-        const int CC_ACTIVATE = 10;
-        const int CC_PLACE = 11;
-        const int CC_REMOVE = 12;
+        string frameNo;
+        int bpm;
+        short ticksPerFrame;
+        int activateCC;
+        int placeCC;
+        int removeCC;
 
-        const byte BLUE = 0;
-        const byte RED = 1;
-        const byte YELLOW = 2;
-        const byte GREEN = 3;
-
-        const string FRAME_NO = "FRAME_NO_";
-
-        int bpm = 400;
+        byte blueId;
+        byte redId;
+        byte yellowId;
+        byte greenId;
 
         readonly List<EmitterDetail> activeEmitters = new List<EmitterDetail>();
 
-        public void SetBpm(int bpm) => this.bpm = bpm;
+
+        private void OnEnable()
+        {
+            frameNo = ConfigRegistry.Midi.FrameNumberPrefix;
+            ticksPerFrame = ConfigRegistry.Midi.TicksPerFrame;
+            bpm = ConfigRegistry.Midi.Bpm;
+
+            activateCC = ConfigRegistry.Midi.ActivateCC;
+            placeCC = ConfigRegistry.Midi.PlaceCC;
+            removeCC = ConfigRegistry.Midi.RemoveCC;
+
+            blueId = ConfigRegistry.Grid.BlueEmitterId;
+            redId = ConfigRegistry.Grid.RedEmitterId;
+            yellowId = ConfigRegistry.Grid.YellowEmitterId;
+            greenId = ConfigRegistry.Grid.GreenEmitterId;
+        }
+
+        public void SetBpm(int bpm)
+        {
+            this.bpm = bpm;
+        }
 
         public MidiFile FromFramesToMidiFile(IReadOnlyList<Frame> sourceFrames, int startFrame = 1)
         {
@@ -48,7 +68,7 @@ namespace Tempera.Mental.Midi.Transforms
         private MidiFile BuildMidiFile()
         {
             var midiFile = new MidiFile();
-            midiFile.TimeDivision = new TicksPerQuarterNoteTimeDivision((short)TICKS_PER_FRAME);
+            midiFile.TimeDivision = new TicksPerQuarterNoteTimeDivision((short)ticksPerFrame);
             return midiFile;
         }
 
@@ -66,7 +86,7 @@ namespace Tempera.Mental.Midi.Transforms
 
             for (int i = 0; i < sourceFrames.Count; i++)
             {
-                long frameTick = i * TICKS_PER_FRAME;
+                long frameTick = i * ticksPerFrame;
 
                 frameTick = WriteFrameStart(manager, frameTick, startFrame + i);
 
@@ -80,11 +100,14 @@ namespace Tempera.Mental.Midi.Transforms
 
                 previousFrameGroups = CopyGroups(currentFrameGroups);
             }
+
+            // set marker on last tick of sequence to force playback to read to the end, otherwise looping starts too early
+            manager.Objects.Add(new TimedEvent(new MarkerEvent(END_OF_SEQUENCE), sourceFrames.Count * ticksPerFrame));
         }
 
         private long WriteFrameStart(TimedObjectsManager<TimedEvent> manager, long tick, int frameNumber)
         {
-            manager.Objects.Add(new TimedEvent(new MarkerEvent($"{FRAME_NO}{frameNumber}"), tick++));
+            manager.Objects.Add(new TimedEvent(new MarkerEvent($"{frameNo}{frameNumber}"), tick++));
             return tick;
         }
 
@@ -92,7 +115,7 @@ namespace Tempera.Mental.Midi.Transforms
                                     Dictionary<byte, HashSet<byte>> previous,
                                     Dictionary<byte, HashSet<byte>> current)
         {
-            for (byte emitter = BLUE; emitter <= GREEN; emitter++)
+            for (byte emitter = blueId; emitter <= greenId; emitter++)
             {
                 List<byte> toRemove = previous[emitter].Except(current[emitter]).ToList();
                 if (toRemove.Count == 0) continue;
@@ -100,7 +123,7 @@ namespace Tempera.Mental.Midi.Transforms
                 tick = WriteActivateEmitter(manager, tick, emitter);
 
                 foreach (byte pos in toRemove)
-                    tick = WriteEmitterEvent(manager, tick, CC_REMOVE, pos);
+                    tick = WriteEmitterEvent(manager, tick, removeCC, pos);
             }
             return tick;
         }
@@ -109,7 +132,7 @@ namespace Tempera.Mental.Midi.Transforms
                                      Dictionary<byte, HashSet<byte>> previous,
                                      Dictionary<byte, HashSet<byte>> current)
         {
-            for (byte emitter = BLUE; emitter <= GREEN; emitter++)
+            for (byte emitter = blueId; emitter <= greenId; emitter++)
             {
                 List<byte> toAdd = current[emitter].Except(previous[emitter]).ToList();
                 if (toAdd.Count == 0) continue;
@@ -117,7 +140,7 @@ namespace Tempera.Mental.Midi.Transforms
                 tick = WriteActivateEmitter(manager, tick, emitter);
 
                 foreach (byte pos in toAdd)
-                    tick = WriteEmitterEvent(manager, tick, CC_PLACE, pos);
+                    tick = WriteEmitterEvent(manager, tick, placeCC, pos);
             }
             return;
         }
@@ -125,7 +148,7 @@ namespace Tempera.Mental.Midi.Transforms
         private long WriteActivateEmitter(TimedObjectsManager<TimedEvent> manager, long tick, byte emitter)
         {
             manager.Objects.Add(new TimedEvent(
-                new ControlChangeEvent((SevenBitNumber)CC_ACTIVATE, (SevenBitNumber)emitter), tick++));
+                new ControlChangeEvent((SevenBitNumber)activateCC, (SevenBitNumber)emitter), tick++));
             return tick;
         }
 
@@ -138,10 +161,10 @@ namespace Tempera.Mental.Midi.Transforms
 
         private long ClearAllEmitters(TimedObjectsManager<TimedEvent> manager, long tick)
         {
-            for (int i = BLUE; i <= GREEN; i++)
+            for (int i = blueId; i <= greenId; i++)
             {
                 tick = WriteActivateEmitter(manager, tick, (byte)i);
-                tick = WriteEmitterEvent(manager, tick, CC_REMOVE, 64);
+                tick = WriteEmitterEvent(manager, tick, removeCC, 64);
             }
             return tick;
         }
@@ -168,8 +191,7 @@ namespace Tempera.Mental.Midi.Transforms
 
         private long GetTicksPerFrame(MidiFile midiFile)
         {
-            short tpqn = (midiFile.TimeDivision as TicksPerQuarterNoteTimeDivision)
-                         ?.TicksPerQuarterNote ?? TICKS_PER_FRAME;
+            short tpqn = (midiFile.TimeDivision as TicksPerQuarterNoteTimeDivision)?.TicksPerQuarterNote ?? ticksPerFrame;
             LogMan.Log("TPQN: " + tpqn);
             return tpqn;
         }
@@ -177,27 +199,28 @@ namespace Tempera.Mental.Midi.Transforms
         private Frame BuildFrameFromEvents(IGrouping<long, TimedEvent> group,
                                             Dictionary<Vector2Int, EmitterDetail> frameBuffer)
         {
-            Frame frame = new Frame();
+            Frame frame = new Frame(ConfigRegistry.Grid.GridWidth, ConfigRegistry.Grid.GridHeight);
             byte currentEmitterId = 0;
 
             foreach (var timedEvent in group)
             {
                 if (timedEvent.Event is not ControlChangeEvent cc) continue;
 
-                switch ((int)cc.ControlNumber)
+                int controlNumber = (int)cc.ControlNumber;
+
+                if (controlNumber == activateCC)
                 {
-                    case CC_ACTIVATE:
-                        currentEmitterId = (byte)cc.ControlValue;
-                        break;
-
-                    case CC_PLACE:
-                        HandlePlaceEvent(cc, currentEmitterId, frameBuffer);
-                        break;
-
-                    case CC_REMOVE:
-                        HandleRemoveEvent(cc, frameBuffer);
-                        break;
+                    currentEmitterId = (byte)cc.ControlValue;
                 }
+                else if (controlNumber == placeCC)
+                {
+                    HandlePlaceEvent(cc, currentEmitterId, frameBuffer);
+                }
+                else if (controlNumber == removeCC)
+                {
+                    HandleRemoveEvent(cc, frameBuffer);
+                }
+
             }
 
             PopulateFrame(frame, frameBuffer);
@@ -257,10 +280,10 @@ namespace Tempera.Mental.Midi.Transforms
         {
             return new Dictionary<byte, HashSet<byte>>
             {
-                { BLUE,   new HashSet<byte>() },
-                { RED,    new HashSet<byte>() },
-                { YELLOW, new HashSet<byte>() },
-                { GREEN,  new HashSet<byte>() }
+                { blueId,   new HashSet<byte>() },
+                { redId,    new HashSet<byte>() },
+                { yellowId, new HashSet<byte>() },
+                { greenId,  new HashSet<byte>() }
             };
         }
 

@@ -1,70 +1,75 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Tempera.Mental.Frames
+namespace TemperaMental.Frames
 {
     public class Frame
     {
-        private const int WIDTH = 8;
-        private const int HEIGHT = 8;
+        readonly int width;
+        readonly int height;
 
-        private readonly EmitterDetail?[] matrix;
+        private readonly EmitterDetail?[] grid;
 
-        public Frame()
+        public Frame(int width, int height)
         {
-            matrix = new EmitterDetail?[WIDTH * HEIGHT];
+            this.width = width;
+            this.height = height;
+            grid = new EmitterDetail?[width * height];
         }
 
         public Frame(Frame otherFrame)
         {
-            matrix = new EmitterDetail?[WIDTH * HEIGHT];
-            System.Array.Copy(otherFrame.matrix, matrix, matrix.Length);
-        }
+            width = otherFrame.width;
+            height = otherFrame.height;
+            grid = new EmitterDetail?[width * height];
+
+            System.Array.Copy(otherFrame.grid, grid, grid.Length);
+        }   
 
         public void AddEmitter(EmitterDetail emitterDetail)
         {
-            matrix[GetIndex(emitterDetail.Position.x, emitterDetail.Position.y)] = emitterDetail;
+            grid[GetIndex(emitterDetail.Position.x, emitterDetail.Position.y)] = emitterDetail;
         }
 
         public bool TryRemoveEmitter(Vector2Int position)
         {
             int index = GetIndex(position.x, position.y);
 
-            if (!matrix[index].HasValue) return false;
+            if (!grid[index].HasValue) return false;
 
-            matrix[index] = null;
+            grid[index] = null;
             return true;
         }
 
         public bool CheckSameEmitterAtPosition(Vector2Int pos, int currentEmitterId)
         {
-            return matrix[GetIndex(pos.x, pos.y)]?.EmitterId == currentEmitterId;
+            return grid[GetIndex(pos.x, pos.y)]?.EmitterId == currentEmitterId;
         }
 
         public void ClearEmitters()
         {
-            System.Array.Clear(matrix, 0, matrix.Length);
+            System.Array.Clear(grid, 0, grid.Length);
         }
 
         public void ListActiveEmitters(List<EmitterDetail> results)
         {
             results.Clear();
-            for (int i = 0; i < matrix.Length; i++)
+            for (int i = 0; i < grid.Length; i++)
             {
-                if (matrix[i].HasValue)
-                    results.Add(matrix[i].Value);
+                if (grid[i].HasValue)
+                    results.Add(grid[i].Value);
             }
         }
 
         private int GetIndex(int x, int y)
         {
 #if UNITY_EDITOR
-            if (x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT)
+            if (x < 0 || x >= width || y < 0 || y >= height)
             {
                 throw new System.ArgumentOutOfRangeException($"Position ({x},{y}) out of grid bounds");
             }
 #endif
-            return y * WIDTH + x;
+            return y * width + x;
         }
     }
 }

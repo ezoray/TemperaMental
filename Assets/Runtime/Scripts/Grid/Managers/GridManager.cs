@@ -1,14 +1,20 @@
-using Tempera.Mental.Core;
+using TemperaMental.Applications.Config;
+using TemperaMental.Core;
 using UnityEngine;
 
-namespace Tempera.Mental.Grid
+namespace TemperaMental.Grid
 {
     public class GridManager : MonoBehaviour
     {
         [SerializeField] BaseTilemapManager baseTilemapManager;
         [SerializeField] EmitterTilemapManager emitterTilemapManager;
 
-        BoundsInt gridBounds = new BoundsInt(0, 0, 0, 8, 8, 1);
+        BoundsInt gridBounds;
+
+        private void OnEnable()
+        {
+             gridBounds = new BoundsInt(0, 0, 0, ConfigRegistry.Grid.GridWidth, ConfigRegistry.Grid.GridHeight, 1);
+        }
 
         private void Start()
         {
@@ -17,8 +23,6 @@ namespace Tempera.Mental.Grid
 
         public bool TryGetCellPositionInGrid(Vector3 worldPoint, out Vector3Int cellPosition)
         {
-            Debug.Log("GridManager TryGetCellPositionInGrid " + worldPoint);
-
             cellPosition = baseTilemapManager.BaseTilemap.WorldToCell(worldPoint);
 
             return gridBounds.Contains(cellPosition);

@@ -1,8 +1,8 @@
-using Tempera.Mental.Core;
+using TemperaMental.Core;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Tempera.Mental.UI.Frames
+namespace TemperaMental.UI.Frames
 {
     public class FrameUiManager : MonoBehaviour
     {

@@ -1,9 +1,9 @@
 using System.Collections.Generic;
-using Tempera.Mental.Core;
+using TemperaMental.Core;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-namespace Tempera.Mental.Grid
+namespace TemperaMental.Grid
 {
     public class EmitterTilemapManager : MonoBehaviour
     {

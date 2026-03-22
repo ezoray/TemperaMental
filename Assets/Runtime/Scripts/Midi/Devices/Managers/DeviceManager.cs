@@ -2,15 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Melanchall.DryWetMidi.Multimedia;
-using Tempera.Mental.Logs;
+using TemperaMental.Applications.Config;
+using TemperaMental.Logs;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace Tempera.Mental.Midi.Devices
+namespace TemperaMental.Midi.Devices
 {
     public class DeviceManager : MonoBehaviour
     {
-        const string PRIMARY_DEVICE = "MidiView";
+        string primaryDevice;
 
         List<string> connectedDevices;
         OutputDevice currentDevice;
@@ -28,6 +29,8 @@ namespace Tempera.Mental.Midi.Devices
         {
             connectedDevices = new List<string>();
             isInitialSync = true;
+
+            primaryDevice = ConfigRegistry.Midi.PrimaryDevice;
         }
 
         private void Start()
@@ -101,8 +104,8 @@ namespace Tempera.Mental.Midi.Devices
         {
             if (connectedDevices.Count == 0) return;
 
-            string target = connectedDevices.Contains(PRIMARY_DEVICE)
-                ? PRIMARY_DEVICE
+            string target = connectedDevices.Contains(primaryDevice)
+                ? primaryDevice
                 : connectedDevices[0];
 
             ActionOnDeviceSelected(target);

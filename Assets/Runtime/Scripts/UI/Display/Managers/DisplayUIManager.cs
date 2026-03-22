@@ -1,8 +1,9 @@
 using UnityEngine;
 using TMPro;
-using Tempera.Mental.Core;
+using TemperaMental.Core;
+using TemperaMental.Applications.Config;
 
-namespace Tempera.Mental.UI.Display
+namespace TemperaMental.UI.Display
 {
     public class DisplayUIManager : MonoBehaviour
     {
@@ -13,6 +14,10 @@ namespace Tempera.Mental.UI.Display
         [SerializeField] TextMeshProUGUI frameText;
         [SerializeField] TextMeshProUGUI loopText;
 
+        private void Awake()
+        {
+            bpmText.text = ConfigRegistry.Midi.Bpm.ToString();
+        }
 
         public void ActionOnLoopStateChanged(bool isLooping)
         {

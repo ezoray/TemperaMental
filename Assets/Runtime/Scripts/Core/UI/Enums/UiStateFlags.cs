@@ -1,10 +1,11 @@
 using System;
 
-namespace Tempera.Mental.Core.UI
+namespace TemperaMental.Core.UI
 {
     [Flags]
-    public enum UiState
+    public enum UiStateFlags
     {
+        // canvas group indexes
         None = 0,
         Device = 1,
         File = 2,
@@ -13,6 +14,7 @@ namespace Tempera.Mental.Core.UI
         Creation = 16,
         Selection = 32,
 
+        // all enabled
         All = Device | File | Mode | Playback | Creation | Selection
     }
 }

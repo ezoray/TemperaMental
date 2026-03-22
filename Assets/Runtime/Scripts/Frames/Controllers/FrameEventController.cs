@@ -1,7 +1,7 @@
-using Tempera.Mental.Grid;
+using TemperaMental.Grid;
 using UnityEngine;
 
-namespace Tempera.Mental.Frames
+namespace TemperaMental.Frames
 {
     public class FrameEventController : MonoBehaviour
     {

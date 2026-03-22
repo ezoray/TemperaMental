@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-namespace Tempera.Mental.UI
+namespace TemperaMental.UI
 {
     [CreateAssetMenu(fileName = "Emitter", menuName = "Tempera/EmitterDefinition")]
     public class EmitterDefinition : ScriptableObject

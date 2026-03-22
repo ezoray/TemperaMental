@@ -1,11 +1,11 @@
 using Melanchall.DryWetMidi.Multimedia;
-using Tempera.Mental.Core;
-using Tempera.Mental.Frames;
-using Tempera.Mental.Midi.Devices;
-using Tempera.Mental.Midi.Transforms;
+using TemperaMental.Core;
+using TemperaMental.Frames;
+using TemperaMental.Midi.Devices;
+using TemperaMental.Midi.Transforms;
 using UnityEngine;
 
-namespace Tempera.Mental.Midi.Playbacks
+namespace TemperaMental.Midi.Playbacks
 {
     public class PlaybackEventController : MonoBehaviour
     {

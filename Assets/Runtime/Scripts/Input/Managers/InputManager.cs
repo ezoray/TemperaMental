@@ -4,7 +4,7 @@ using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
-namespace Tempera.Mental.Input
+namespace TemperaMental.Input
 {
     public class InputManager : MonoBehaviour
     {

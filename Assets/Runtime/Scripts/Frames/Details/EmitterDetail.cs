@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Tempera.Mental.Frames
+namespace TemperaMental.Frames
 {
     public struct EmitterDetail
     {

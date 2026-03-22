@@ -1,26 +1,31 @@
-using Tempera.Mental.Core;
-using TMPro;
+using TemperaMental.Applications.Config;
+using TemperaMental.Core;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.UI;
 
-namespace Tempera.Mental.UI.Playbacks
+namespace TemperaMental.UI.Playbacks
 {
     public class PlaybackUiManager : MonoBehaviour
     {
-        const int BPM_MIN = 1;
-        const int BPM_MAX = 2000;
+        int minBpm;
+        int maxBpm;
 
         [Header("Order: PlayPosition, Play, Pause, Stop")]
         [SerializeField] Button[] controlButtons;
 
         [SerializeField] Slider bpmSlider;
 
+        private void Awake()
+        {
+            minBpm = ConfigRegistry.Midi.MinBpm;
+            maxBpm = ConfigRegistry.Midi.MaxBpm;
+        }
+
         public void OnClickIncrementBpm()
         {
             int newBpm = (int)bpmSlider.value +1;
 
-            if (newBpm <= BPM_MAX)
+            if (newBpm <= maxBpm)
             {
                 bpmSlider.value = newBpm;
             }
@@ -30,7 +35,7 @@ namespace Tempera.Mental.UI.Playbacks
         {
             int newBpm = (int)bpmSlider.value -1;
 
-            if (newBpm >= BPM_MIN)
+            if (newBpm >= minBpm)
             {
                 bpmSlider.value = newBpm;
             }

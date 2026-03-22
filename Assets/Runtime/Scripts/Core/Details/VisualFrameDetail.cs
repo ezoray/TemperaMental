@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Tempera.Mental.Core
+namespace TemperaMental.Core
 {
     public struct VisualFrameDetail
     {

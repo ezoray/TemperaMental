@@ -1,4 +1,4 @@
-namespace Tempera.Mental.Core
+namespace TemperaMental.Core
 {
     // don't change ordering as fragily tied to UI onClick value
     public enum PlaybackUIEvent

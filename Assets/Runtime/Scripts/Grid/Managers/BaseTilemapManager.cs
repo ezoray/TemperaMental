@@ -1,7 +1,8 @@
+using TemperaMental.Logs;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-namespace Tempera.Mental.Grid
+namespace TemperaMental.Grid
 {
     public class BaseTilemapManager : MonoBehaviour
     {
@@ -11,7 +12,7 @@ namespace Tempera.Mental.Grid
     
         public void FillBackground(BoundsInt gridBounds)
         {
-            var tiles = new TileBase[8 * 8];
+            var tiles = new TileBase[gridBounds.xMax * gridBounds.yMax];
             for (int i = 0; i < tiles.Length; i++)
                 tiles[i] = tile;
 

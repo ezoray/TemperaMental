@@ -3,16 +3,17 @@ using System.Collections.Concurrent;
 using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Interaction;
 using Melanchall.DryWetMidi.Multimedia;
-using Tempera.Mental.Core;
-using Tempera.Mental.Logs;
+using TemperaMental.Applications.Config;
+using TemperaMental.Core;
+using TemperaMental.Logs;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace Tempera.Mental.Midi.Playbacks
+namespace TemperaMental.Midi.Playbacks
 {
     public class PlaybackManager : MonoBehaviour
     {
-        const string FRAME_NO_PREFIX = "FRAME_NO_";
+        string frameNoPrefix;
 
         OutputDevice outputDevice;
         string outputDeviceName;
@@ -30,6 +31,8 @@ namespace Tempera.Mental.Midi.Playbacks
         private void OnEnable()
         {
             frameQueue = new ConcurrentQueue<int>();
+
+            frameNoPrefix = ConfigRegistry.Midi.FrameNumberPrefix;
         }
 
         private void Update()
@@ -154,9 +157,9 @@ namespace Tempera.Mental.Midi.Playbacks
             {
                 string text = marker.Text;
 
-                if (text.StartsWith(FRAME_NO_PREFIX))
+                if (text.StartsWith(frameNoPrefix))
                 {
-                    string numberPart = text.Replace(FRAME_NO_PREFIX, "");
+                    string numberPart = text.Replace(frameNoPrefix, "");
 
                     if (int.TryParse(numberPart, out var frameNumber))
                     {

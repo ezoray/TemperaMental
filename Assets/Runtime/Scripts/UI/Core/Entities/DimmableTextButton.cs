@@ -2,7 +2,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Tempera.Mental.UI.Core
+namespace TemperaMental.UI.Core
 {
     // due to button text not dimming when button is disabled override it and handle it ourselves
     public class DimmableTextButton : Button

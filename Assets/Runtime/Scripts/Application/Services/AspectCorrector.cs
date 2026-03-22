@@ -1,10 +1,10 @@
 using UnityEngine;
 
-namespace Tempera.Mental.Applications
+namespace TemperaMental.Applications
 {
     using UnityEngine;
 
-    public class AspectCorrectionService : MonoBehaviour
+    public class AspectCorrector : MonoBehaviour
     {
         const float TARGET_RATIO = 3f / 4f;
 

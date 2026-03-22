@@ -1,19 +1,24 @@
 using System.Collections.Generic;
-using Tempera.Mental.Core;
-using Tempera.Mental.Logs;
-using Tempera.Mental.Utils;
+using TemperaMental.Applications.Config;
+using TemperaMental.Core;
+using TemperaMental.Logs;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace Tempera.Mental.Frames
+namespace TemperaMental.Frames
 {
     public class FrameManager : MonoBehaviour
     {
+        int gridWidth;
+        int gridHeight;
+
         List<Frame> frames;
         Frame currentFrame;
         int currentFrameIndex;
         int currentEmitterId;
         Frame copiedFrame;
+
+        List<Color> emitterColors;
 
         // reusable lists
         List<EmitterDetail> emitterDetails;
@@ -28,6 +33,17 @@ namespace Tempera.Mental.Frames
             frames = new List<Frame>();
             emitterDetails = new List<EmitterDetail>();
             visualEmitterDetails = new List<VisualEmitterDetail>();
+
+            gridWidth = ConfigRegistry.Grid.GridWidth;
+            gridHeight = ConfigRegistry.Grid.GridHeight;
+
+            emitterColors = new List<Color>
+            {
+                ConfigRegistry.Grid.EmitterBlue,
+                ConfigRegistry.Grid.EmitterRed,
+                ConfigRegistry.Grid.EmitterYellow,
+                ConfigRegistry.Grid.EmitterGreen
+            };
 
             AddFrame();
         }
@@ -67,9 +83,7 @@ namespace Tempera.Mental.Frames
 
         public void InsertFrame()
         {
-            LogMan.Log("InsertFrame");
-
-            InsertFrameAt(currentFrameIndex + 1, new Frame());
+            InsertFrameAt(currentFrameIndex + 1, new Frame(gridWidth, gridHeight));
         }
 
         public void PasteOntoFrame()
@@ -161,13 +175,11 @@ namespace Tempera.Mental.Frames
 
         public void AddEmitterAtPosition(Vector2Int cellPosition)
         {
-            LogMan.Log("FrameManager AddEmitterAtPosition: " + cellPosition);
-
             if (!currentFrame.CheckSameEmitterAtPosition(cellPosition, currentEmitterId))
             {
                 currentFrame.AddEmitter(new EmitterDetail(cellPosition, currentEmitterId));
 
-                onAddEmitter?.Invoke(cellPosition, EmitterUtils.GetColor(currentEmitterId));
+                onAddEmitter?.Invoke(cellPosition, emitterColors[currentEmitterId]);
             }
         }
 
@@ -197,7 +209,7 @@ namespace Tempera.Mental.Frames
             foreach (var emitterDetail in emitterDetails)
             {
                 visualEmitterDetails.Add(new VisualEmitterDetail(new Vector3Int(emitterDetail.Position.x, emitterDetail.Position.y),
-                    EmitterUtils.GetColor(emitterDetail.EmitterId)));
+                    emitterColors[emitterDetail.EmitterId]));
             }
 
             return new VisualFrameDetail(currentFrameIndex + 1, frames.Count, visualEmitterDetails);
@@ -217,12 +229,12 @@ namespace Tempera.Mental.Frames
         {
             if (frames.Count == 0)
             {
-                frames.Add(new Frame());
+                frames.Add(new Frame(gridWidth, gridHeight));
                 SetCurrentFrame(0);
             }
             else
             {
-                InsertFrameAt(currentFrameIndex + 1, new Frame());
+                InsertFrameAt(currentFrameIndex + 1, new Frame(gridWidth, gridHeight));
             }
         }
 

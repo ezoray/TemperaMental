@@ -1,6 +1,6 @@
 using System;
 
-namespace Tempera.Mental.Core
+namespace TemperaMental.Core
 {
     [Flags]
     public enum PlaybackFlags
