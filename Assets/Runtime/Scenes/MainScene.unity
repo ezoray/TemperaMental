@@ -2145,6 +2145,7 @@ Transform:
   - {fileID: 1899363812}
   - {fileID: 1125144673}
   - {fileID: 371604530}
+  - {fileID: 1219916200}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &368916157
@@ -6978,6 +6979,104 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!1 &1219916199
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1219916200}
+  - component: {fileID: 1219916202}
+  - component: {fileID: 1219916201}
+  m_Layer: 0
+  m_Name: MidiManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1219916200
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1219916199}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 342393026}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1219916201
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1219916199}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e25d3a3f2a9b461a87f97ec43aefd5e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TemperaMental.Midi.Transforms.TransformService
+--- !u!114 &1219916202
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1219916199}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1ebda1244ff644e59ba79ff94bcaab6d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Tempera.Mental.Midi.Core.MidiManager
+  transformService: {fileID: 1219916201}
+  onBpmChanged:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1561101351}
+        m_TargetAssemblyTypeName: TemperaMental.Midi.Playbacks.PlaybackEventController,
+          Assembly-CSharp
+        m_MethodName: ActionOnBpmChanged
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 597592033}
+        m_TargetAssemblyTypeName: TemperaMental.UI.Display.DisplayUIManager, Assembly-CSharp
+        m_MethodName: ActionOnBpmChanged
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1244920275}
+        m_TargetAssemblyTypeName: TemperaMental.UI.Playbacks.PlaybackUiManager, Assembly-CSharp
+        m_MethodName: ActionOnBpmChanged
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1001 &1220885576
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8701,9 +8800,9 @@ Camera:
   m_NormalizedViewPortRect:
     serializedVersion: 2
     x: 0
-    y: 0
-    width: 1
-    height: 1
+    y: 0.22083335
+    width: 0.6875
+    height: 0.68750006
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 60
@@ -8986,7 +9085,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Tempera.Mental.Play.PlayEventController
   deviceManager: {fileID: 1125144674}
   playbackManager: {fileID: 572567632}
-  transformService: {fileID: 688550772}
+  midiManager: {fileID: 1219916202}
   frameManager: {fileID: 1457006301}
 --- !u!4 &1561101352
 Transform:
@@ -10518,7 +10617,7 @@ GameObject:
   - component: {fileID: 1899363812}
   - component: {fileID: 1899363811}
   m_Layer: 0
-  m_Name: MidiEventController
+  m_Name: MidiFileEventController
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10536,38 +10635,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 020fc6c7d28154858975ea3ea572d866, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Tempera.Mental.Midi.Core.MidiEventController
+  midiManager: {fileID: 1219916202}
   midiFileService: {fileID: 371604531}
   frameManager: {fileID: 1457006301}
   transformService: {fileID: 688550772}
-  onSetBpm:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1244920275}
-        m_TargetAssemblyTypeName: Tempera.Mental.UI.Playbacks.PlaybackUiManager,
-          Assembly-CSharp
-        m_MethodName: ActionOnSetBpm
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 1244920275}
-        m_TargetAssemblyTypeName: Tempera.Mental.UI.Playbacks.PlaybackUiManager,
-          Assembly-CSharp
-        m_MethodName: ActionOnSetBpm
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
 --- !u!4 &1899363812
 Transform:
   m_ObjectHideFlags: 0
@@ -11517,8 +11588,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 597592033}
-        m_TargetAssemblyTypeName: Tempera.Mental.UI.Display.DisplayUIManager, Assembly-CSharp
+      - m_Target: {fileID: 1561101351}
+        m_TargetAssemblyTypeName: TemperaMental.Midi.Playbacks.PlaybackEventController,
+          Assembly-CSharp
         m_MethodName: ActionOnBpmChanged
         m_Mode: 0
         m_Arguments:

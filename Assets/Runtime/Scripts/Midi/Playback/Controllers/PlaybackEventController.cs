@@ -1,8 +1,8 @@
 using Melanchall.DryWetMidi.Multimedia;
+using Tempera.Mental.Midi.Core;
 using TemperaMental.Core;
 using TemperaMental.Frames;
 using TemperaMental.Midi.Devices;
-using TemperaMental.Midi.Transforms;
 using UnityEngine;
 
 namespace TemperaMental.Midi.Playbacks
@@ -11,8 +11,14 @@ namespace TemperaMental.Midi.Playbacks
     {
         [SerializeField] DeviceManager deviceManager;
         [SerializeField] PlaybackManager playbackManager;
-        [SerializeField] TransformService transformService;
+        [SerializeField] MidiManager midiManager;
         [SerializeField] FrameManager frameManager;
+
+
+        public void ActionOnBpmChanged(int newBpm)
+        {
+            playbackManager.ChangeBpm(newBpm);
+        }
 
         public void ActionOnDeviceRemoved()
         {
@@ -41,13 +47,13 @@ namespace TemperaMental.Midi.Playbacks
 
         public void OnClickPlay()
         {
-            playbackManager.Play(transformService.FromFramesToMidiFile(frameManager.GetFrames()));
+            playbackManager.Play(midiManager.FromFramesToMidiFile(frameManager.GetFrames()));
         }
 
         public void OnClickPlayPosition()
         {
             int startingFrameNumber = frameManager.GetCurrentFrameNumber();
-            playbackManager.Play(transformService.FromFramesToMidiFile(frameManager.GetFramesFromCurrentPosition(), startingFrameNumber));
+            playbackManager.Play(midiManager.FromFramesToMidiFile(frameManager.GetFramesFromCurrentPosition(), startingFrameNumber));
         }
 
         public void ActionOnPlaybackUiEvent(PlaybackUIEvent eventType)
@@ -56,11 +62,11 @@ namespace TemperaMental.Midi.Playbacks
             {
                 case PlaybackUIEvent.PlayPosition:
                     int startingFrameNumber = frameManager.GetCurrentFrameNumber();
-                    playbackManager.Play(transformService.FromFramesToMidiFile(frameManager.GetFramesFromCurrentPosition(), startingFrameNumber));
+                    playbackManager.Play(midiManager.FromFramesToMidiFile(frameManager.GetFramesFromCurrentPosition(), startingFrameNumber));
                     break;
 
                 case PlaybackUIEvent.Play:
-                    playbackManager.Play(transformService.FromFramesToMidiFile(frameManager.GetFrames()));
+                    playbackManager.Play(midiManager.FromFramesToMidiFile(frameManager.GetFrames()));
                     break;
 
                 case PlaybackUIEvent.Pause:

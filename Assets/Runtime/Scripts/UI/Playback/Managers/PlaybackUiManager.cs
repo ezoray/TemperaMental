@@ -23,7 +23,7 @@ namespace TemperaMental.UI.Playbacks
 
         public void OnClickIncrementBpm()
         {
-            int newBpm = (int)bpmSlider.value +1;
+            int newBpm = Mathf.RoundToInt(bpmSlider.value) +1;
 
             if (newBpm <= maxBpm)
             {
@@ -33,7 +33,7 @@ namespace TemperaMental.UI.Playbacks
 
         public void OnClickDecrementBpm()
         {
-            int newBpm = (int)bpmSlider.value -1;
+            int newBpm = Mathf.RoundToInt(bpmSlider.value) - 1;
 
             if (newBpm >= minBpm)
             {
@@ -41,9 +41,11 @@ namespace TemperaMental.UI.Playbacks
             }
         }
 
-        public void ActionOnSetBpm(int bpm)
+        public void ActionOnBpmChanged(int newBpm)
         {
-            bpmSlider.value = bpm;
+            if (Mathf.RoundToInt(bpmSlider.value) == newBpm) return;
+
+            bpmSlider.value = newBpm;
         }
 
         public void ActionOnPlaybackStateChanged(PlaybackState playbackState)
@@ -54,7 +56,7 @@ namespace TemperaMental.UI.Playbacks
                     ApplyState(PlaybackFlags.Stopped);
                     break;
 
-                case PlaybackState.Playing:
+                case PlaybackState.Playing: 
                     ApplyState(PlaybackFlags.Playing);
                     break;
 

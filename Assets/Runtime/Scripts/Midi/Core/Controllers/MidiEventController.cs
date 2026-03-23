@@ -1,23 +1,21 @@
 using System;
 using System.Collections.Generic;
 using Melanchall.DryWetMidi.Core;
+using Tempera.Mental.Midi.Core;
 using TemperaMental.Frames;
 using TemperaMental.Logs;
 using TemperaMental.Midi.IO;
 using TemperaMental.Midi.Transforms;
-using TemperaMental.Utils;
 using UnityEngine;
-using UnityEngine.Events;
 
 namespace TemperaMental.Midi.Core
 {
     public class MidiEventController : MonoBehaviour
     {
+        [SerializeField] MidiManager midiManager;
         [SerializeField] MidiFileService midiFileService;
         [SerializeField] FrameManager frameManager;
         [SerializeField] TransformService transformService;
-
-        [SerializeField] UnityEvent<int> onSetBpm;
 
         public void OnClickAppendMidiFileAsFrames()
         {
@@ -25,7 +23,7 @@ namespace TemperaMental.Midi.Core
             {
                 if(midiFileService.TryOpenMidiFile(out MidiFile midiFile))
                 {
-                    List<Frame> frames = transformService.FromMidiFileToFrames(midiFile);
+                    List<Frame> frames = midiManager.FromMidiFileToFrames(midiFile);
                     frameManager.AppendFrames(frames);
 
                     LogMan.Log("File appended");
@@ -42,14 +40,9 @@ namespace TemperaMental.Midi.Core
             try
             {
                 if (midiFileService.TryOpenMidiFile(out MidiFile midiFile))
-                {
-
-                    List<Frame> frames = transformService.FromMidiFileToFrames(midiFile);
+                {   
+                    List<Frame> frames = midiManager.FromMidiFileToFrames(midiFile);
                     frameManager.SetFrames(frames);
-
-                    int bpm = MidiUtils.GetBpmFromMidiFile(midiFile);
-
-                    onSetBpm?.Invoke(bpm);
 
                     LogMan.Log("File loaded");
                 }
@@ -64,7 +57,8 @@ namespace TemperaMental.Midi.Core
         {
             try
             {
-                MidiFile midiFile = transformService.FromFramesToMidiFile(frameManager.GetFrames());
+                MidiFile midiFile = midiManager.FromFramesToMidiFile(frameManager.GetFrames(), 1);
+
                 if(midiFileService.TrySaveMidiFile(midiFile))
                 {
                     LogMan.Log("File saved");
@@ -76,21 +70,9 @@ namespace TemperaMental.Midi.Core
             }
         }
 
-        public void OnClickConvertFramesToMidiFile()
-        {
-            try
-            {
-                MidiFile midiFile = transformService.FromFramesToMidiFile(frameManager.GetFrames());
-            }
-            catch (Exception ex)
-            {
-                LogMan.LogError($"{ex}");
-            }
-        }
-
         public void ActionOnBpmValueChanged(float bpm)
         {
-            transformService.SetBpm((int)bpm);
+            midiManager.SetBpm(Mathf.RoundToInt(bpm));
         }
     }
 }

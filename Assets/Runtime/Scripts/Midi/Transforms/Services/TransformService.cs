@@ -7,6 +7,7 @@ using TemperaMental.Applications.Config;
 using TemperaMental.Frames;
 using TemperaMental.Logs;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace TemperaMental.Midi.Transforms
 {
@@ -16,7 +17,6 @@ namespace TemperaMental.Midi.Transforms
         const int MICROSECONDS_PER_MINUTE = 60_000_000;
 
         string frameNo;
-        int bpm;
         short ticksPerFrame;
         int activateCC;
         int placeCC;
@@ -34,7 +34,6 @@ namespace TemperaMental.Midi.Transforms
         {
             frameNo = ConfigRegistry.Midi.FrameNumberPrefix;
             ticksPerFrame = ConfigRegistry.Midi.TicksPerFrame;
-            bpm = ConfigRegistry.Midi.Bpm;
 
             activateCC = ConfigRegistry.Midi.ActivateCC;
             placeCC = ConfigRegistry.Midi.PlaceCC;
@@ -46,15 +45,10 @@ namespace TemperaMental.Midi.Transforms
             greenId = ConfigRegistry.Grid.GreenEmitterId;
         }
 
-        public void SetBpm(int bpm)
-        {
-            this.bpm = bpm;
-        }
-
-        public MidiFile FromFramesToMidiFile(IReadOnlyList<Frame> sourceFrames, int startFrame = 1)
+        public MidiFile FromFramesToMidiFile(IReadOnlyList<Frame> sourceFrames, int bpm, int startFrame = 1)
         {
             MidiFile midiFile = BuildMidiFile();
-            TrackChunk trackChunk = BuildTrackChunk();
+            TrackChunk trackChunk = BuildTrackChunk(bpm);
 
             using (var manager = trackChunk.ManageTimedEvents())
             {
@@ -72,7 +66,7 @@ namespace TemperaMental.Midi.Transforms
             return midiFile;
         }
 
-        private TrackChunk BuildTrackChunk()
+        private TrackChunk BuildTrackChunk(int bpm)
         {
             var trackChunk = new TrackChunk();
             long microsecondsPerQuarterNote = MICROSECONDS_PER_MINUTE / bpm;
@@ -111,9 +105,8 @@ namespace TemperaMental.Midi.Transforms
             return tick;
         }
 
-        private long WriteRemovals(TimedObjectsManager<TimedEvent> manager, long tick,
-                                    Dictionary<byte, HashSet<byte>> previous,
-                                    Dictionary<byte, HashSet<byte>> current)
+        private long WriteRemovals(TimedObjectsManager<TimedEvent> manager, long tick, Dictionary<byte, HashSet<byte>> previous,
+            Dictionary<byte, HashSet<byte>> current)
         {
             for (byte emitter = blueId; emitter <= greenId; emitter++)
             {

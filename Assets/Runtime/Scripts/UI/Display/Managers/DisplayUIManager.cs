@@ -16,7 +16,7 @@ namespace TemperaMental.UI.Display
 
         private void Awake()
         {
-            bpmText.text = ConfigRegistry.Midi.Bpm.ToString();
+            bpmText.text = ConfigRegistry.Midi.DefaultBpm.ToString();
         }
 
         public void ActionOnLoopStateChanged(bool isLooping)
@@ -29,7 +29,7 @@ namespace TemperaMental.UI.Display
             frameText.text = $"{frameDetail.FrameNumber} / {frameDetail.FrameTotal}";
         }
 
-        public void ActionOnBpmChanged(float bpm)
+        public void ActionOnBpmChanged(int bpm)
         {
             bpmText.text = bpm.ToString();
         }

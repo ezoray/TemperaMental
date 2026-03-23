@@ -35,7 +35,7 @@ namespace TemperaMental.Frames
         public void OnClickNewFrame() => frameManager.InsertFrame();
 
         // frame slider
-        public void ActionOnSelectedFrameChanged(float selectedFrame) => frameManager.GoToFrame((int)selectedFrame);
+        public void ActionOnSelectedFrameChanged(float selectedFrame) => frameManager.GoToFrame(Mathf.RoundToInt(selectedFrame));
 
         public void ActionOnPlayingFrameChanged(int newFrame) => frameManager.GoToFrame(newFrame);
 

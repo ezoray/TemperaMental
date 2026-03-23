@@ -6,6 +6,7 @@ using Melanchall.DryWetMidi.Multimedia;
 using TemperaMental.Applications.Config;
 using TemperaMental.Core;
 using TemperaMental.Logs;
+using TemperaMental.Utils;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -21,6 +22,8 @@ namespace TemperaMental.Midi.Playbacks
 
         volatile bool isPlaybackFinished;
         bool isLooping;
+
+        int midiFileBpm;
 
         private ConcurrentQueue<int> frameQueue;
 
@@ -119,6 +122,8 @@ namespace TemperaMental.Midi.Playbacks
                     playback.ErrorOccurred += OnPlaybackError;
                     playback.Finished += OnPlaybackFinished;
                     playback.EventPlayed += OnEventPlayed;
+
+                    midiFileBpm = MidiUtils.GetBpmFromMidiFile(midiFile);
                 }
 
                 playback.Start();
@@ -206,6 +211,14 @@ namespace TemperaMental.Midi.Playbacks
         private void OnDestroy()
         {
             ResetPlayback();
+        }
+
+        public void ChangeBpm(int newBpm)
+        {
+            if (GetPlaybackState() == PlaybackState.Playing || GetPlaybackState() == PlaybackState.Paused)
+            {
+                playback.Speed = (float)newBpm / midiFileBpm;
+            }
         }
 
         public string OutputDeviceName { get => outputDeviceName; }

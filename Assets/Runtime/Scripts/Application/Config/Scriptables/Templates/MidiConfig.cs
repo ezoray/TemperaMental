@@ -9,7 +9,7 @@ namespace TemperaMental.Applications.Config
         public string FilterName = "Midi";
         public string FilterType = "mid";
 
-        public int Bpm = 400;
+        public int DefaultBpm = 400;
         public int MinBpm = 40;
         public int MaxBpm = 2000;
 
