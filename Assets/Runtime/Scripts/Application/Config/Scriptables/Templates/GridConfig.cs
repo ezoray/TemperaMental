@@ -17,5 +17,8 @@ namespace TemperaMental.Applications.Config
         public byte RedEmitterId = 1;
         public byte YellowEmitterId = 2;
         public byte GreenEmitterId = 3;
+        public int EmitterCount = 4;
+
+        public int DefaultEmitterId = 0;
     }
 }

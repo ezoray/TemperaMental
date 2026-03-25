@@ -1,11 +1,11 @@
 using UnityEngine;
 
-namespace TemperaMental.Frames
+namespace TemperaMental.Core
 {
     public struct EmitterDetail
     {
-        public Vector2Int Position { get; set; }
-        public int EmitterId { get; set; }
+        readonly public Vector2Int Position;
+        readonly public int EmitterId;
 
         public EmitterDetail(Vector2Int position, int emitterId)
         {

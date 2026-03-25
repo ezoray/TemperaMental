@@ -28,7 +28,7 @@ namespace TemperaMental.Grid
             return gridBounds.Contains(cellPosition);
         }
 
-        public void ActionOnChangeFrame(VisualFrameDetail frameDetail)
+        public void ActionOnFrameChanged(FrameDetail frameDetail)
         {
             emitterTilemapManager.ClearTiles();
             emitterTilemapManager.AddTiles(frameDetail.EmitterDetails);
@@ -40,9 +40,9 @@ namespace TemperaMental.Grid
         }
 
 
-        public void ActionOnAddEmitter(Vector2Int position, Color color)
+        public void ActionOnAddEmitter(EmitterDetail emitterDetail)
         {
-            emitterTilemapManager.AddTile(new Vector3Int(position.x, position.y), color);
+            emitterTilemapManager.AddTile(emitterDetail);
         }
     }
 }

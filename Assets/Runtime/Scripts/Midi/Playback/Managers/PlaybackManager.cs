@@ -17,7 +17,6 @@ namespace TemperaMental.Midi.Playbacks
         string frameNoPrefix;
 
         OutputDevice outputDevice;
-        string outputDeviceName;
         private Playback playback;
 
         volatile bool isPlaybackFinished;
@@ -27,7 +26,7 @@ namespace TemperaMental.Midi.Playbacks
 
         private ConcurrentQueue<int> frameQueue;
 
-        [SerializeField] UnityEvent<int> onFrameChanged;
+        [SerializeField] UnityEvent<int> onPlaybackFrameChanged;
         [SerializeField] UnityEvent<PlaybackState> onPlaybackStateChanged;
         [SerializeField] UnityEvent<bool> onLoopStateChanged;
 
@@ -54,7 +53,7 @@ namespace TemperaMental.Midi.Playbacks
             {
                 while (frameQueue.TryDequeue(out int frameNumber))
                 {
-                    onFrameChanged?.Invoke(frameNumber);
+                    onPlaybackFrameChanged?.Invoke(frameNumber);
                 }
             }
         }
@@ -104,6 +103,7 @@ namespace TemperaMental.Midi.Playbacks
             }              
         }
 
+        // todo currently playback will happily run when output device is null, at least for cc's, but it probably shouldn't be relied upon
         public void Play(MidiFile midiFile)
         {
             try
@@ -114,7 +114,14 @@ namespace TemperaMental.Midi.Playbacks
                 {
                     ResetPlayback();
 
-                    playback = midiFile.GetPlayback();
+                    playback = midiFile.GetPlayback(new PlaybackSettings
+                    {
+                        ClockSettings = new MidiClockSettings
+                        {
+                            CreateTickGeneratorCallback = () => new RegularPrecisionTickGenerator()
+                        }
+                    });
+
                     playback.OutputDevice = outputDevice;
 
                     playback.Loop = isLooping;
@@ -149,11 +156,10 @@ namespace TemperaMental.Midi.Playbacks
             onLoopStateChanged?.Invoke(isLooping);
         }
 
+        // todo interface is disabled on playback but do check for playing
         public void SetOutputDevice(OutputDevice outputDevice)
         {
             this.outputDevice = outputDevice;
-            outputDeviceName = outputDevice.Name;
-            outputDevice.PrepareForEventsSending();
         }
 
         private void OnEventPlayed(object sender, MidiEventPlayedEventArgs eventArgs)
@@ -220,7 +226,5 @@ namespace TemperaMental.Midi.Playbacks
                 playback.Speed = (float)newBpm / midiFileBpm;
             }
         }
-
-        public string OutputDeviceName { get => outputDeviceName; }
     }
 }

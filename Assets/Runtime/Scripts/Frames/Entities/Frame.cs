@@ -1,4 +1,5 @@
-using System.Collections.Generic;
+using System;
+using TemperaMental.Core;
 using UnityEngine;
 
 namespace TemperaMental.Frames
@@ -23,7 +24,7 @@ namespace TemperaMental.Frames
             height = otherFrame.height;
             grid = new EmitterDetail?[width * height];
 
-            System.Array.Copy(otherFrame.grid, grid, grid.Length);
+            Array.Copy(otherFrame.grid, grid, grid.Length);
         }   
 
         public void AddEmitter(EmitterDetail emitterDetail)
@@ -48,16 +49,16 @@ namespace TemperaMental.Frames
 
         public void ClearEmitters()
         {
-            System.Array.Clear(grid, 0, grid.Length);
+            Array.Clear(grid, 0, grid.Length);
         }
 
-        public void ListActiveEmitters(List<EmitterDetail> results)
+        // pass in action method as parameter to process active emitters rather than having to pass out a list
+        public void ActionActiveEmitters(Action<EmitterDetail> action)
         {
-            results.Clear();
             for (int i = 0; i < grid.Length; i++)
             {
                 if (grid[i].HasValue)
-                    results.Add(grid[i].Value);
+                    action(grid[i].Value);
             }
         }
 

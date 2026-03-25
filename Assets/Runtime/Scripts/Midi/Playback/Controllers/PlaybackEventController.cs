@@ -1,5 +1,5 @@
 using Melanchall.DryWetMidi.Multimedia;
-using Tempera.Mental.Midi.Core;
+using TemperaMental.Midi.Core;
 using TemperaMental.Core;
 using TemperaMental.Frames;
 using TemperaMental.Midi.Devices;

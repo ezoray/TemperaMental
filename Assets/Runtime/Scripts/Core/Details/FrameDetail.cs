@@ -1,14 +1,15 @@
 using System.Collections.Generic;
+using TemperaMental.Frames;
 
 namespace TemperaMental.Core
 {
-    public struct VisualFrameDetail
+    public struct FrameDetail
     {
         public int FrameNumber;
         public int FrameTotal;
-        public List<VisualEmitterDetail> EmitterDetails;
+        public List<EmitterDetail> EmitterDetails;
 
-        public VisualFrameDetail(int frameNumber, int frameTotal, List<VisualEmitterDetail> emitterDetails)
+        public FrameDetail(int frameNumber, int frameTotal, List<EmitterDetail> emitterDetails)
         {
             FrameNumber = frameNumber;
             FrameTotal = frameTotal;

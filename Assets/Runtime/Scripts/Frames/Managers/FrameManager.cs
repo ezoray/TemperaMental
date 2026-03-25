@@ -18,33 +18,27 @@ namespace TemperaMental.Frames
         int currentEmitterId;
         Frame copiedFrame;
 
-        List<Color> emitterColors;
-
-        // reusable lists
+        // reusable list
         List<EmitterDetail> emitterDetails;
-        List<VisualEmitterDetail> visualEmitterDetails;
 
-        [SerializeField] UnityEvent<Vector2Int,Color> onAddEmitter;
+        [SerializeField] UnityEvent<int> onEmitterTypeChanged;
+        [SerializeField] UnityEvent<EmitterDetail> onAddEmitter;
         [SerializeField] UnityEvent<Vector2Int> onRemoveEmitter;
-        [SerializeField] UnityEvent<VisualFrameDetail> onFrameChange;
+        [SerializeField] UnityEvent<FrameDetail> onFrameChanged;
 
         private void Awake()
         {
             frames = new List<Frame>();
             emitterDetails = new List<EmitterDetail>();
-            visualEmitterDetails = new List<VisualEmitterDetail>();
 
             gridWidth = ConfigRegistry.Grid.GridWidth;
             gridHeight = ConfigRegistry.Grid.GridHeight;
 
-            emitterColors = new List<Color>
-            {
-                ConfigRegistry.Grid.EmitterBlue,
-                ConfigRegistry.Grid.EmitterRed,
-                ConfigRegistry.Grid.EmitterYellow,
-                ConfigRegistry.Grid.EmitterGreen
-            };
+            currentEmitterId = ConfigRegistry.Grid.DefaultEmitterId;
+        }
 
+        private void Start()
+        {
             AddFrame();
         }
 
@@ -154,18 +148,22 @@ namespace TemperaMental.Frames
                 return;
             }
  
-            this.frames = new List<Frame>(newFrames);
-            visualEmitterDetails.Clear();
+            frames = new List<Frame>(newFrames);
 
             SetCurrentFrame(0);           
         }
 
-        public void SetEmitter(int emitterId)
+        public void SetEmitterType(int emitterId)
         {
-            currentEmitterId = emitterId;
-        }
+            if (emitterId != currentEmitterId)
+            {
+                currentEmitterId = emitterId;
 
-        public void RemoveEmitterAtPosition(Vector2Int position)
+                onEmitterTypeChanged?.Invoke(currentEmitterId);
+            }
+        }    
+
+        public void RemoveEmitter(Vector2Int position)
         {
             if (currentFrame.TryRemoveEmitter(position))
             {
@@ -173,13 +171,15 @@ namespace TemperaMental.Frames
             }
         }
 
-        public void AddEmitterAtPosition(Vector2Int cellPosition)
+        public void AddEmitter(Vector2Int cellPosition)
         {
             if (!currentFrame.CheckSameEmitterAtPosition(cellPosition, currentEmitterId))
             {
-                currentFrame.AddEmitter(new EmitterDetail(cellPosition, currentEmitterId));
+                EmitterDetail emitterDetail = new EmitterDetail(cellPosition, currentEmitterId);
 
-                onAddEmitter?.Invoke(cellPosition, emitterColors[currentEmitterId]);
+                currentFrame.AddEmitter(emitterDetail);
+
+                onAddEmitter?.Invoke(emitterDetail);
             }
         }
 
@@ -200,19 +200,18 @@ namespace TemperaMental.Frames
             return frames;
         }
 
-        private VisualFrameDetail GetFrameDetail(Frame frame)
+        private FrameDetail GetFrameDetail(Frame frame)
         {
-            visualEmitterDetails.Clear();
+            emitterDetails.Clear();
 
-            frame.ListActiveEmitters(emitterDetails);
+            frame.ActionActiveEmitters(CreateFrameDetail);
 
-            foreach (var emitterDetail in emitterDetails)
-            {
-                visualEmitterDetails.Add(new VisualEmitterDetail(new Vector3Int(emitterDetail.Position.x, emitterDetail.Position.y),
-                    emitterColors[emitterDetail.EmitterId]));
-            }
+            return new FrameDetail(currentFrameIndex + 1, frames.Count, emitterDetails);
+        }
 
-            return new VisualFrameDetail(currentFrameIndex + 1, frames.Count, visualEmitterDetails);
+        private void CreateFrameDetail(EmitterDetail detail)
+        {
+            emitterDetails.Add(detail);
         }
 
         private void SetCurrentFrame(int index)
@@ -246,7 +245,7 @@ namespace TemperaMental.Frames
 
         private void NotifyFrameChanged()
         {
-            onFrameChange?.Invoke(GetFrameDetail(currentFrame));
+            onFrameChanged?.Invoke(GetFrameDetail(currentFrame));
         }
     }
 }

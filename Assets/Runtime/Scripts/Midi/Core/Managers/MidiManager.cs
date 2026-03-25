@@ -1,21 +1,26 @@
 using System.Collections.Generic;
 using Melanchall.DryWetMidi.Core;
+using TemperaMental.Applications.Config;
 using TemperaMental.Frames;
 using TemperaMental.Midi.Transforms;
 using TemperaMental.Utils;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace Tempera.Mental.Midi.Core
+namespace TemperaMental.Midi.Core
 {
     public class MidiManager : MonoBehaviour
     {
-        [SerializeField] TransformService transformService;
+        [SerializeField] MidiTransformService transformService;
 
         int bpm;
-
         [SerializeField] UnityEvent<int> onBpmChanged;
 
+
+        private void Awake()
+        {
+            bpm = ConfigRegistry.Midi.DefaultBpm;
+        }
 
         public List<Frame> FromMidiFileToFrames(MidiFile midiFile)
         {
@@ -39,8 +44,5 @@ namespace Tempera.Mental.Midi.Core
 
             onBpmChanged?.Invoke(bpm);
         }
-
-
-        public int Bpm { get => bpm; }
     }
 }

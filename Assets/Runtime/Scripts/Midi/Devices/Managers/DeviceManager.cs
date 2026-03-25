@@ -131,6 +131,7 @@ namespace TemperaMental.Midi.Devices
                 }
 
                 currentDevice = OutputDevice.GetByName(deviceName);
+                currentDevice.PrepareForEventsSending();
 
                 onDeviceSelected?.Invoke(currentDevice);
 

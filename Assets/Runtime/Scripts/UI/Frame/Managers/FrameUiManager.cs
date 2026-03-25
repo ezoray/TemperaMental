@@ -19,7 +19,7 @@ namespace TemperaMental.UI.Frames
             selectionRing.position = buttonRect.position;
         }
 
-        public void ActionOnFrameChanged(VisualFrameDetail frameDetail)
+        public void ActionOnFrameChanged(FrameDetail frameDetail)
         {
             frameSlider.maxValue = frameDetail.FrameTotal;
             frameSlider.value = frameDetail.FrameNumber;

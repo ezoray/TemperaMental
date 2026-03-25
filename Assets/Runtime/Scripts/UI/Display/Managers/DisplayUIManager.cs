@@ -24,7 +24,7 @@ namespace TemperaMental.UI.Display
             loopText.text = isLooping ? LOOP_ON : LOOP_OFF;
         }
 
-        public void ActionOnFrameChanged(VisualFrameDetail frameDetail)
+        public void ActionOnFrameChanged(FrameDetail frameDetail)
         {
             frameText.text = $"{frameDetail.FrameNumber} / {frameDetail.FrameTotal}";
         }

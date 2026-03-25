@@ -30,14 +30,14 @@ namespace TemperaMental.Frames
 
         public void OnClickPreviousFrame() => frameManager.GoToPreviousFrame();
 
-        public void OnClickChangeEmitter(int emitterId) => frameManager.SetEmitter(emitterId);
+        public void OnClickChangeEmitter(int emitterId) => frameManager.SetEmitterType(emitterId);
 
         public void OnClickNewFrame() => frameManager.InsertFrame();
 
         // frame slider
         public void ActionOnSelectedFrameChanged(float selectedFrame) => frameManager.GoToFrame(Mathf.RoundToInt(selectedFrame));
 
-        public void ActionOnPlayingFrameChanged(int newFrame) => frameManager.GoToFrame(newFrame);
+        public void ActionOnPlaybackFrameChanged(int newFrame) => frameManager.GoToFrame(newFrame);
 
         public void OnMouseLeftClick(Vector2 mousePosition)
         {
@@ -45,7 +45,7 @@ namespace TemperaMental.Frames
 
             if(gridManager.TryGetCellPositionInGrid(worldPoint, out var cellPosition))
             {
-                frameManager.AddEmitterAtPosition(new Vector2Int(cellPosition.x, cellPosition.y));
+                frameManager.AddEmitter(new Vector2Int(cellPosition.x, cellPosition.y));
             }
         }
 
@@ -55,7 +55,7 @@ namespace TemperaMental.Frames
 
             if (gridManager.TryGetCellPositionInGrid(worldPoint, out var cellPosition))
             {
-                frameManager.RemoveEmitterAtPosition(new Vector2Int(cellPosition.x, cellPosition.y));
+                frameManager.RemoveEmitter(new Vector2Int(cellPosition.x, cellPosition.y));
             }
         }
     }

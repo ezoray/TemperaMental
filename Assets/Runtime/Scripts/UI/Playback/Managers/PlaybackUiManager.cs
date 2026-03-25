@@ -19,6 +19,9 @@ namespace TemperaMental.UI.Playbacks
         {
             minBpm = ConfigRegistry.Midi.MinBpm;
             maxBpm = ConfigRegistry.Midi.MaxBpm;
+
+            bpmSlider.minValue = minBpm;
+            bpmSlider.maxValue = maxBpm;
         }
 
         public void OnClickIncrementBpm()
