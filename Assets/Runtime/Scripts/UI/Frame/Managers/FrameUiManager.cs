@@ -8,7 +8,7 @@ namespace TemperaMental.UI.Frames
     {
         [SerializeField] Slider frameSlider;
 
-        //  highlight image for selected colour
+        // highlight image for selected colour
         [SerializeField] RectTransform selectionRing;
 
         // move highlight image to behind selected colour button
@@ -19,10 +19,30 @@ namespace TemperaMental.UI.Frames
             selectionRing.position = buttonRect.position;
         }
 
+        public void OnClickNextFrame()
+        {
+            frameSlider.value++;
+        }
+
+        public void OnClickPreviousFrame()
+        {
+            frameSlider.value--;
+        }
+
+        public void OnClickStartFrame()
+        {
+            frameSlider.value = frameSlider.minValue;
+        }
+
+        public void OnClickEndFrame()
+        {
+            frameSlider.value = frameSlider.maxValue;
+        }
+
         public void ActionOnFrameChanged(FrameDetail frameDetail)
         {
             frameSlider.maxValue = frameDetail.FrameTotal;
-            frameSlider.value = frameDetail.FrameNumber;
+            frameSlider.SetValueWithoutNotify(frameDetail.FrameNumber);
         }
     }
 }

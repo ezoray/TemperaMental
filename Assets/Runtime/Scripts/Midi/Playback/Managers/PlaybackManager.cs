@@ -23,6 +23,7 @@ namespace TemperaMental.Midi.Playbacks
         bool isLooping;
 
         int midiFileBpm;
+        int startingFrame;
 
         private ConcurrentQueue<int> frameQueue;
 
@@ -60,6 +61,19 @@ namespace TemperaMental.Midi.Playbacks
             }
         }
 
+        // when playing from position not at start we need to check that user doesn't try to move to a frame before that start position
+        // as playback doesn't have it (due to playback handling looping it would restart from frame 1 if it had all frames)
+        // move to start position instead
+        public void SeekToFrame(int seekFrame)
+        {
+            if (GetPlaybackState() == PlaybackState.Idle) return;
+
+            if (seekFrame < startingFrame) seekFrame = startingFrame;
+
+            long ticks = (seekFrame - startingFrame) * ConfigRegistry.Midi.TicksPerFrame;
+            playback.MoveToTime(new MidiTimeSpan(ticks));
+        }
+
         // UI stop is treated as reset (playback Stop is actually pausing playback)
         public void Reset()
         {
@@ -69,7 +83,7 @@ namespace TemperaMental.Midi.Playbacks
 
                 if (state != PlaybackState.Playing && state != PlaybackState.Paused)
                 {
-                    LogMan.LogWarning("Reset playback, wrong state: " + state);
+                    LogMan.LogWarning("Stop playback, wrong state: " + state);
                     return;
                 }
 
@@ -82,7 +96,7 @@ namespace TemperaMental.Midi.Playbacks
             }
             catch (Exception ex)
             {
-                LogMan.LogError("Reset failed: " + ex);
+                LogMan.LogError("Stop failed: " + ex);
             }
         }
 
@@ -111,7 +125,7 @@ namespace TemperaMental.Midi.Playbacks
         }
 
         // todo currently playback will happily run when output device is null, at least for cc's, but it probably shouldn't be relied upon
-        public void Play(MidiFile midiFile)
+        public void Play(MidiFile midiFile, int startingFrame)
         {
             try
             {
@@ -128,6 +142,10 @@ namespace TemperaMental.Midi.Playbacks
                             CreateTickGeneratorCallback = () => new RegularPrecisionTickGenerator()
                         }
                     });
+
+                    this.startingFrame = startingFrame;
+
+                    LogMan.Log("StartingFrame: " + startingFrame);
 
                     playback.OutputDevice = outputDevice;
 
@@ -196,8 +214,7 @@ namespace TemperaMental.Midi.Playbacks
 
         private void OnPlaybackError(object sender, PlaybackErrorOccurredEventArgs e)
         {
-            LogMan.LogError($"Playback error: {e.Site}, {e.Exception.Message}");
-
+            // todo log this - cannot log here in callback
             isPlaybackFinished = true;
         }
 

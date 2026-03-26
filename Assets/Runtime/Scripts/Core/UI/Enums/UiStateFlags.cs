@@ -14,7 +14,8 @@ namespace TemperaMental.Core.UI
         Creation = 16,
         Selection = 32,
 
-        // all enabled
-        All = Device | File | Mode | Playback | Creation | Selection
+        // presets
+        All = Device | File | Mode | Playback | Creation | Selection,
+        Playing = Playback | Selection
     }
 }

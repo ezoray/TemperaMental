@@ -23,6 +23,7 @@ namespace TemperaMental.Midi.Core
         int emitterCount;
 
         // reusable bitmask buffers, one ulong per emitter (bits 0–63 map to grid positions)
+        // comparison between last frame and new determines what emitters to add/remove
         ulong[] previousGroups;
         ulong[] currentGroups;
 
@@ -43,6 +44,14 @@ namespace TemperaMental.Midi.Core
 
             previousGroups = new ulong[emitterCount];
             currentGroups = new ulong[emitterCount];
+
+            // set bitmask to show all cells populated to force clear on Tempera for very first frame so app and Tempera are in sync
+            for (int i = 0; i < emitterCount; i++)
+            {
+                previousGroups[i] = ulong.MaxValue;
+            }
+
+            isEnabled = true;
         }
 
         // send only when playback is off

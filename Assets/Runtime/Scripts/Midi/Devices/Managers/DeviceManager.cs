@@ -117,8 +117,6 @@ namespace TemperaMental.Midi.Devices
 
         private void OnDeviceChange(object sender, DeviceAddedRemovedEventArgs eventArgs)
         {
-            LogMan.Log("OnDeviceChange Device: " + eventArgs.Device);
-
             isDeviceChange = true;
         }
 
@@ -137,7 +135,7 @@ namespace TemperaMental.Midi.Devices
 
                 onDeviceSelected?.Invoke(currentDevice);
 
-                LogMan.Log($"Device {deviceName} successfully opened.");
+                LogMan.Log($"Device '{deviceName}' selected");
             }
             catch (Exception ex)
             {

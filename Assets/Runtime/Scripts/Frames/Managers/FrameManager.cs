@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using TemperaMental.Applications.Config;
 using TemperaMental.Core;
@@ -21,6 +22,8 @@ namespace TemperaMental.Frames
         // reusable list
         List<EmitterDetail> emitterDetails;
 
+        bool isPlaybackActive;
+
         [SerializeField] UnityEvent<int> onEmitterTypeChanged;
         [SerializeField] UnityEvent<EmitterDetail> onAddEmitter;
         [SerializeField] UnityEvent<Vector2Int> onRemoveEmitter;
@@ -40,6 +43,11 @@ namespace TemperaMental.Frames
         private void Start()
         {
             AddFrame();
+        }
+
+        public void SetPlaybackActive(bool isActive)
+        {
+            isPlaybackActive = isActive;
         }
 
         public void DeleteFrame()
@@ -102,34 +110,13 @@ namespace TemperaMental.Frames
             copiedFrame = new Frame(currentFrame);
             LogMan.Log($"Frame {currentFrameIndex + 1} copied");
         }
-    
-        public void GoToNextFrame()
-        {
-            SetCurrentFrame(currentFrameIndex +1);
-        }
 
-        public void GoToPreviousFrame()
+        public void GoToFrame(int frameNumber, bool isDuringPlayback = false)
         {
-            SetCurrentFrame(currentFrameIndex - 1);
-        }
+            if (!isDuringPlayback && isPlaybackActive) return;
 
-        public void GoToFrame(int frameNumber)
-        {
+            LogMan.Log("GoToFrame: " + frameNumber);
             SetCurrentFrame(frameNumber - 1);
-        }
-
-        public void GoToStartFrame()
-        {
-            if (frames.Count == 0) return;
-
-            SetCurrentFrame(0);
-        }
-
-        public void GoToEndFrame()
-        {
-            if (frames.Count == 0) return;
-
-            SetCurrentFrame(frames.Count - 1);
         }
 
         public void AppendFrames(List<Frame> newFrames)
@@ -194,7 +181,11 @@ namespace TemperaMental.Frames
         {
             int count = frames.Count - currentFrameIndex;
 
-            return frames.GetRange(currentFrameIndex, count);
+            List<Frame> range = frames.GetRange(currentFrameIndex, count);
+
+            LogMan.Log("Frame Count: " + range.Count);
+
+            return range;
         }
 
         public int GetCurrentFrameNumber()

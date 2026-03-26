@@ -1,3 +1,4 @@
+using TemperaMental.Core;
 using TemperaMental.Grid;
 using UnityEngine;
 
@@ -9,10 +10,6 @@ namespace TemperaMental.Frames
         [SerializeField] GridManager gridManager;
         [SerializeField] FrameManager frameManager;
 
-
-        public void OnClickEndFrame() => frameManager.GoToEndFrame();
-
-        public void OnClickStartFrame() => frameManager.GoToStartFrame();
 
         public void OnClickDeleteFrame() => frameManager.DeleteFrame();
 
@@ -26,9 +23,7 @@ namespace TemperaMental.Frames
 
         public void OnClickCopyFrame() => frameManager.CopyFrame();
 
-        public void OnClickNextFrame() => frameManager.GoToNextFrame();
-
-        public void OnClickPreviousFrame() => frameManager.GoToPreviousFrame();
+      
 
         public void OnClickChangeEmitter(int emitterId) => frameManager.SetEmitterType(emitterId);
 
@@ -37,7 +32,7 @@ namespace TemperaMental.Frames
         // frame slider
         public void ActionOnSelectedFrameChanged(float selectedFrame) => frameManager.GoToFrame(Mathf.RoundToInt(selectedFrame));
 
-        public void ActionOnPlaybackFrameChanged(int newFrame) => frameManager.GoToFrame(newFrame);
+        public void ActionOnPlaybackFrameChanged(int newFrame) => frameManager.GoToFrame(newFrame, true);
 
         public void OnMouseLeftClick(Vector2 mousePosition)
         {
@@ -57,6 +52,11 @@ namespace TemperaMental.Frames
             {
                 frameManager.RemoveEmitter(new Vector2Int(cellPosition.x, cellPosition.y));
             }
+        }
+
+        public void ActionOnPlaybackStateChanged(PlaybackState playbackState)
+        {
+            frameManager.SetPlaybackActive(playbackState != PlaybackState.Idle);
         }
     }
 }
