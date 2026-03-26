@@ -17,7 +17,6 @@ namespace TemperaMental.Utils
                 var tempoMap = midiFile.GetTempoMap();
                 var tempo = tempoMap.GetTempoAtTime(new MidiTimeSpan(0));
                 int bpm = (int)Math.Round(tempo.BeatsPerMinute);
-                LogMan.Log($"BPM: {bpm}");
                 return bpm;
             }
             catch (Exception ex)

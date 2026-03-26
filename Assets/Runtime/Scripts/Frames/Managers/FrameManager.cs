@@ -46,6 +46,8 @@ namespace TemperaMental.Frames
         {
             if (frames.Count == 0) return;
 
+            LogMan.Log("Frame deleted");
+
             if (frames.Count == 1)
             {
                 ClearFrame();
@@ -61,6 +63,8 @@ namespace TemperaMental.Frames
         {
             frames.Clear();
             AddFrame();
+
+            LogMan.Log("All frames deleted");
         }
 
         public void ClearFrame()
@@ -72,12 +76,15 @@ namespace TemperaMental.Frames
 
         public void DuplicateFrame()
         {
+            LogMan.Log($"Frame {currentFrameIndex + 1} duplicated");
             InsertFrameAt(currentFrameIndex + 1, new Frame(frames[currentFrameIndex]));
         }
 
         public void InsertFrame()
         {
             InsertFrameAt(currentFrameIndex + 1, new Frame(gridWidth, gridHeight));
+
+            LogMan.Log("Frame added");
         }
 
         public void PasteOntoFrame()

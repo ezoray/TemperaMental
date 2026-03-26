@@ -47,7 +47,7 @@ namespace TemperaMental.Midi.Core
 
         // send only when playback is off
         public void EnableSendingByPlaybackState(PlaybackState playbackState)
-        {
+        { 
             switch (playbackState)
             {
                 case PlaybackState.Idle:
@@ -140,13 +140,11 @@ namespace TemperaMental.Midi.Core
         public void ClearOutputDevice()
         {
             outputDevice = null;
-            isEnabled = false;
         }
 
         public void SetOutputDevice(OutputDevice outputDevice)
         {
             this.outputDevice = outputDevice;
-            isEnabled = true;
         }
 
         // fill current groups with set emitters for this frame
@@ -184,7 +182,7 @@ namespace TemperaMental.Midi.Core
 
         private void SendEmitterMessage(int cmdCC, int value)
         {
-            if (isEnabled)
+            if (outputDevice != null && isEnabled)
             {
                 outputDevice.SendEvent(new ControlChangeEvent((SevenBitNumber)cmdCC, (SevenBitNumber)value));
             }

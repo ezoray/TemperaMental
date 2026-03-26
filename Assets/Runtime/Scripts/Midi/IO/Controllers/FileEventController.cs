@@ -28,7 +28,7 @@ namespace TemperaMental.Midi.IO
             }
             catch (Exception ex)
             {
-                LogMan.LogError($"{ex}");
+                LogMan.LogError($"Error appending file: {ex}");
             }
         }
 
@@ -46,7 +46,7 @@ namespace TemperaMental.Midi.IO
             }
             catch (Exception ex)
             {
-                LogMan.LogError($"{ex}");
+                LogMan.LogError($"Error loading file: {ex}");
             }
         }
 
@@ -63,7 +63,7 @@ namespace TemperaMental.Midi.IO
             }
             catch (Exception ex)
             {
-                LogMan.LogError($"{ex}");
+                LogMan.LogError($"Error saving file: {ex}");
             }
         }
     }

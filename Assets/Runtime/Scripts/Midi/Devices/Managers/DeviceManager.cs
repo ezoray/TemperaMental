@@ -102,11 +102,13 @@ namespace TemperaMental.Midi.Devices
 
         private void HandleInitialSelection()
         {
-            if (connectedDevices.Count == 0) return;
+            if (connectedDevices.Count == 0)
+            {
+                LogMan.Log("No midi devices detected");
+                return;
+            }
 
-            string target = connectedDevices.Contains(primaryDevice)
-                ? primaryDevice
-                : connectedDevices[0];
+            string target = connectedDevices.Contains(primaryDevice) ? primaryDevice : connectedDevices[0];
 
             ActionOnDeviceSelected(target);
 
@@ -139,7 +141,7 @@ namespace TemperaMental.Midi.Devices
             }
             catch (Exception ex)
             {
-                LogMan.LogError($"Failed to select device {deviceName}: {ex.Message}");
+                LogMan.LogError($"Failed to open device {deviceName}: {ex.Message}");
             }
         }
 

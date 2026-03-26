@@ -47,6 +47,8 @@ namespace TemperaMental.Midi.Playbacks
                 playback.EventPlayed -= OnEventPlayed;
                 ResetPlayback();
 
+                LogMan.Log("Playback finished");
+
                 onPlaybackStateChanged?.Invoke(PlaybackState.Idle);
             }
             else
@@ -58,6 +60,7 @@ namespace TemperaMental.Midi.Playbacks
             }
         }
 
+        // UI stop is treated as reset (playback Stop is actually pausing playback)
         public void Reset()
         {
             try
@@ -71,6 +74,8 @@ namespace TemperaMental.Midi.Playbacks
                 }
 
                 ResetPlayback();
+
+                LogMan.Log("Playback stopped");
 
                 onPlaybackStateChanged?.Invoke(PlaybackState.Idle);
 
@@ -93,6 +98,8 @@ namespace TemperaMental.Midi.Playbacks
 
                 // calling stop pauses playback
                 playback.Stop();
+
+                LogMan.Log("Playback paused");
 
                 onPlaybackStateChanged?.Invoke(PlaybackState.Paused);
             }
@@ -134,6 +141,8 @@ namespace TemperaMental.Midi.Playbacks
                 }
 
                 playback.Start();
+
+                LogMan.Log("Playing...");
 
                 onPlaybackStateChanged?.Invoke(PlaybackState.Playing);
             }
