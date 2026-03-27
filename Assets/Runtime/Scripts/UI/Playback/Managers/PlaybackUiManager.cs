@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace TemperaMental.UI.Playbacks
 {
-    public class PlaybackUiManager : MonoBehaviour
+    public class PlaybackUIManager : MonoBehaviour
     {
         int minBpm;
         int maxBpm;

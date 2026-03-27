@@ -12,8 +12,8 @@ namespace TemperaMental.Core
         Stop = 8,
 
         // state presets
-        Playing = Pause | Stop,
-        Paused = Play | Stop,
+        Playing = PlayPosition | Play | Pause | Stop,
+        Paused = PlayPosition | Play | Stop,
         Stopped = PlayPosition | Play
     }
 }

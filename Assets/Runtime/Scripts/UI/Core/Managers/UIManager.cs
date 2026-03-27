@@ -1,11 +1,10 @@
 using System.Collections.Generic;
 using TemperaMental.Core;
-using TemperaMental.Core.UI;
 using UnityEngine;
 
 namespace TemperaMental.UI.Core
 {
-    public class UiStateManager : MonoBehaviour
+    public class UIManager : MonoBehaviour
     {
         [Header("Order: Device, File, Mode, Playback, Create, Select")]
         [SerializeField] List<CanvasGroup> panels;

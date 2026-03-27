@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using TemperaMental.Applications.Config;
 using TemperaMental.Core;
@@ -84,7 +83,7 @@ namespace TemperaMental.Frames
 
         public void DuplicateFrame()
         {
-            LogMan.Log($"Frame {currentFrameIndex + 1} duplicated");
+            LogMan.Log($"Frame duplicated");
             InsertFrameAt(currentFrameIndex + 1, new Frame(frames[currentFrameIndex]));
         }
 
@@ -115,7 +114,6 @@ namespace TemperaMental.Frames
         {
             if (!isDuringPlayback && isPlaybackActive) return;
 
-            LogMan.Log("GoToFrame: " + frameNumber);
             SetCurrentFrame(frameNumber - 1);
         }
 

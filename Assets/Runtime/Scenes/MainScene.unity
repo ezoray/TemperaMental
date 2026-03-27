@@ -396,7 +396,7 @@ GameObject:
   - component: {fileID: 43681585}
   - component: {fileID: 43681584}
   m_Layer: 0
-  m_Name: InputManager
+  m_Name: MouseManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -428,44 +428,120 @@ MonoBehaviour:
       m_Calls: []
   m_ActionEvents:
   - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 43681585}
-        m_TargetAssemblyTypeName: Tempera.Mental.Input.InputManager, Assembly-CSharp
-        m_MethodName: OnMouseLeftClick
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: cdc916d5-7019-49b1-b195-1b96ab1d3eeb
-    m_ActionName: 'Player/LeftClick[/Mouse/leftButton]'
-  - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 43681585}
-        m_TargetAssemblyTypeName: Tempera.Mental.Input.InputManager, Assembly-CSharp
-        m_MethodName: OnMouseRightClick
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: e23375a8-9a3d-40af-a7e2-d73358976b95
-    m_ActionName: 'Player/RightClick[/Mouse/rightButton]'
+      m_Calls: []
+    m_ActionId: 9b41d13c-4ad3-497a-aef8-b4c6f1bbdd25
+    m_ActionName: 'File/Append[/Keyboard/i]'
   - m_PersistentCalls:
       m_Calls: []
-    m_ActionId: 4bd4c97c-9d3b-4573-9b30-c7224a913975
-    m_ActionName: 'Player/LeftButtonDown[/Mouse/leftButton]'
+    m_ActionId: 9daa7c1a-9b5b-436d-b4c4-4e3f3f308025
+    m_ActionName: 'File/Load[/Keyboard/o]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: d60af09f-1689-48f8-96a7-e45ddf866782
+    m_ActionName: 'File/Save[/Keyboard/p]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 026b7794-ebbc-4b37-841b-26f92a8ec770
+    m_ActionName: 'Mouse/LeftClick[/Mouse/leftButton]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 2f921130-63d7-4f40-8f3e-1b278b1a7ffe
+    m_ActionName: 'Mouse/RightClick[/Mouse/rightButton]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 2c88a3eb-1c69-4dcf-a258-821d6f7be416
+    m_ActionName: 'Mouse/LeftButtonDown[/Mouse/leftButton]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 560e35f8-24ca-4c4b-b3bf-c13af0da72e6
+    m_ActionName: Playback/New action
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 97a86160-2ee2-465b-a808-8761bed44e54
+    m_ActionName: 'Mouse/Position[/Mouse/position]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 56aa4d1c-2459-4dd6-a528-7603ef21219c
+    m_ActionName: 'Mouse/Pan[/Keyboard/leftCtrl,/Mouse/delta]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 5be2a0bc-520d-4d0c-baac-addfb7d4973c
+    m_ActionName: 'Playback/Play[/Keyboard/rightArrow,/Keyboard/space]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 88a9c818-277f-4ff9-bd9e-57406b8a9edc
+    m_ActionName: 'Playback/Pause[/Keyboard/upArrow]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: d2789644-5c8a-4b35-a7b1-0bd390b61247
+    m_ActionName: 'Playback/Stop[/Keyboard/leftArrow]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: bc9ead37-26c2-4a3b-979a-e92fbd5928a3
+    m_ActionName: 'Playback/Loop[/Keyboard/l]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 69971adb-3825-4a1e-9419-8a2412fd8c6b
+    m_ActionName: 'Playback/PlusBpm[/Keyboard/period]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 2cf2dc28-5639-468d-ba89-2db1bc1bf29d
+    m_ActionName: 'Playback/PlusBpm1[/Keyboard/comma]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 8a6cdd13-a2cc-492e-a8a5-d588a68a41e1
+    m_ActionName: 'Emitter/Blue[/Keyboard/1]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 68a19bcc-728d-4e11-adae-788c28ac0d32
+    m_ActionName: 'Emitter/Red[/Keyboard/2]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 9c576487-4b10-458d-a41c-a8ac4061f533
+    m_ActionName: 'Emitter/Yellow[/Keyboard/3]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: cff75eae-619f-40c7-ae7b-19987ffe6289
+    m_ActionName: 'Emitter/Green[/Keyboard/4]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: d145db94-afce-409f-b003-19dd98bc0fe7
+    m_ActionName: 'Mode/Emitter[/Keyboard/5]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: b1eabd5a-cf48-4677-a3cb-64983975b7ee
+    m_ActionName: 'Create/Duplicate[/Keyboard/s]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 6b19d3a6-a4a3-447f-a5c7-a6a37914f67a
+    m_ActionName: 'Playback1/PlayPosition[/Keyboard/downArrow]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 0f1c7b0b-b411-4bee-8250-70a962b8df9f
+    m_ActionName: 'Create/Copy[/Keyboard/q]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 2b05d522-456b-4c04-bf00-83761d205016
+    m_ActionName: 'Create/New[/Keyboard/w]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 3e6fac03-6337-4c2a-9c01-cc5e452535f9
+    m_ActionName: 'Create/Paste[/Keyboard/e]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: ce02f443-170a-4044-bb0e-634dea7bf407
+    m_ActionName: 'Create/Clear[/Keyboard/t]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: d45bab00-8a31-4db3-b2dc-7ff0399e76bb
+    m_ActionName: 'Create/Delete[/Keyboard/g]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: a7052de4-6518-47f8-8111-670a838b6fbb
+    m_ActionName: 'Create/DeleteAll[/Keyboard/b]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
-  m_DefaultActionMap: Player
+  m_DefaultActionMap: 
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
 --- !u!114 &43681585
@@ -521,12 +597,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 43681583}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1665524020}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &84394325
 GameObject:
@@ -1095,7 +1171,7 @@ GameObject:
   - component: {fileID: 114619601}
   - component: {fileID: 114619602}
   m_Layer: 0
-  m_Name: UiStateManager
+  m_Name: UIManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2530,18 +2606,6 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 849915434}
-        m_TargetAssemblyTypeName: Tempera.Mental.UI.FrameUiManager, Assembly-CSharp
-        m_MethodName: OnClickSelectColor
-        m_Mode: 2
-        m_Arguments:
-          m_ObjectArgument: {fileID: 402468839}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.UI.Button, UnityEngine.UI
-          m_IntArgument: 4
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
       - m_Target: {fileID: 1362657596}
         m_TargetAssemblyTypeName: Tempera.Mental.Frames.FrameEventController, Assembly-CSharp
         m_MethodName: OnClickChangeEmitter
@@ -2989,6 +3053,51 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 430393938}
   m_CullTransparentMesh: 1
+--- !u!1 &448141344
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 448141345}
+  - component: {fileID: 448141346}
+  m_Layer: 0
+  m_Name: EmitterInputHandler
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &448141345
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 448141344}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1665524020}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &448141346
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 448141344}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d76644d10585476a9949e6fa091b655, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TemperaMental.Input.Keyboards.EmitterInputHandler
+  frameEventController: {fileID: 1362657596}
 --- !u!1 &455917104
 GameObject:
   m_ObjectHideFlags: 0
@@ -3556,6 +3665,57 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 5331573247357082670, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
   m_PrefabInstance: {fileID: 538192059}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &541242250
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 541242251}
+  - component: {fileID: 541242252}
+  m_Layer: 0
+  m_Name: KeyboardManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &541242251
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 541242250}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1665524020}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &541242252
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 541242250}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15e75ca0066814c3f8408426c6b04c33, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TemperaMental.Input.KeyboardInputHandler
+  inputHandlers:
+  - {fileID: 448141346}
+  - {fileID: 1975458682}
+  - {fileID: 775014838}
+  - {fileID: 1616239206}
+  - {fileID: 1573614569}
+  - {fileID: 1679775038}
 --- !u!1001 &543366975
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4686,18 +4846,6 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 849915434}
-        m_TargetAssemblyTypeName: Tempera.Mental.UI.FrameUiManager, Assembly-CSharp
-        m_MethodName: OnClickSelectColor
-        m_Mode: 2
-        m_Arguments:
-          m_ObjectArgument: {fileID: 721684639}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.UI.Button, UnityEngine.UI
-          m_IntArgument: 2
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
       - m_Target: {fileID: 1362657596}
         m_TargetAssemblyTypeName: Tempera.Mental.Frames.FrameEventController, Assembly-CSharp
         m_MethodName: OnClickChangeEmitter
@@ -4917,6 +5065,50 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 5331573247357082670, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
   m_PrefabInstance: {fileID: 721832737}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &775014837
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 775014839}
+  - component: {fileID: 775014838}
+  m_Layer: 0
+  m_Name: ModeInputHandler
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &775014838
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 775014837}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 44dac315f91c74fb19e5d14cf60b1b64, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TemperaMental.Input.Keyboards.ModeInputHandler
+--- !u!4 &775014839
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 775014837}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1665524020}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &794889093
 GameObject:
   m_ObjectHideFlags: 0
@@ -5192,6 +5384,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Tempera.Mental.UI.GridManager
   frameSlider: {fileID: 1309759012}
+  emitterButtons:
+  - {fileID: 1940902951}
+  - {fileID: 721684639}
+  - {fileID: 402468839}
+  - {fileID: 2005578580}
   selectionRing: {fileID: 691874080}
 --- !u!4 &849915435
 Transform:
@@ -8659,6 +8856,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 849915434}
+        m_TargetAssemblyTypeName: TemperaMental.UI.Frames.FrameUiManager, Assembly-CSharp
+        m_MethodName: ActionOnEmitterChanged
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   onAddEmitter:
     m_PersistentCalls:
       m_Calls:
@@ -9260,6 +9469,51 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1799877661}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1573614567
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1573614568}
+  - component: {fileID: 1573614569}
+  m_Layer: 0
+  m_Name: CreateInputHandler
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1573614568
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1573614567}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1665524020}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1573614569
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1573614567}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e29f1b51163245b09b413a1dbefe772, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TemperaMental.Input.Keyboards.CreateInputHandler
+  frameEventController: {fileID: 1362657596}
 --- !u!1 &1587327797
 GameObject:
   m_ObjectHideFlags: 0
@@ -9444,6 +9698,52 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1599832656}
   m_CullTransparentMesh: 1
+--- !u!1 &1616239204
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1616239205}
+  - component: {fileID: 1616239206}
+  m_Layer: 0
+  m_Name: PlaybackInputHandler
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1616239205
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1616239204}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1665524020}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1616239206
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1616239204}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 47630c085a62f435fb0dc2b79ea3652e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TemperaMental.Input.Keyboards.PlaybackInputHandler
+  playbackEventController: {fileID: 1561101351}
+  playbackUIManager: {fileID: 1244920275}
 --- !u!1 &1650145626
 GameObject:
   m_ObjectHideFlags: 0
@@ -9522,6 +9822,90 @@ Transform:
   - {fileID: 932124898}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1665524019
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1665524020}
+  m_Layer: 0
+  m_Name: Input
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1665524020
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1665524019}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 43681586}
+  - {fileID: 541242251}
+  - {fileID: 448141345}
+  - {fileID: 1975458681}
+  - {fileID: 775014839}
+  - {fileID: 1616239205}
+  - {fileID: 1573614568}
+  - {fileID: 1679775037}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1679775036
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1679775037}
+  - component: {fileID: 1679775038}
+  m_Layer: 0
+  m_Name: SelectInputHandler
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1679775037
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1679775036}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1665524020}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1679775038
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1679775036}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 913d2ec8bc9864293adb0cfd95bf708b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TemperaMental.Input.Keyboards.SelectInputHandler
+  frameUIManager: {fileID: 849915434}
 --- !u!1 &1683433340
 GameObject:
   m_ObjectHideFlags: 0
@@ -10886,6 +11270,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dbd18dddec884488e99f994e2a1c547c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Tempera.Mental.SceneManager
+  mouseManager: {fileID: 43681585}
+  keyboardManager: {fileID: 541242252}
 --- !u!4 &1935426355
 Transform:
   m_ObjectHideFlags: 0
@@ -10985,18 +11371,6 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 849915434}
-        m_TargetAssemblyTypeName: Tempera.Mental.UI.FrameUiManager, Assembly-CSharp
-        m_MethodName: OnClickSelectColor
-        m_Mode: 2
-        m_Arguments:
-          m_ObjectArgument: {fileID: 1940902951}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.UI.Button, UnityEngine.UI
-          m_IntArgument: 1
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
       - m_Target: {fileID: 1362657596}
         m_TargetAssemblyTypeName: Tempera.Mental.Frames.FrameEventController, Assembly-CSharp
         m_MethodName: OnClickChangeEmitter
@@ -11248,6 +11622,51 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 5331573247357082670, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
   m_PrefabInstance: {fileID: 1970725179}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1975458680
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1975458681}
+  - component: {fileID: 1975458682}
+  m_Layer: 0
+  m_Name: FileInputHandler
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1975458681
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1975458680}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1665524020}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1975458682
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1975458680}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 27adbb871cf3b409bb320cc4edd89b40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TemperaMental.Input.FileInputHandler
+  fileEventController: {fileID: 1587327799}
 --- !u!1 &1991906789
 GameObject:
   m_ObjectHideFlags: 0
@@ -11407,18 +11826,6 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 849915434}
-        m_TargetAssemblyTypeName: Tempera.Mental.UI.FrameUiManager, Assembly-CSharp
-        m_MethodName: OnClickSelectColor
-        m_Mode: 2
-        m_Arguments:
-          m_ObjectArgument: {fileID: 2005578580}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.UI.Button, UnityEngine.UI
-          m_IntArgument: 8
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
       - m_Target: {fileID: 1362657596}
         m_TargetAssemblyTypeName: Tempera.Mental.Frames.FrameEventController, Assembly-CSharp
         m_MethodName: OnClickChangeEmitter
@@ -12394,7 +12801,6 @@ SceneRoots:
   m_Roots:
   - {fileID: 1553216988}
   - {fileID: 1659232568}
-  - {fileID: 43681586}
   - {fileID: 158003354}
   - {fileID: 1814786751}
   - {fileID: 342393026}
@@ -12403,3 +12809,4 @@ SceneRoots:
   - {fileID: 1799877661}
   - {fileID: 1164451988}
   - {fileID: 1752810629}
+  - {fileID: 1665524020}

@@ -1,23 +1,17 @@
+using System.Collections.Generic;
 using TemperaMental.Core;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace TemperaMental.UI.Frames
 {
-    public class FrameUiManager : MonoBehaviour
+    public class FrameUIManager : MonoBehaviour
     {
         [SerializeField] Slider frameSlider;
+        [SerializeField] List<Button> emitterButtons;
 
         // highlight image for selected colour
         [SerializeField] RectTransform selectionRing;
-
-        // move highlight image to behind selected colour button
-        public void OnClickSelectColor(Button button)
-        {
-            RectTransform buttonRect = button.GetComponent<RectTransform>();
-
-            selectionRing.position = buttonRect.position;
-        }
 
         public void OnClickNextFrame()
         {
@@ -37,6 +31,13 @@ namespace TemperaMental.UI.Frames
         public void OnClickEndFrame()
         {
             frameSlider.value = frameSlider.maxValue;
+        }
+
+        public void ActionOnEmitterChanged(int newEmitterId)
+        {
+            RectTransform rectTransform = emitterButtons[newEmitterId].GetComponent<RectTransform>();
+
+            selectionRing.position = rectTransform.position;
         }
 
         public void ActionOnFrameChanged(FrameDetail frameDetail)

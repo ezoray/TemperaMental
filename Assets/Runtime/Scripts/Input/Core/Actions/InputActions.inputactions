@@ -1,0 +1,722 @@
+{
+    "version": 1,
+    "name": "InputActions",
+    "maps": [
+        {
+            "name": "Player",
+            "id": "8a4af4cc-1531-499f-9e16-3736c0f01242",
+            "actions": [],
+            "bindings": []
+        },
+        {
+            "name": "Mouse",
+            "id": "9b08f28f-55da-4c81-8551-dc81db58665c",
+            "actions": [
+                {
+                    "name": "LeftClick",
+                    "type": "Button",
+                    "id": "026b7794-ebbc-4b37-841b-26f92a8ec770",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "RightClick",
+                    "type": "Button",
+                    "id": "2f921130-63d7-4f40-8f3e-1b278b1a7ffe",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "Press",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "LeftButtonDown",
+                    "type": "PassThrough",
+                    "id": "2c88a3eb-1c69-4dcf-a258-821d6f7be416",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "Hold",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Position",
+                    "type": "Value",
+                    "id": "97a86160-2ee2-465b-a808-8761bed44e54",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Pan",
+                    "type": "Value",
+                    "id": "56aa4d1c-2459-4dd6-a528-7603ef21219c",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "b5747b60-cf44-4928-ada0-4ea9e199351a",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "LeftClick",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7ea3ffe8-5e16-4458-9083-7aadfa5ab5e5",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RightClick",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b13be618-e253-4127-b4c8-d0e222266932",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "LeftButtonDown",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "006e7f08-9bed-470d-8748-a90f8b8406e0",
+                    "path": "<Mouse>/position",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Position",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "One Modifier",
+                    "id": "31367381-d073-475c-9267-bef048aef4e3",
+                    "path": "OneModifier",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Pan",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "modifier",
+                    "id": "c76cb763-3cb8-40f2-ab16-06c30d39564d",
+                    "path": "<Keyboard>/leftCtrl",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Pan",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "binding",
+                    "id": "86b07221-8d5a-4e98-9213-dc1b6e98d9ab",
+                    "path": "<Mouse>/delta",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Pan",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                }
+            ]
+        },
+        {
+            "name": "File",
+            "id": "6270fc5f-7127-4c1e-a388-d73968b6d476",
+            "actions": [
+                {
+                    "name": "Append",
+                    "type": "Button",
+                    "id": "9b41d13c-4ad3-497a-aef8-b4c6f1bbdd25",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Load",
+                    "type": "Button",
+                    "id": "9daa7c1a-9b5b-436d-b4c4-4e3f3f308025",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Save",
+                    "type": "Button",
+                    "id": "d60af09f-1689-48f8-96a7-e45ddf866782",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "b34b75e8-4275-4340-bcd8-925019b153a6",
+                    "path": "<Keyboard>/i",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Append",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8d93370b-0820-4c33-a618-85975115234a",
+                    "path": "<Keyboard>/o",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Load",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "ea801fa3-75c9-4c29-b5fa-01034d887942",
+                    "path": "<Keyboard>/p",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Save",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "Playback",
+            "id": "a029ab64-d92c-4901-88c8-f913a951a42c",
+            "actions": [
+                {
+                    "name": "PlayPosition",
+                    "type": "Button",
+                    "id": "560e35f8-24ca-4c4b-b3bf-c13af0da72e6",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Play",
+                    "type": "Button",
+                    "id": "5be2a0bc-520d-4d0c-baac-addfb7d4973c",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Pause",
+                    "type": "Button",
+                    "id": "88a9c818-277f-4ff9-bd9e-57406b8a9edc",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Stop",
+                    "type": "Button",
+                    "id": "d2789644-5c8a-4b35-a7b1-0bd390b61247",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Loop",
+                    "type": "Button",
+                    "id": "bc9ead37-26c2-4a3b-979a-e92fbd5928a3",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "PlusBpm",
+                    "type": "Button",
+                    "id": "69971adb-3825-4a1e-9419-8a2412fd8c6b",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "MinusBpm",
+                    "type": "Button",
+                    "id": "2cf2dc28-5639-468d-ba89-2db1bc1bf29d",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "93b68c9b-28b7-445f-8161-d5f25aceefd2",
+                    "path": "<Keyboard>/upArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PlayPosition",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8c6ee5b3-d999-47a0-a719-6b0491aba353",
+                    "path": "<Keyboard>/rightArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Play",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "ac09854f-703f-4ea9-8b4e-62ab99291534",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Play",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "044bd456-0290-4338-b59c-da4121b0a085",
+                    "path": "<Keyboard>/downArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Pause",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d115ea97-d98e-4325-94ab-1f69e7bb073c",
+                    "path": "<Keyboard>/leftArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Stop",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "ce167575-0948-4115-9995-aa073176818f",
+                    "path": "<Keyboard>/l",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Loop",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "aed89a94-f63b-4c2d-909c-038b8ff439d5",
+                    "path": "<Keyboard>/period",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PlusBpm",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "4493ea5b-8969-44c0-9d6a-a2fd85dcc4b6",
+                    "path": "<Keyboard>/comma",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MinusBpm",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "Emitter",
+            "id": "2235b5f4-9d57-4fda-a52f-27b3b9ecbe8e",
+            "actions": [
+                {
+                    "name": "Blue",
+                    "type": "Button",
+                    "id": "8a6cdd13-a2cc-492e-a8a5-d588a68a41e1",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Red",
+                    "type": "Button",
+                    "id": "68a19bcc-728d-4e11-adae-788c28ac0d32",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Yellow",
+                    "type": "Button",
+                    "id": "9c576487-4b10-458d-a41c-a8ac4061f533",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Green",
+                    "type": "Button",
+                    "id": "cff75eae-619f-40c7-ae7b-19987ffe6289",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "f40b3fdf-2fd8-4a22-a5f6-964602e16d6c",
+                    "path": "<Keyboard>/1",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Blue",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7eea0fab-efb9-4264-aae4-8b5c811a4c39",
+                    "path": "<Keyboard>/2",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Red",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "bf970296-a20a-45a0-b555-29ac6dc9014f",
+                    "path": "<Keyboard>/3",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Yellow",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8564c6ba-e337-47a4-a798-4e46cbca4688",
+                    "path": "<Keyboard>/4",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Green",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "Mode",
+            "id": "f217fc0e-577a-4717-ad45-671c97a2dc57",
+            "actions": [
+                {
+                    "name": "Emitter",
+                    "type": "Button",
+                    "id": "d145db94-afce-409f-b003-19dd98bc0fe7",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "703023f8-cd55-41c3-93f5-90c57537f604",
+                    "path": "<Keyboard>/5",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Emitter",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "Create",
+            "id": "787047c5-09ae-482f-afe8-981d8879f782",
+            "actions": [
+                {
+                    "name": "Duplicate",
+                    "type": "Button",
+                    "id": "b1eabd5a-cf48-4677-a3cb-64983975b7ee",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Copy",
+                    "type": "Button",
+                    "id": "0f1c7b0b-b411-4bee-8250-70a962b8df9f",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "New",
+                    "type": "Button",
+                    "id": "2b05d522-456b-4c04-bf00-83761d205016",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Paste",
+                    "type": "Button",
+                    "id": "3e6fac03-6337-4c2a-9c01-cc5e452535f9",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Clear",
+                    "type": "Button",
+                    "id": "ce02f443-170a-4044-bb0e-634dea7bf407",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Delete",
+                    "type": "Button",
+                    "id": "d45bab00-8a31-4db3-b2dc-7ff0399e76bb",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "DeleteAll",
+                    "type": "Button",
+                    "id": "a7052de4-6518-47f8-8111-670a838b6fbb",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "f47f54fb-919d-42df-b416-cb8fc4f5a82d",
+                    "path": "<Keyboard>/s",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Duplicate",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "55d37203-fdce-4be6-a927-c013a707bb28",
+                    "path": "<Keyboard>/q",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Copy",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "529c536c-e7db-4577-935b-e4d59566d929",
+                    "path": "<Keyboard>/w",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "New",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5e6f40ef-ace3-44f5-a1e0-5a780d8e7889",
+                    "path": "<Keyboard>/e",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Paste",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "50eb4ffd-bec7-4b6d-921e-b06098e97aa2",
+                    "path": "<Keyboard>/t",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Clear",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "6db96cbb-dfe8-4912-aaf3-1c1727a5ef24",
+                    "path": "<Keyboard>/g",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Delete",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "24c019f7-4768-4b38-87fb-2a995f3a74ea",
+                    "path": "<Keyboard>/b",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "DeleteAll",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "Select",
+            "id": "cc62faf3-9fad-41e0-a381-a01676424b2e",
+            "actions": [
+                {
+                    "name": "Start",
+                    "type": "Button",
+                    "id": "6b19d3a6-a4a3-447f-a5c7-a6a37914f67a",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Previous",
+                    "type": "Button",
+                    "id": "ce6ac37f-c14d-4752-94a9-5574e82ad00e",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Next",
+                    "type": "Button",
+                    "id": "f93a9a2e-b499-46af-a11c-e34b932b2a26",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "End",
+                    "type": "Button",
+                    "id": "3bbf563c-1e7c-403e-9e7f-acc39b9bc74e",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "afa537dc-b87f-4227-940f-531d7e4dd597",
+                    "path": "<Keyboard>/backquote",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Start",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e101b351-bc46-4123-955c-f5c02bf8f681",
+                    "path": "<Keyboard>/a",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Previous",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "9aab069e-0f86-4f19-83ae-e9c031ad5c95",
+                    "path": "<Keyboard>/d",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Next",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8c567153-14f5-4477-9e8b-0cac638b0dfd",
+                    "path": "<Keyboard>/c",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "End",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}

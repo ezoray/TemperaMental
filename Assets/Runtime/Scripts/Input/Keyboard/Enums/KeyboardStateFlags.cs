@@ -1,13 +1,13 @@
 using System;
 
-namespace TemperaMental.Core.UI
+namespace TemperaMental.Input.Keyboards
 {
     [Flags]
-    public enum UiStateFlags
+    public enum KeyboardStateFlags
     {
-        // canvas group indexes
+        // input handler indexes
         None = 0,
-        Device = 1,
+        Emitter = 1,
         File = 2,
         Mode = 4,
         Playback = 8,
@@ -15,7 +15,7 @@ namespace TemperaMental.Core.UI
         Selection = 32,
 
         // presets
-        All = Device | File | Mode | Playback | Creation | Selection,
+        All = Emitter | File | Mode | Playback | Creation | Selection,
         Playing = Playback | Selection
     }
 }

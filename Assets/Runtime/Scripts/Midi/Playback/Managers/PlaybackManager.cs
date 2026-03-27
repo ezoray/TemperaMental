@@ -74,8 +74,8 @@ namespace TemperaMental.Midi.Playbacks
             playback.MoveToTime(new MidiTimeSpan(ticks));
         }
 
-        // UI stop is treated as reset (playback Stop is actually pausing playback)
-        public void Reset()
+        // To stop playback is reset (playback.Stop pauses playback)
+        public void Stop()
         {
             try
             {
@@ -83,7 +83,7 @@ namespace TemperaMental.Midi.Playbacks
 
                 if (state != PlaybackState.Playing && state != PlaybackState.Paused)
                 {
-                    LogMan.LogWarning("Stop playback, wrong state: " + state);
+          //          LogMan.LogWarning("Stop playback, wrong state: " + state);
                     return;
                 }
 
@@ -106,7 +106,7 @@ namespace TemperaMental.Midi.Playbacks
             {
                 if (GetPlaybackState() != PlaybackState.Playing)
                 {
-                    LogMan.LogError("Pause playback, wrong state: " + GetPlaybackState());
+          //          LogMan.LogWarning   ("Pause playback, wrong state: " + GetPlaybackState());
                     return;
                 }
 

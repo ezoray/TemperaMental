@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace TemperaMental.Applications
+namespace TemperaMental.Applications.Core
 {
     using UnityEngine;
 

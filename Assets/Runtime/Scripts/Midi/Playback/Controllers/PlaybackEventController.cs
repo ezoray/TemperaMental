@@ -24,7 +24,7 @@ namespace TemperaMental.Midi.Playbacks
 
         public void ActionOnDeviceRemoved()
         {
-            playbackManager.Reset();
+            playbackManager.Stop();
         }
 
         public void ActionOnDeviceChanged(OutputDevice device)
@@ -39,7 +39,7 @@ namespace TemperaMental.Midi.Playbacks
 
         public void OnClickStop()
         {
-            playbackManager.Reset();
+            playbackManager.Stop();
         }
 
         public void OnClickPause()

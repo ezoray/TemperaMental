@@ -9,6 +9,10 @@ namespace TemperaMental.Midi.IO
 {
     public class MidiFileService : MonoBehaviour
     {
+        const string APPEND_TITLE = "Append Midi File";
+        const string LOAD_TITLE = "Open Midi File";
+        const string SAVE_TITLE = "Save Midi File";
+
         ExtensionFilter[] fileExtensions;
 
 
@@ -21,7 +25,7 @@ namespace TemperaMental.Midi.IO
         {
             try
             {
-                string savePath = StandaloneFileBrowser.SaveFilePanel("Save Midi File", "", "", fileExtensions);
+                string savePath = StandaloneFileBrowser.SaveFilePanel(SAVE_TITLE, "", "", fileExtensions);
 
                 if (string.IsNullOrEmpty(savePath))
                 {
@@ -39,13 +43,15 @@ namespace TemperaMental.Midi.IO
             }
         }
 
-        public bool TryOpenMidiFile(out MidiFile midiFile)
+        public bool TryOpenMidiFile(out MidiFile midiFile, bool isAppend = false)
         {
             midiFile = null;
 
+            string title = isAppend ? APPEND_TITLE : LOAD_TITLE;
+
             try
             {
-                string[] paths = StandaloneFileBrowser.OpenFilePanel("Open Midi File", "", fileExtensions, false);
+                string[] paths = StandaloneFileBrowser.OpenFilePanel(title, "", fileExtensions, false);
 
                 if (paths == null || paths.Length == 0 || string.IsNullOrEmpty(paths[0]))
                 {

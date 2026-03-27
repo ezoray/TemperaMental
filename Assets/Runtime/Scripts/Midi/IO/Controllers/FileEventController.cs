@@ -18,7 +18,7 @@ namespace TemperaMental.Midi.IO
         {
             try
             {
-                if (midiFileService.TryOpenMidiFile(out MidiFile midiFile))
+                if (midiFileService.TryOpenMidiFile(out MidiFile midiFile, true))
                 {
                     List<Frame> frames = midiManager.FromMidiFileToFrames(midiFile);
                     frameManager.AppendFrames(frames);

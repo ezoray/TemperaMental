@@ -6,7 +6,7 @@ using UnityEngine.Events;
 
 namespace TemperaMental.UI.Devices
 {
-    public class DeviceUiManager : MonoBehaviour
+    public class DeviceUIManager : MonoBehaviour
     {
         [SerializeField] TMP_Dropdown deviceDropdown;
         [SerializeField] UnityEvent<string> onDeviceChanged;
