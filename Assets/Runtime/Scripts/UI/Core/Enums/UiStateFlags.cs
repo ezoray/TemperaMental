@@ -16,6 +16,7 @@ namespace TemperaMental.UI.Core
 
         // presets
         All = Device | File | Mode | Playback | Creation | Selection,
-        Playing = Playback | Selection
+        Playing = Playback | Selection,
+        Paused = Playback | Selection
     }
 }

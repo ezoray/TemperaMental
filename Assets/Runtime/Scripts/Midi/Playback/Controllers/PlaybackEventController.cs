@@ -1,4 +1,3 @@
-using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Multimedia;
 using TemperaMental.Frames;
 using TemperaMental.Midi.Core;
@@ -55,9 +54,7 @@ namespace TemperaMental.Midi.Playbacks
         public void OnClickPlayPosition()
         {
             int startingFrame = frameManager.GetCurrentFrameNumber();
-            MidiFile midiFile = midiManager.FromFramesToMidiFile(frameManager.GetFramesFromCurrentPosition(), startingFrame);
-
-            playbackManager.Play(midiFile, startingFrame);
+            playbackManager.Play(midiManager.FromFramesToMidiFile(frameManager.GetFrames()), startingFrame);
         }
     }
 }

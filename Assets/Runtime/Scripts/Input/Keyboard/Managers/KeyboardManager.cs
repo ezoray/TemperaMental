@@ -42,7 +42,7 @@ namespace TemperaMental.Input.Keyboards
                     break;
 
                 case PlaybackState.Paused:
-                    ApplyState(KeyboardStateFlags.Playback);
+                    ApplyState(KeyboardStateFlags.Paused);
                     break;
             }
         }

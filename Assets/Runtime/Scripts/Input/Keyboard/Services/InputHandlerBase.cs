@@ -11,8 +11,6 @@ namespace TemperaMental.Input
 
         public virtual void SetEnabled(bool isEnabled)
         {
-            this.enabled = isEnabled;
-
             if (actionMap == null) return;
 
             if (isEnabled) actionMap.Enable(); else actionMap.Disable();

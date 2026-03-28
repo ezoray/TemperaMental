@@ -23,18 +23,6 @@ namespace TemperaMental.Input
             fileActions.Save.performed += OnSave;
         }
 
-        public override void SetEnabled(bool isEnabled)
-        {
-            if(isEnabled)
-            {
-                fileActions.Enable();
-            }
-            else
-            {
-                fileActions.Disable();
-            }
-        }
-
         private void OnDisable()
         {
             fileActions.Append.performed -= OnAppend;

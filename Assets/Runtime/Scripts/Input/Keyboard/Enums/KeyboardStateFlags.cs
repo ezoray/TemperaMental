@@ -16,6 +16,7 @@ namespace TemperaMental.Input.Keyboards
 
         // presets
         All = Emitter | File | Mode | Playback | Creation | Selection,
-        Playing = Playback | Selection
+        Playing = Playback | Selection,
+        Paused = Playback | Selection
     }
 }

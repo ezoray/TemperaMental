@@ -8,8 +8,6 @@ namespace TemperaMental.Utils
 {
     public static class MidiUtils
     {
-        const int MICROSECONDS_PER_MINUTE = 60_000_000;
-
         public static int GetBpmFromMidiFile(MidiFile midiFile)
         {
             try
@@ -24,6 +22,16 @@ namespace TemperaMental.Utils
                 LogMan.LogError($"Unable to get BPM: {ex}");
                 return ConfigRegistry.Midi.DefaultBpm;
             }
+        }
+
+        public static long GetTotalFrames(MidiFile midiFile)
+        {
+            short ticksPerQuarterNote = ((TicksPerQuarterNoteTimeDivision)midiFile.TimeDivision).TicksPerQuarterNote;
+
+            MidiTimeSpan duration = midiFile.GetDuration<MidiTimeSpan>();
+            long lastTick = (long)duration;
+
+            return lastTick / ticksPerQuarterNote;
         }
     }
 }

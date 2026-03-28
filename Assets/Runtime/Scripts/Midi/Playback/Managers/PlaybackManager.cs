@@ -17,14 +17,17 @@ namespace TemperaMental.Midi.Playbacks
         string frameNoPrefix;
 
         OutputDevice outputDevice;
-        private Playback playback;
+        Playback playback;
 
         volatile bool isPlaybackFinished;
         bool isLooping;
 
+        int playFrame;
+        long totalFrames;
+        short ticksPerFrame;
         int midiFileBpm;
-        int startingFrame;
 
+        private PlaybackState playbackState;
         private ConcurrentQueue<int> frameQueue;
 
         [SerializeField] UnityEvent<int> onPlaybackFrameChanged;
@@ -34,8 +37,8 @@ namespace TemperaMental.Midi.Playbacks
         private void OnEnable()
         {
             frameQueue = new ConcurrentQueue<int>();
-
             frameNoPrefix = ConfigRegistry.Midi.FrameNumberPrefix;
+            playbackState = PlaybackState.Idle;
         }
 
         private void Update()
@@ -43,14 +46,9 @@ namespace TemperaMental.Midi.Playbacks
             if (isPlaybackFinished)
             {
                 isPlaybackFinished = false;
-
-                playback.Finished -= OnPlaybackFinished;
-                playback.EventPlayed -= OnEventPlayed;
                 ResetPlayback();
-
                 LogMan.Log("Playback finished");
-
-                onPlaybackStateChanged?.Invoke(PlaybackState.Idle);
+                SetPlaybackState(PlaybackState.Idle);
             }
             else
             {
@@ -61,38 +59,50 @@ namespace TemperaMental.Midi.Playbacks
             }
         }
 
-        // when playing from position not at start we need to check that user doesn't try to move to a frame before that start position
-        // as playback doesn't have it (due to playback handling looping it would restart from frame 1 if it had all frames)
-        // move to start position instead
         public void SeekToFrame(int seekFrame)
         {
-            if (GetPlaybackState() == PlaybackState.Idle) return;
+            if (playbackState == PlaybackState.Idle) return;
 
-            if (seekFrame < startingFrame) seekFrame = startingFrame;
+            playFrame = Mathf.Clamp(seekFrame, 1, (int)totalFrames);
 
-            long ticks = (seekFrame - startingFrame) * ConfigRegistry.Midi.TicksPerFrame;
+            if (playbackState == PlaybackState.Playing)
+            {
+                LogMan.Log($"Playing from frame {playFrame}");
+            }
+
+            long ticks = (playFrame - 1) * ticksPerFrame;
             playback.MoveToTime(new MidiTimeSpan(ticks));
         }
 
-        // To stop playback is reset (playback.Stop pauses playback)
+        public void ChangeLoopState()
+        {
+            isLooping = !isLooping;
+
+            if (playbackState != PlaybackState.Idle)
+            {
+                playback.Loop = isLooping;
+            }
+
+            onLoopStateChanged?.Invoke(isLooping);
+        }
+
+        public void ChangeBpm(int newBpm)
+        {
+            if (playbackState == PlaybackState.Playing || playbackState == PlaybackState.Paused)
+            {
+                playback.Speed = (float)newBpm / midiFileBpm;
+            }
+        }
+
         public void Stop()
         {
             try
             {
-                PlaybackState state = GetPlaybackState();
-
-                if (state != PlaybackState.Playing && state != PlaybackState.Paused)
-                {
-          //          LogMan.LogWarning("Stop playback, wrong state: " + state);
-                    return;
-                }
+                if (playbackState != PlaybackState.Playing && playbackState != PlaybackState.Paused) return;
 
                 ResetPlayback();
-
                 LogMan.Log("Playback stopped");
-
-                onPlaybackStateChanged?.Invoke(PlaybackState.Idle);
-
+                SetPlaybackState(PlaybackState.Idle);
             }
             catch (Exception ex)
             {
@@ -104,65 +114,36 @@ namespace TemperaMental.Midi.Playbacks
         {
             try
             {
-                if (GetPlaybackState() != PlaybackState.Playing)
-                {
-          //          LogMan.LogWarning   ("Pause playback, wrong state: " + GetPlaybackState());
-                    return;
-                }
+                if (playbackState != PlaybackState.Playing) return;
 
-                // calling stop pauses playback
                 playback.Stop();
-
                 LogMan.Log("Playback paused");
-
-                onPlaybackStateChanged?.Invoke(PlaybackState.Paused);
+                SetPlaybackState(PlaybackState.Paused);
             }
-
             catch (Exception ex)
             {
-                LogMan.LogError("Pause failed: " + ex); 
-            }              
+                LogMan.LogError("Pause failed: " + ex);
+            }
         }
 
-        // todo currently playback will happily run when output device is null, at least for cc's, but it probably shouldn't be relied upon
-        public void Play(MidiFile midiFile, int startingFrame)
+        public void SetOutputDevice(OutputDevice outputDevice)
+        {
+            this.outputDevice = outputDevice;
+        }
+
+        public void Play(MidiFile midiFile, int startFrame)
         {
             try
             {
-                PlaybackState playbackState = GetPlaybackState();
+                InitPlayback(midiFile, startFrame);
 
-                if (playbackState != PlaybackState.Paused)
-                {
-                    ResetPlayback();
+                midiFileBpm = MidiUtils.GetBpmFromMidiFile(midiFile);
 
-                    playback = midiFile.GetPlayback(new PlaybackSettings
-                    {
-                        ClockSettings = new MidiClockSettings
-                        {
-                            CreateTickGeneratorCallback = () => new RegularPrecisionTickGenerator()
-                        }
-                    });
-
-                    this.startingFrame = startingFrame;
-
-                    LogMan.Log("StartingFrame: " + startingFrame);
-
-                    playback.OutputDevice = outputDevice;
-
-                    playback.Loop = isLooping;
-
-                    playback.ErrorOccurred += OnPlaybackError;
-                    playback.Finished += OnPlaybackFinished;
-                    playback.EventPlayed += OnEventPlayed;
-
-                    midiFileBpm = MidiUtils.GetBpmFromMidiFile(midiFile);
-                }
+                LogMan.Log("Total frames " + totalFrames);
 
                 playback.Start();
-
-                LogMan.Log("Playing...");
-
-                onPlaybackStateChanged?.Invoke(PlaybackState.Playing);
+                LogMan.Log("Playing from frame " + playFrame);
+                SetPlaybackState(PlaybackState.Playing);
             }
             catch (Exception ex)
             {
@@ -171,33 +152,57 @@ namespace TemperaMental.Midi.Playbacks
             }
         }
 
-        public void ChangeLoopState()
+        private void InitPlayback(MidiFile midiFile, int startFrame)
         {
-            isLooping = !isLooping;
-
-            if (GetPlaybackState() != PlaybackState.Idle)
+            if (playbackState != PlaybackState.Idle)
             {
-                playback.Loop = isLooping;
+                ResetPlayback();
             }
 
-            onLoopStateChanged?.Invoke(isLooping);
+            playback = midiFile.GetPlayback(new PlaybackSettings
+            {
+                ClockSettings = new MidiClockSettings
+                {
+                    CreateTickGeneratorCallback = () => new RegularPrecisionTickGenerator()
+                }
+            });
+
+            playback.ErrorOccurred += OnPlaybackError;
+            playback.Finished += OnPlaybackFinished;
+            playback.EventPlayed += OnEventPlayed;
+            playback.RepeatStarted += OnRepeatStarted;
+
+            ticksPerFrame = ((TicksPerQuarterNoteTimeDivision)midiFile.TimeDivision).TicksPerQuarterNote;
+
+            LogMan.Log("ticksPerFrame: " + ticksPerFrame);
+
+            totalFrames = MidiUtils.GetTotalFrames(midiFile);
+            playFrame = Mathf.Clamp(startFrame, 1, (int)totalFrames);
+
+            LogMan.Log("PlayFrame: " + playFrame);
+
+            long playTick = (playFrame - 1) * ticksPerFrame;
+            playback.MoveToTime(new MidiTimeSpan(playTick));
+
+            playback.OutputDevice = outputDevice;
+            playback.Loop = isLooping;
         }
 
-        // todo interface is disabled on playback but do check for playing
-        public void SetOutputDevice(OutputDevice outputDevice)
+        private void OnRepeatStarted(object sender, EventArgs e)
         {
-            this.outputDevice = outputDevice;
+            long ticks = (playFrame - 1) * ticksPerFrame;
+            playback.MoveToTime(new MidiTimeSpan(ticks));
         }
 
         private void OnEventPlayed(object sender, MidiEventPlayedEventArgs eventArgs)
         {
             if (eventArgs.Event is MarkerEvent marker)
             {
-                string text = marker.Text;
+                string markerText = marker.Text;
 
-                if (text.StartsWith(frameNoPrefix))
+                if (markerText.StartsWith(frameNoPrefix))
                 {
-                    string numberPart = text.Replace(frameNoPrefix, "");
+                    string numberPart = markerText.Replace(frameNoPrefix, "");
 
                     if (int.TryParse(numberPart, out var frameNumber))
                     {
@@ -214,20 +219,13 @@ namespace TemperaMental.Midi.Playbacks
 
         private void OnPlaybackError(object sender, PlaybackErrorOccurredEventArgs e)
         {
-            // todo log this - cannot log here in callback
             isPlaybackFinished = true;
         }
 
-        private PlaybackState GetPlaybackState()
+        private void SetPlaybackState(PlaybackState state)
         {
-            if (playback == null || !playback.IsRunning)
-            {
-                long tick = playback?.GetCurrentTime<MidiTimeSpan>().TimeSpan ?? 0;
-
-                return tick > 0 ? PlaybackState.Paused : PlaybackState.Idle;
-            }
-
-            return PlaybackState.Playing;
+            playbackState = state;
+            onPlaybackStateChanged?.Invoke(state);
         }
 
         private void ResetPlayback()
@@ -235,22 +233,20 @@ namespace TemperaMental.Midi.Playbacks
             if (playback != null)
             {
                 playback.Stop();
+                playback.ErrorOccurred -= OnPlaybackError;
+                playback.Finished -= OnPlaybackFinished;
+                playback.EventPlayed -= OnEventPlayed;
+                playback.RepeatStarted -= OnRepeatStarted;
                 playback.Dispose();
                 playback = null;
             }
+
+            SetPlaybackState(PlaybackState.Idle);
         }
 
         private void OnDestroy()
         {
             ResetPlayback();
-        }
-
-        public void ChangeBpm(int newBpm)
-        {
-            if (GetPlaybackState() == PlaybackState.Playing || GetPlaybackState() == PlaybackState.Paused)
-            {
-                playback.Speed = (float)newBpm / midiFileBpm;
-            }
         }
     }
 }

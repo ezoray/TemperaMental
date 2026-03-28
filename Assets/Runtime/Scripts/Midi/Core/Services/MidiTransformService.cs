@@ -5,22 +5,22 @@ using Melanchall.DryWetMidi.Interaction;
 using TemperaMental.Applications.Config;
 using TemperaMental.Core;
 using TemperaMental.Frames;
-using TemperaMental.Logs;
 using UnityEngine;
 
 namespace TemperaMental.Midi.Transforms
 {
     public class MidiTransformService : MonoBehaviour
     {
-        const string END_OF_SEQUENCE = "SEQ_END";
         const int MICROSECONDS_PER_MINUTE = 60_000_000;
 
-        string frameNo;
         short ticksPerFrame;
         int activateCC;
         int placeCC;
         int removeCC;
         byte clearEmittersValue;
+
+        string frameNo;
+        string seqEndMarker;
 
         int gridWidth;
         int gridHeight;
@@ -34,6 +34,8 @@ namespace TemperaMental.Midi.Transforms
         private void OnEnable()
         {
             frameNo = ConfigRegistry.Midi.FrameNumberPrefix;
+            seqEndMarker = ConfigRegistry.Midi.SeqEndMarker;
+
             ticksPerFrame = ConfigRegistry.Midi.TicksPerFrame;
 
             activateCC = ConfigRegistry.Midi.ActivateCC;
@@ -108,7 +110,7 @@ namespace TemperaMental.Midi.Transforms
 
             // set marker at end of last frame/quarter note to force playback to play to the end before looping
             // todo there is still slight drift (can't see an easy way to fix)
-            manager.Objects.Add(new TimedEvent(new MarkerEvent(END_OF_SEQUENCE), sourceFrames.Count * ticksPerFrame));
+            manager.Objects.Add(new TimedEvent(new MarkerEvent(seqEndMarker), sourceFrames.Count * ticksPerFrame));
         }
 
         // set a marker to track frame changes on playback

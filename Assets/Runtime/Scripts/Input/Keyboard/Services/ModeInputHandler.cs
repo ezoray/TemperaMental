@@ -13,18 +13,6 @@ namespace TemperaMental.Input.Keyboards
             modeActions.Enable();
         }
 
-        public override void SetEnabled(bool isEnabled)
-        {
-            if (isEnabled)
-            {
-                modeActions.Enable();
-            }   
-            else
-            {
-                modeActions.Disable();
-            }
-        }
-
         private void OnDisable()
         {
    

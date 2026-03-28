@@ -91,7 +91,7 @@ namespace TemperaMental.Frames
         {
             InsertFrameAt(currentFrameIndex + 1, new Frame(gridWidth, gridHeight));
 
-            LogMan.Log("Frame added");
+            LogMan.Log("New frame");
         }
 
         public void PasteOntoFrame()
@@ -107,12 +107,17 @@ namespace TemperaMental.Frames
         public void CopyFrame()
         {
             copiedFrame = new Frame(currentFrame);
-            LogMan.Log($"Frame {currentFrameIndex + 1} copied");
+            LogMan.Log($"Frame copied");
         }
 
-        public void GoToFrame(int frameNumber, bool isDuringPlayback = false)
+        public void GoToPlaybackFrame(int frameNumber)
         {
-            if (!isDuringPlayback && isPlaybackActive) return;
+            SetCurrentFrame(frameNumber - 1);
+        }
+
+        public void GoToSelectedFrame(int frameNumber)
+        {
+            if (isPlaybackActive) return;
 
             SetCurrentFrame(frameNumber - 1);
         }
