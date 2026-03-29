@@ -31,9 +31,14 @@ namespace TemperaMental.Midi.Playbacks
             playbackManager.SetOutputDevice(device);
         }
 
+        public void OnClickToggleReverse()
+        {
+            playbackManager.ToggleReverse();
+        }
+
         public void OnClickChangeLoopState()    
         {
-            playbackManager.ChangeLoopState();
+            playbackManager.ToggleLooping();
         }
 
         public void OnClickStop()
@@ -48,13 +53,16 @@ namespace TemperaMental.Midi.Playbacks
 
         public void OnClickPlay()
         {
-            playbackManager.Play(midiManager.FromFramesToMidiFile(frameManager.GetFrames()),1);
+            MidiFileDetail midiFileDetail = midiManager.FromFramesToMidiFiles(frameManager.GetFrames());
+
+            playbackManager.Play(midiFileDetail);
         }
 
         public void OnClickPlayPosition()
         {
-            int startingFrame = frameManager.GetCurrentFrameNumber();
-            playbackManager.Play(midiManager.FromFramesToMidiFile(frameManager.GetFrames()), startingFrame);
+            int initialFrame = frameManager.GetCurrentFrameNumber();
+            MidiFileDetail midiFileDetail = midiManager.FromFramesToMidiFiles(frameManager.GetFrames());
+            playbackManager.Play(midiFileDetail, initialFrame);
         }
     }
 }

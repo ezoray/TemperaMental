@@ -22,6 +22,14 @@ namespace TemperaMental.Midi.Core
             bpm = ConfigRegistry.Midi.DefaultBpm;
         }
 
+        public MidiFileDetail FromFramesToMidiFiles(IReadOnlyList<Frame> frames)
+        {
+            MidiFile forwardMidiFile = transformService.FromFramesToMidiFile(frames, bpm, false);
+            MidiFile reversedMidiFile = transformService.FromFramesToMidiFileReversed(frames, bpm);
+
+            return new MidiFileDetail(forwardMidiFile, reversedMidiFile);
+        }
+
         public List<Frame> FromMidiFileToFrames(MidiFile midiFile)
         {
             bpm = MidiUtils.GetBpmFromMidiFile(midiFile);
@@ -33,7 +41,7 @@ namespace TemperaMental.Midi.Core
 
         public MidiFile FromFramesToMidiFile(IReadOnlyList<Frame> frames, int startFrame = 1)
         {
-            return transformService.FromFramesToMidiFile(frames, bpm, startFrame);
+            return transformService.FromFramesToMidiFile(frames, bpm, false);
         }
  
         public void SetBpm(int newBpm)

@@ -24,14 +24,14 @@ namespace TemperaMental.Utils
             }
         }
 
-        public static long GetTotalFrames(MidiFile midiFile)
+        public static int GetTotalFrames(MidiFile midiFile)
         {
             short ticksPerQuarterNote = ((TicksPerQuarterNoteTimeDivision)midiFile.TimeDivision).TicksPerQuarterNote;
 
             MidiTimeSpan duration = midiFile.GetDuration<MidiTimeSpan>();
             long lastTick = (long)duration;
 
-            return lastTick / ticksPerQuarterNote;
+            return (int)(lastTick / ticksPerQuarterNote);
         }
     }
 }

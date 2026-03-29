@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace TemperaMental.UI.Core
 {
+    // todo seeing an error stopping play mode, we might need to clear this list
     public class UIManager : MonoBehaviour
     {
         [Header("Order: Device, File, Mode, Playback, Create, Select")]

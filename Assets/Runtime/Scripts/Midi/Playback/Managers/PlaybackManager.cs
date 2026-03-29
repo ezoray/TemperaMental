@@ -6,6 +6,7 @@ using Melanchall.DryWetMidi.Multimedia;
 using TemperaMental.Applications.Config;
 using TemperaMental.Core;
 using TemperaMental.Logs;
+using TemperaMental.Midi.Core;
 using TemperaMental.Utils;
 using UnityEngine;
 using UnityEngine.Events;
@@ -17,28 +18,38 @@ namespace TemperaMental.Midi.Playbacks
         string frameNoPrefix;
 
         OutputDevice outputDevice;
-        Playback playback;
+        Playback forwardPlayback;
+        Playback reversePlayback;
 
         volatile bool isPlaybackFinished;
-        bool isLooping;
+        bool isLooped;
+        bool isReversed;
 
-        int playFrame;
-        long totalFrames;
+        int anchorFrame;
+        volatile int playFrame;
+        int totalFrames;
         short ticksPerFrame;
         int midiFileBpm;
 
-        private PlaybackState playbackState;
-        private ConcurrentQueue<int> frameQueue;
+        PlaybackState playbackState;
+        ConcurrentQueue<int> frameQueue;
 
         [SerializeField] UnityEvent<int> onPlaybackFrameChanged;
         [SerializeField] UnityEvent<PlaybackState> onPlaybackStateChanged;
         [SerializeField] UnityEvent<bool> onLoopStateChanged;
+        [SerializeField] UnityEvent<bool> onReverseStateChanged;
+
+        Playback ActivePlayback => isReversed ? reversePlayback : forwardPlayback;
 
         private void OnEnable()
         {
             frameQueue = new ConcurrentQueue<int>();
-            frameNoPrefix = ConfigRegistry.Midi.FrameNumberPrefix;
+            frameNoPrefix = ConfigRegistry.Midi.FrameStartPrefix;
             playbackState = PlaybackState.Idle;
+
+            isPlaybackFinished = false;
+            isLooped = false;
+            isReversed = false;
         }
 
         private void Update()
@@ -50,12 +61,10 @@ namespace TemperaMental.Midi.Playbacks
                 LogMan.Log("Playback finished");
                 SetPlaybackState(PlaybackState.Idle);
             }
-            else
+
+            while (frameQueue.TryDequeue(out int frameNumber))
             {
-                while (frameQueue.TryDequeue(out int frameNumber))
-                {
-                    onPlaybackFrameChanged?.Invoke(frameNumber);
-                }
+                onPlaybackFrameChanged?.Invoke(frameNumber);
             }
         }
 
@@ -63,34 +72,60 @@ namespace TemperaMental.Midi.Playbacks
         {
             if (playbackState == PlaybackState.Idle) return;
 
-            playFrame = Mathf.Clamp(seekFrame, 1, (int)totalFrames);
+            playFrame = Mathf.Clamp(seekFrame, 1, totalFrames);
 
-            if (playbackState == PlaybackState.Playing)
-            {
-                LogMan.Log($"Playing from frame {playFrame}");
-            }
+            int mappedFrame = isReversed ? (totalFrames - playFrame) + 1 : playFrame;
+            anchorFrame = mappedFrame;
 
-            long ticks = (playFrame - 1) * ticksPerFrame;
-            playback.MoveToTime(new MidiTimeSpan(ticks));
+            long ticks = (mappedFrame - 1) * ticksPerFrame;
+            ActivePlayback.MoveToTime(new MidiTimeSpan(ticks));
         }
 
-        public void ChangeLoopState()
+        public void ToggleReverse()
         {
-            isLooping = !isLooping;
+            isReversed = !isReversed;
 
             if (playbackState != PlaybackState.Idle)
             {
-                playback.Loop = isLooping;
+                Playback outgoing = isReversed ? forwardPlayback : reversePlayback;
+                Playback incoming = isReversed ? reversePlayback : forwardPlayback;
+
+                outgoing.Stop();
+
+                int mappedFrame = isReversed ? (totalFrames - playFrame) + 1 : playFrame;
+                anchorFrame = mappedFrame;
+
+                long ticks = (mappedFrame - 1) * ticksPerFrame;
+                incoming.MoveToTime(new MidiTimeSpan(ticks));
+
+                if (playbackState == PlaybackState.Playing)
+                {
+                    incoming.Start();
+                }
             }
 
-            onLoopStateChanged?.Invoke(isLooping);
+            onReverseStateChanged?.Invoke(isReversed);
+        }
+
+        public void ToggleLooping()
+        {
+            isLooped = !isLooped;
+
+            if (playbackState != PlaybackState.Idle)
+            {
+                forwardPlayback.Loop = isLooped;
+                reversePlayback.Loop = isLooped;
+            }
+
+            onLoopStateChanged?.Invoke(isLooped);
         }
 
         public void ChangeBpm(int newBpm)
         {
             if (playbackState == PlaybackState.Playing || playbackState == PlaybackState.Paused)
             {
-                playback.Speed = (float)newBpm / midiFileBpm;
+                forwardPlayback.Speed = (float)newBpm / midiFileBpm;
+                reversePlayback.Speed = (float)newBpm / midiFileBpm;
             }
         }
 
@@ -116,7 +151,7 @@ namespace TemperaMental.Midi.Playbacks
             {
                 if (playbackState != PlaybackState.Playing) return;
 
-                playback.Stop();
+                ActivePlayback.Stop();
                 LogMan.Log("Playback paused");
                 SetPlaybackState(PlaybackState.Paused);
             }
@@ -131,18 +166,18 @@ namespace TemperaMental.Midi.Playbacks
             this.outputDevice = outputDevice;
         }
 
-        public void Play(MidiFile midiFile, int startFrame)
+        public void Play(MidiFileDetail midiFileDetail, int initialFrame = 1)
         {
             try
             {
-                InitPlayback(midiFile, startFrame);
+                InitPlaybacks(midiFileDetail, initialFrame);
 
-                midiFileBpm = MidiUtils.GetBpmFromMidiFile(midiFile);
+                midiFileBpm = MidiUtils.GetBpmFromMidiFile(midiFileDetail.ForwardMidiFile);
 
-                LogMan.Log("Total frames " + totalFrames);
+                ActivePlayback.Start();
 
-                playback.Start();
                 LogMan.Log("Playing from frame " + playFrame);
+
                 SetPlaybackState(PlaybackState.Playing);
             }
             catch (Exception ex)
@@ -152,14 +187,45 @@ namespace TemperaMental.Midi.Playbacks
             }
         }
 
-        private void InitPlayback(MidiFile midiFile, int startFrame)
+        private void InitPlaybacks(MidiFileDetail midiFileDetail, int initialFrame)
         {
             if (playbackState != PlaybackState.Idle)
             {
                 ResetPlayback();
             }
 
-            playback = midiFile.GetPlayback(new PlaybackSettings
+            forwardPlayback = CreatePlayback(midiFileDetail.ForwardMidiFile);
+            reversePlayback = CreatePlayback(midiFileDetail.ReverseMidiFile);
+
+            ticksPerFrame = ((TicksPerQuarterNoteTimeDivision)midiFileDetail.ForwardMidiFile.TimeDivision).TicksPerQuarterNote;
+
+            totalFrames = MidiUtils.GetTotalFrames(midiFileDetail.ForwardMidiFile);
+            playFrame = Mathf.Clamp(initialFrame, 1, totalFrames);
+
+            if (isReversed)
+            {
+                int reversedStartFrame = (totalFrames - playFrame) + 1;
+                long reverseTick = (reversedStartFrame - 1) * ticksPerFrame;
+                reversePlayback.MoveToTime(new MidiTimeSpan(reverseTick));
+                anchorFrame = reversedStartFrame;
+            }
+            else
+            {
+                long forwardTick = (playFrame - 1) * ticksPerFrame;
+                forwardPlayback.MoveToTime(new MidiTimeSpan(forwardTick));
+                anchorFrame = playFrame;
+            }
+
+            forwardPlayback.OutputDevice = outputDevice;
+            reversePlayback.OutputDevice = outputDevice;
+
+            forwardPlayback.Loop = isLooped;
+            reversePlayback.Loop = isLooped;
+        }
+
+        private Playback CreatePlayback(MidiFile midiFile)
+        {
+            Playback playback = midiFile.GetPlayback(new PlaybackSettings
             {
                 ClockSettings = new MidiClockSettings
                 {
@@ -172,26 +238,7 @@ namespace TemperaMental.Midi.Playbacks
             playback.EventPlayed += OnEventPlayed;
             playback.RepeatStarted += OnRepeatStarted;
 
-            ticksPerFrame = ((TicksPerQuarterNoteTimeDivision)midiFile.TimeDivision).TicksPerQuarterNote;
-
-            LogMan.Log("ticksPerFrame: " + ticksPerFrame);
-
-            totalFrames = MidiUtils.GetTotalFrames(midiFile);
-            playFrame = Mathf.Clamp(startFrame, 1, (int)totalFrames);
-
-            LogMan.Log("PlayFrame: " + playFrame);
-
-            long playTick = (playFrame - 1) * ticksPerFrame;
-            playback.MoveToTime(new MidiTimeSpan(playTick));
-
-            playback.OutputDevice = outputDevice;
-            playback.Loop = isLooping;
-        }
-
-        private void OnRepeatStarted(object sender, EventArgs e)
-        {
-            long ticks = (playFrame - 1) * ticksPerFrame;
-            playback.MoveToTime(new MidiTimeSpan(ticks));
+            return playback;
         }
 
         private void OnEventPlayed(object sender, MidiEventPlayedEventArgs eventArgs)
@@ -206,10 +253,17 @@ namespace TemperaMental.Midi.Playbacks
 
                     if (int.TryParse(numberPart, out var frameNumber))
                     {
+                        playFrame = frameNumber; 
                         frameQueue.Enqueue(frameNumber);
                     }
                 }
             }
+        }
+
+        private void OnRepeatStarted(object sender, EventArgs e)
+        {
+            long ticks = (anchorFrame - 1) * ticksPerFrame;
+            ActivePlayback.MoveToTime(new MidiTimeSpan(ticks));
         }
 
         private void OnPlaybackFinished(object sender, EventArgs e)
@@ -228,19 +282,23 @@ namespace TemperaMental.Midi.Playbacks
             onPlaybackStateChanged?.Invoke(state);
         }
 
+        private void DisposePlayback(ref Playback pb)
+        {
+            if (pb == null) return;
+
+            pb.Stop();
+            pb.ErrorOccurred -= OnPlaybackError;
+            pb.Finished -= OnPlaybackFinished;
+            pb.EventPlayed -= OnEventPlayed;
+            pb.RepeatStarted -= OnRepeatStarted;
+            pb.Dispose();
+            pb = null;
+        }
+
         private void ResetPlayback()
         {
-            if (playback != null)
-            {
-                playback.Stop();
-                playback.ErrorOccurred -= OnPlaybackError;
-                playback.Finished -= OnPlaybackFinished;
-                playback.EventPlayed -= OnEventPlayed;
-                playback.RepeatStarted -= OnRepeatStarted;
-                playback.Dispose();
-                playback = null;
-            }
-
+            DisposePlayback(ref forwardPlayback);
+            DisposePlayback(ref reversePlayback);
             SetPlaybackState(PlaybackState.Idle);
         }
 

@@ -19,7 +19,7 @@ namespace TemperaMental.Applications.Config
         public int RemoveCC = 12;
         public byte ClearEmittersValue = 64;
 
-        public string FrameNumberPrefix = "FRAME_NO_";
+        public string FrameStartPrefix = "START_FRAME_NO_";
         public string SeqEndMarker = "END_SEQ";
     }
 }

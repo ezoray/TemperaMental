@@ -5,6 +5,7 @@ using Melanchall.DryWetMidi.Interaction;
 using TemperaMental.Applications.Config;
 using TemperaMental.Core;
 using TemperaMental.Frames;
+using TemperaMental.Logs;
 using UnityEngine;
 
 namespace TemperaMental.Midi.Transforms
@@ -19,7 +20,7 @@ namespace TemperaMental.Midi.Transforms
         int removeCC;
         byte clearEmittersValue;
 
-        string frameNo;
+        string frameStartPrefix;
         string seqEndMarker;
 
         int gridWidth;
@@ -33,7 +34,7 @@ namespace TemperaMental.Midi.Transforms
 
         private void OnEnable()
         {
-            frameNo = ConfigRegistry.Midi.FrameNumberPrefix;
+            frameStartPrefix = ConfigRegistry.Midi.FrameStartPrefix;
             seqEndMarker = ConfigRegistry.Midi.SeqEndMarker;
 
             ticksPerFrame = ConfigRegistry.Midi.TicksPerFrame;
@@ -48,19 +49,39 @@ namespace TemperaMental.Midi.Transforms
             gridHeight = ConfigRegistry.Grid.GridHeight;
             gridSize = gridWidth * gridHeight;
 
-     
+
             previousGroups = new ulong[emitterCount];
             currentGroups = new ulong[emitterCount];
         }
 
-        public MidiFile FromFramesToMidiFile(IReadOnlyList<Frame> sourceFrames, int bpm, int startFrame = 1)
+        public MidiFile FromFramesToMidiFileReversed(IReadOnlyList<Frame> sourceFrames, int bpm)
+        {
+            List<Frame> reversedFrames = GetReversedList<Frame>(sourceFrames);
+
+            return FromFramesToMidiFile(reversedFrames, bpm, true);
+        }
+
+        private List<T> GetReversedList<T>(IReadOnlyList<T> original)
+        {
+            List<T> reversed = new List<T>(original.Count);
+
+            for (int i = original.Count - 1; i >= 0; i--)
+            {
+                reversed.Add(original[i]);
+            }
+
+            return reversed;
+        }
+
+
+        public MidiFile FromFramesToMidiFile(IReadOnlyList<Frame> sourceFrames, int bpm, bool isReversed)
         {
             MidiFile midiFile = BuildMidiFile();
             TrackChunk trackChunk = BuildTrackChunk(bpm);
 
             using (var manager = trackChunk.ManageTimedEvents())
             {
-                WriteFrames(manager, sourceFrames, startFrame);
+                WriteFrames(manager, sourceFrames, isReversed);
             }
 
             midiFile.Chunks.Add(trackChunk);
@@ -85,7 +106,7 @@ namespace TemperaMental.Midi.Transforms
             return trackChunk;
         }
 
-        private void WriteFrames(TimedObjectsManager<TimedEvent> manager, IReadOnlyList<Frame> sourceFrames, int startFrame)
+        private void WriteFrames(TimedObjectsManager<TimedEvent> manager, IReadOnlyList<Frame> sourceFrames, bool isReversed)
         {
             ClearGroups(previousGroups);
 
@@ -93,7 +114,9 @@ namespace TemperaMental.Midi.Transforms
             {
                 long frameTick = i * ticksPerFrame;
 
-                frameTick = WriteFrameStart(manager, frameTick, startFrame + i);
+                int frameNumber = isReversed ? sourceFrames.Count - i : i + 1;
+
+                frameTick = WriteFrameStart(manager, frameTick, frameNumber);
 
                 if (i == 0)
                 {
@@ -116,7 +139,7 @@ namespace TemperaMental.Midi.Transforms
         // set a marker to track frame changes on playback
         private long WriteFrameStart(TimedObjectsManager<TimedEvent> manager, long tick, int frameNumber)
         {
-            manager.Objects.Add(new TimedEvent(new MarkerEvent($"{frameNo}{frameNumber}"), tick++));
+            manager.Objects.Add(new TimedEvent(new MarkerEvent($"{frameStartPrefix}{frameNumber}"), tick++));
 
             return tick;
         }
