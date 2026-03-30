@@ -20,6 +20,7 @@ namespace TemperaMental.Applications.Core
 
         private void Start()
         {
+            QualitySettings.vSyncCount = 0;
             Application.targetFrameRate = ConfigRegistry.App.FrameRate;
 
             keyboardManager.InitActions(inputActions);

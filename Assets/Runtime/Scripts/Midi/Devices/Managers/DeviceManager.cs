@@ -11,10 +11,6 @@ namespace TemperaMental.Midi.Devices
 {
     public class DeviceManager : MonoBehaviour
     {
-        const float DEVICE_CHECK_INTERVAL = 0.5f;
-
-        float deviceCheckTimer;
-
         string primaryDevice;
 
         List<string> connectedDevices;
@@ -50,10 +46,6 @@ namespace TemperaMental.Midi.Devices
         {
             if (!isDeviceChange) return;
 
-            deviceCheckTimer += Time.deltaTime;
-            if (deviceCheckTimer < DEVICE_CHECK_INTERVAL) return;
-
-            deviceCheckTimer = 0f;
             isDeviceChange = false;
             SyncDeviceList();
         }

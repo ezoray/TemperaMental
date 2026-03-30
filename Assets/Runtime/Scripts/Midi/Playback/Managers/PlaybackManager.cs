@@ -74,10 +74,9 @@ namespace TemperaMental.Midi.Playbacks
 
             playFrame = Mathf.Clamp(seekFrame, 1, totalFrames);
 
-            int mappedFrame = isReversed ? (totalFrames - playFrame) + 1 : playFrame;
-            anchorFrame = mappedFrame;
+            anchorFrame = isReversed ? (totalFrames - playFrame) + 1 : playFrame;
 
-            long ticks = (mappedFrame - 1) * ticksPerFrame;
+            long ticks = (anchorFrame - 1) * ticksPerFrame;
             ActivePlayback.MoveToTime(new MidiTimeSpan(ticks));
         }
 
@@ -92,10 +91,9 @@ namespace TemperaMental.Midi.Playbacks
 
                 outgoing.Stop();
 
-                int mappedFrame = isReversed ? (totalFrames - playFrame) + 1 : playFrame;
-                anchorFrame = mappedFrame;
+                anchorFrame = isReversed ? (totalFrames - playFrame) + 1 : playFrame;
 
-                long ticks = (mappedFrame - 1) * ticksPerFrame;
+                long ticks = (anchorFrame - 1) * ticksPerFrame;
                 incoming.MoveToTime(new MidiTimeSpan(ticks));
 
                 if (playbackState == PlaybackState.Playing)
@@ -137,7 +135,6 @@ namespace TemperaMental.Midi.Playbacks
 
                 ResetPlayback();
                 LogMan.Log("Playback stopped");
-                SetPlaybackState(PlaybackState.Idle);
             }
             catch (Exception ex)
             {
@@ -176,7 +173,7 @@ namespace TemperaMental.Midi.Playbacks
 
                 ActivePlayback.Start();
 
-                LogMan.Log("Playing from frame " + playFrame);
+                LogMan.Log("Playing...");
 
                 SetPlaybackState(PlaybackState.Playing);
             }
@@ -202,6 +199,11 @@ namespace TemperaMental.Midi.Playbacks
             totalFrames = MidiUtils.GetTotalFrames(midiFileDetail.ForwardMidiFile);
             playFrame = Mathf.Clamp(initialFrame, 1, totalFrames);
 
+            if(playFrame == 1 && isReversed)
+            {
+                playFrame = totalFrames;
+            }
+
             if (isReversed)
             {
                 int reversedStartFrame = (totalFrames - playFrame) + 1;
@@ -225,13 +227,7 @@ namespace TemperaMental.Midi.Playbacks
 
         private Playback CreatePlayback(MidiFile midiFile)
         {
-            Playback playback = midiFile.GetPlayback(new PlaybackSettings
-            {
-                ClockSettings = new MidiClockSettings
-                {
-                    CreateTickGeneratorCallback = () => new RegularPrecisionTickGenerator()
-                }
-            });
+            Playback playback = midiFile.GetPlayback();
 
             playback.ErrorOccurred += OnPlaybackError;
             playback.Finished += OnPlaybackFinished;
@@ -300,6 +296,11 @@ namespace TemperaMental.Midi.Playbacks
             DisposePlayback(ref forwardPlayback);
             DisposePlayback(ref reversePlayback);
             SetPlaybackState(PlaybackState.Idle);
+
+            // force garbage collection otherwise freed empty memory won't being released
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
         }
 
         private void OnDestroy()
