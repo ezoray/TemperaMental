@@ -11,6 +11,10 @@ namespace TemperaMental.Midi.Devices
 {
     public class DeviceManager : MonoBehaviour
     {
+        const float DEVICE_CHECK_INTERVAL = 0.5f;
+
+        float deviceCheckTimer;
+
         string primaryDevice;
 
         List<string> connectedDevices;
@@ -44,13 +48,14 @@ namespace TemperaMental.Midi.Devices
         // DevicesWatcher runs on a separate thread so signal a device change to pick up in Update
         private void Update()
         {
-            // todo don't poll so often
-            if(isDeviceChange)
-            {
-                isDeviceChange = false;
+            if (!isDeviceChange) return;
 
-                SyncDeviceList();    
-            }
+            deviceCheckTimer += Time.deltaTime;
+            if (deviceCheckTimer < DEVICE_CHECK_INTERVAL) return;
+
+            deviceCheckTimer = 0f;
+            isDeviceChange = false;
+            SyncDeviceList();
         }
 
         public OutputDevice GetOutputDevice(string deviceName)
