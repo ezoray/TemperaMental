@@ -12,6 +12,7 @@ namespace TemperaMental.Midi.Devices
     public class DeviceManager : MonoBehaviour
     {
         string primaryDevice;
+        string currentDeviceName;
 
         List<string> connectedDevices;
         OutputDevice currentDevice;
@@ -24,12 +25,10 @@ namespace TemperaMental.Midi.Devices
         [SerializeField] UnityEvent onCurrentDeviceRemoved;
         [SerializeField] UnityEvent<List<string>> onDevicesUpdated;
 
-
         private void OnEnable()
         {
             connectedDevices = new List<string>();
             isInitialSync = true;
-
             primaryDevice = ConfigRegistry.Midi.PrimaryDevice;
         }
 
@@ -37,11 +36,9 @@ namespace TemperaMental.Midi.Devices
         {
             DevicesWatcher.Instance.DeviceAdded += OnDeviceChange;
             DevicesWatcher.Instance.DeviceRemoved += OnDeviceChange;
-
             SyncDeviceList();
         }
 
-        // DevicesWatcher runs on a separate thread so signal a device change to pick up in Update
         private void Update()
         {
             if (!isDeviceChange) return;
@@ -50,58 +47,78 @@ namespace TemperaMental.Midi.Devices
             SyncDeviceList();
         }
 
-        public OutputDevice GetOutputDevice(string deviceName)
+        private void SyncDeviceList()
         {
-            try
+            List<string> hardware = GetHardwareDeviceNames();
+            List<string> removed = connectedDevices.Except(hardware).ToList();
+            List<string> added = hardware.Except(connectedDevices).ToList();
+
+            foreach (string name in removed)
             {
-                return OutputDevice.GetByName(deviceName);
+                LogMan.Log($"Device disconnected: {name}");
+                if (currentDevice != null && currentDeviceName == name)
+                {
+                    try
+                    {
+                        currentDevice.Dispose();
+                    }
+                    catch (Exception ex)
+                    {
+                        LogMan.LogWarning($"Error disposing device {name}: {ex.Message}");
+                    }
+                    finally
+                    {
+                        currentDevice = null;
+                        currentDeviceName = null;
+                    }
+
+                    onCurrentDeviceRemoved?.Invoke();
+                }
             }
-            catch (Exception ex)
+
+            foreach (var name in added)
             {
-                LogMan.LogError($"Could not open device: {ex.Message}");
-                return null;
+                LogMan.Log($"Device connected: {name}");
+            }
+
+            connectedDevices = hardware;
+            onDevicesUpdated?.Invoke(connectedDevices);
+
+            if (isInitialSync)
+            {
+                isInitialSync = false;
+                HandleInitialSelection();
             }
         }
 
-        private void SyncDeviceList()
+        private List<string> GetHardwareDeviceNames()
         {
-            try
+            var names = new List<string>();
+
+            foreach (var device in OutputDevice.GetAll())
             {
-                List<string> hardware = OutputDevice.GetAll().Select(d => d.Name).ToList();
-                List<string> removed = connectedDevices.Except(hardware).ToList();
-
-                foreach (var name in removed)
+                try
                 {
-                    if (currentDevice != null && currentDevice.Name == name)
-                    {
-                        currentDevice.Dispose();
-                        currentDevice = null;
-                        onCurrentDeviceRemoved?.Invoke();
-                    }
+                    names.Add(device.Name);
                 }
-
-                connectedDevices = hardware;
-
-                onDevicesUpdated?.Invoke(connectedDevices);
-
-                if (isInitialSync)
+                catch (Exception ex)
                 {
-                    isInitialSync = false;
-
-                    HandleInitialSelection();
+                    LogMan.LogWarning($"Skipped unreadable device during enumeration: {ex.Message}");
+                }
+                finally
+                {
+                    device.Dispose();
                 }
             }
-            catch (Exception ex)
-            {
-                LogMan.LogError(ex.Message);
-            }
+
+            return names;
         }
 
         private void HandleInitialSelection()
         {
             if (connectedDevices.Count == 0)
             {
-                LogMan.Log("No midi devices detected");
+                LogMan.Log("No MIDI devices detected");
                 return;
             }
 
@@ -125,18 +142,32 @@ namespace TemperaMental.Midi.Devices
                 {
                     currentDevice.Dispose();
                     currentDevice = null;
+                    currentDeviceName = null;
                 }
 
                 currentDevice = OutputDevice.GetByName(deviceName);
                 currentDevice.PrepareForEventsSending();
+                currentDeviceName = deviceName;
 
                 onDeviceSelected?.Invoke(currentDevice);
-
                 LogMan.Log($"Device '{deviceName}' selected");
             }
             catch (Exception ex)
             {
                 LogMan.LogError($"Failed to open device {deviceName}: {ex.Message}");
+            }
+        }
+
+        public OutputDevice GetOutputDevice(string deviceName)
+        {
+            try
+            {
+                return OutputDevice.GetByName(deviceName);
+            }
+            catch (Exception ex)
+            {
+                LogMan.LogError($"Could not open device: {ex.Message}");
+                return null;
             }
         }
 

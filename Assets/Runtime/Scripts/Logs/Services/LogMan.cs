@@ -49,7 +49,6 @@ namespace TemperaMental.Logs
             string formattedMessage = $"<color={colorHex}>{message}</color>";
             Instance.LogToUI(formattedMessage);
 
-#if UNITY_EDITOR
             switch (type)
             {
                 case LogType.Warning: Debug.LogWarning(message);
@@ -61,7 +60,6 @@ namespace TemperaMental.Logs
                 default: Debug.Log(message);
                     break;
             }
-#endif
         }
 
         private void LogToUI(string message)
