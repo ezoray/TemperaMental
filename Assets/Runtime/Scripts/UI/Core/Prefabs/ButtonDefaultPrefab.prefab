@@ -69,7 +69,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_Sprite: {fileID: 21300000, guid: dd961034fa99d481cb8ef69f5c5250a0, type: 3}
-  m_Type: 1
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -137,6 +137,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+  appConfig: {fileID: 11400000, guid: 86b1ab0289c4447f28ed878a70782edb, type: 2}
   buttonText: {fileID: 1175797879279421861}
 --- !u!1 &2546696621927505518
 GameObject:

@@ -6,5 +6,10 @@ namespace TemperaMental.Applications.Config
     public class AppConfig : ScriptableObject
     {
         public int FrameRate = 60;
+
+        // dimmable / repeatable button values
+        public float AlphaValue = 0.3f;
+        public float InitialDelay = 0.3f;
+        public float RepeatRate = 0.1f;
     }
 }
