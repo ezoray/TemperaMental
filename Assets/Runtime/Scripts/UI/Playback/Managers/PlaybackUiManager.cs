@@ -1,5 +1,6 @@
 using TemperaMental.Applications.Config;
 using TemperaMental.Core;
+using TemperaMental.Logs;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,6 +8,13 @@ namespace TemperaMental.UI.Playbacks
 {
     public class PlaybackUIManager : MonoBehaviour
     {
+        [SerializeField] Image loopButtonImage;
+        [SerializeField] Image reverseButtonImage;
+
+        Color defaultOffColor;
+        Color loopOnColor;
+        Color reverseOnColor;
+
         int minBpm;
         int maxBpm;
 
@@ -17,6 +25,10 @@ namespace TemperaMental.UI.Playbacks
 
         private void Awake()
         {
+            defaultOffColor = ConfigRegistry.Midi.DefaultOffColor;
+            loopOnColor = ConfigRegistry.Midi.LoopOnColor;
+            reverseOnColor = ConfigRegistry.Midi.ReverseOnColor;
+
             minBpm = ConfigRegistry.Midi.MinBpm;
             maxBpm = ConfigRegistry.Midi.MaxBpm;
 
@@ -26,7 +38,7 @@ namespace TemperaMental.UI.Playbacks
 
         public void OnClickIncrementBpm()
         {
-            int newBpm = Mathf.RoundToInt(bpmSlider.value) +1;
+            int newBpm = Mathf.RoundToInt(bpmSlider.value) + 1;
 
             if (newBpm <= maxBpm)
             {
@@ -42,6 +54,16 @@ namespace TemperaMental.UI.Playbacks
             {
                 bpmSlider.value = newBpm;
             }
+        }
+
+        public void ActionReverseStateChanged(bool isOn)
+        {
+            reverseButtonImage.color = isOn ? reverseOnColor : defaultOffColor;
+        }
+
+        public void ActionLoopStateChanged(bool isOn)
+        {
+            loopButtonImage.color = isOn ? loopOnColor : defaultOffColor;
         }
 
         public void ActionOnBpmChanged(int newBpm)

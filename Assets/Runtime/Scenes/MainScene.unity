@@ -3987,6 +3987,22 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8711836282921573231, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
+      propertyPath: m_Color.a
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8711836282921573231, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
+      propertyPath: m_Color.b
+      value: 0.55
+      objectReference: {fileID: 0}
+    - target: {fileID: 8711836282921573231, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
+      propertyPath: m_Color.g
+      value: 0.55
+      objectReference: {fileID: 0}
+    - target: {fileID: 8711836282921573231, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
+      propertyPath: m_Color.r
+      value: 0.55
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -4201,12 +4217,36 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 1244920275}
+        m_TargetAssemblyTypeName: TemperaMental.UI.Playbacks.PlaybackUIManager, Assembly-CSharp
+        m_MethodName: ActionLoopStateChanged
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   onReverseStateChanged:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 597592033}
         m_TargetAssemblyTypeName: TemperaMental.UI.Display.DisplayUIManager, Assembly-CSharp
         m_MethodName: ActionOnReverseStateChanged
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1244920275}
+        m_TargetAssemblyTypeName: TemperaMental.UI.Playbacks.PlaybackUIManager, Assembly-CSharp
+        m_MethodName: ActionReverseStateChanged
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -5367,6 +5407,26 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8711836282921573231, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: dd961034fa99d481cb8ef69f5c5250a0, type: 3}
+    - target: {fileID: 8711836282921573231, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
+      propertyPath: m_Color.b
+      value: 0.55
+      objectReference: {fileID: 0}
+    - target: {fileID: 8711836282921573231, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
+      propertyPath: m_Color.g
+      value: 0.55
+      objectReference: {fileID: 0}
+    - target: {fileID: 8711836282921573231, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
+      propertyPath: m_Color.r
+      value: 0.55
+      objectReference: {fileID: 0}
+    - target: {fileID: 8711836282921573231, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -5377,6 +5437,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 5331573247357082670, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
   m_PrefabInstance: {fileID: 728193818}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &758800339 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8711836282921573231, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
+  m_PrefabInstance: {fileID: 543366975}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
 --- !u!1 &775014837
 GameObject:
   m_ObjectHideFlags: 0
@@ -7373,6 +7444,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 5331573247357082670, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
   m_PrefabInstance: {fileID: 1168689430}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1170093368 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8711836282921573231, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
+  m_PrefabInstance: {fileID: 728193818}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
 --- !u!1 &1180307935
 GameObject:
   m_ObjectHideFlags: 0
@@ -8187,6 +8269,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a3ecb5563c81747bd83fb37f20bd1548, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Tempera.Mental.Ui.Playbacks.PlaybackUiManager
+  loopButtonImage: {fileID: 758800339}
+  reverseButtonImage: {fileID: 1170093368}
   controlButtons:
   - {fileID: 1554652825}
   - {fileID: 883754003}
@@ -9619,9 +9703,9 @@ Camera:
   m_NormalizedViewPortRect:
     serializedVersion: 2
     x: 0
-    y: 0
-    width: 1
-    height: 1
+    y: 0.20729168
+    width: 0.6472222
+    height: 0.6472222
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 60
