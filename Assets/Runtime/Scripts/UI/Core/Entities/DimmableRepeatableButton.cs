@@ -1,4 +1,5 @@
 using TemperaMental.Applications.Config;
+using TemperaMental.Logs;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -45,6 +46,8 @@ namespace TemperaMental.UI.Core
 
             if (Time.time >= nextEventTime)
             {
+                LogMan.Log("DimmableRepeatableButton");
+
                 onClick.Invoke();
                 nextEventTime = Time.time + repeatRate;
             }
@@ -54,7 +57,7 @@ namespace TemperaMental.UI.Core
         {
             base.OnPointerDown(eventData);
             if (!interactable) return;
-            OnPress();
+            OnPress(true);
         }
 
         public override void OnPointerUp(PointerEventData eventData)
@@ -71,10 +74,10 @@ namespace TemperaMental.UI.Core
             OnRelease();
         }
 
-        public void OnPress()
-        {
+        public void OnPress(bool fireImmediately = false)
+        { 
             isPressed = true;
-            nextEventTime = Time.time + initialDelay;
+            nextEventTime = fireImmediately ? Time.time : Time.time + initialDelay;
         }
 
         public void OnRelease()

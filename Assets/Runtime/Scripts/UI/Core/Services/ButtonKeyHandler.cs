@@ -1,11 +1,12 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 namespace TemperaMental.UI.Core
 {
     public class ButtonKeyHandler : MonoBehaviour
     {        
-        [SerializeField] DimmableTextButton button;
+        [SerializeField] Button button;
         [SerializeField] InputActionReference actionReference;
 
         private CanvasGroup canvasGroup;
