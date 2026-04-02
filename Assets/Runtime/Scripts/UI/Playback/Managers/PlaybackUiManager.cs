@@ -18,7 +18,7 @@ namespace TemperaMental.UI.Playbacks
         int minBpm;
         int maxBpm;
 
-        [Header("Order: PlayPosition, Play, Pause, Stop")]
+        [Header("Order: Play, Pause, Stop")]
         [SerializeField] Button[] controlButtons;
 
         [SerializeField] Slider bpmSlider;

@@ -13,11 +13,18 @@ namespace TemperaMental.Logs
         public static LogMan Instance;
         public TextMeshProUGUI logDisplay;
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void OnRuntimeMethodLoad()
+        {
+            Instance = null;
+        }
+
         void Awake()
         {
             if (Instance != null && Instance != this)
             {
-                Destroy(gameObject); return;
+                Destroy(gameObject);
+                return;
             }
 
             Instance = this;

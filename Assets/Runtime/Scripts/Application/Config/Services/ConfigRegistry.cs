@@ -17,13 +17,20 @@ namespace TemperaMental.Applications.Config
         public static MidiConfig Midi => Instance.midi;
         public static AppConfig App => Instance.app;
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void OnRuntimeMethodLoad()
+        {
+            Instance = null;
+        }
+
         private void Awake()
         {
-            if (Instance != null)
+            if (Instance != null && Instance != this)
             {
                 Destroy(gameObject);
                 return;
             }
+
             Instance = this;
         }
     }

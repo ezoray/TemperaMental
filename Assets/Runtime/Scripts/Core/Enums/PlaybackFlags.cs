@@ -6,14 +6,13 @@ namespace TemperaMental.Core
     public enum PlaybackFlags
     {
         // button flags
-        PlayPosition = 1,
-        Play = 2,
-        Pause = 4,
-        Stop = 8,
+        Play = 1,
+        Pause = 2,
+        Stop = 4,
 
         // state presets
-        Playing = PlayPosition | Play | Pause | Stop,
-        Paused = PlayPosition | Play | Stop,
-        Stopped = PlayPosition | Play
+        Playing = Play | Pause | Stop,
+        Paused =  Play | Stop,
+        Stopped = Play
     }
 }

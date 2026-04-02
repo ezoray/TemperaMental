@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 8711836282921573231}
   - component: {fileID: 8708782139094388321}
   - component: {fileID: 7418040803222182}
+  - component: {fileID: -8221449181886604918}
   m_Layer: 5
   m_Name: ButtonDefaultPrefab
   m_TagString: Untagged
@@ -139,6 +140,20 @@ MonoBehaviour:
       m_Calls: []
   appConfig: {fileID: 11400000, guid: 86b1ab0289c4447f28ed878a70782edb, type: 2}
   buttonText: {fileID: 1175797879279421861}
+--- !u!114 &-8221449181886604918
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1410924834910122274}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fea093e8116aa476987bf777c4e3a02e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TemperaMental.Applications.Core.KeyHandler
+  button: {fileID: 7418040803222182}
+  actionReference: {fileID: 0}
 --- !u!1 &2546696621927505518
 GameObject:
   m_ObjectHideFlags: 0

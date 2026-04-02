@@ -299,15 +299,6 @@ namespace TemperaMental.Input
             ""id"": ""a029ab64-d92c-4901-88c8-f913a951a42c"",
             ""actions"": [
                 {
-                    ""name"": ""PlayPosition"",
-                    ""type"": ""Button"",
-                    ""id"": ""560e35f8-24ca-4c4b-b3bf-c13af0da72e6"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
                     ""name"": ""Play"",
                     ""type"": ""Button"",
                     ""id"": ""5be2a0bc-520d-4d0c-baac-addfb7d4973c"",
@@ -344,6 +335,15 @@ namespace TemperaMental.Input
                     ""initialStateCheck"": false
                 },
                 {
+                    ""name"": ""Reverse"",
+                    ""type"": ""Button"",
+                    ""id"": ""75c7b19e-3f41-4285-8076-40383dab768b"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
                     ""name"": ""PlusBpm"",
                     ""type"": ""Button"",
                     ""id"": ""69971adb-3825-4a1e-9419-8a2412fd8c6b"",
@@ -363,17 +363,6 @@ namespace TemperaMental.Input
                 }
             ],
             ""bindings"": [
-                {
-                    ""name"": """",
-                    ""id"": ""93b68c9b-28b7-445f-8161-d5f25aceefd2"",
-                    ""path"": ""<Keyboard>/upArrow"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""PlayPosition"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
                 {
                     ""name"": """",
                     ""id"": ""8c6ee5b3-d999-47a0-a719-6b0491aba353"",
@@ -399,7 +388,7 @@ namespace TemperaMental.Input
                 {
                     ""name"": """",
                     ""id"": ""044bd456-0290-4338-b59c-da4121b0a085"",
-                    ""path"": ""<Keyboard>/downArrow"",
+                    ""path"": ""<Keyboard>/upArrow"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -410,7 +399,7 @@ namespace TemperaMental.Input
                 {
                     ""name"": """",
                     ""id"": ""d115ea97-d98e-4325-94ab-1f69e7bb073c"",
-                    ""path"": ""<Keyboard>/leftArrow"",
+                    ""path"": ""<Keyboard>/downArrow"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -426,6 +415,17 @@ namespace TemperaMental.Input
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Loop"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""077d6e56-448c-48d5-83c7-eb17fedb5a58"",
+                    ""path"": ""<Keyboard>/leftArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Reverse"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -774,7 +774,7 @@ namespace TemperaMental.Input
                     ""name"": """",
                     ""id"": ""e101b351-bc46-4123-955c-f5c02bf8f681"",
                     ""path"": ""<Keyboard>/a"",
-                    ""interactions"": """",
+                    ""interactions"": ""Press(behavior=2)"",
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Previous"",
@@ -824,11 +824,11 @@ namespace TemperaMental.Input
             m_File_Save = m_File.FindAction("Save", throwIfNotFound: true);
             // Playback
             m_Playback = asset.FindActionMap("Playback", throwIfNotFound: true);
-            m_Playback_PlayPosition = m_Playback.FindAction("PlayPosition", throwIfNotFound: true);
             m_Playback_Play = m_Playback.FindAction("Play", throwIfNotFound: true);
             m_Playback_Pause = m_Playback.FindAction("Pause", throwIfNotFound: true);
             m_Playback_Stop = m_Playback.FindAction("Stop", throwIfNotFound: true);
             m_Playback_Loop = m_Playback.FindAction("Loop", throwIfNotFound: true);
+            m_Playback_Reverse = m_Playback.FindAction("Reverse", throwIfNotFound: true);
             m_Playback_PlusBpm = m_Playback.FindAction("PlusBpm", throwIfNotFound: true);
             m_Playback_MinusBpm = m_Playback.FindAction("MinusBpm", throwIfNotFound: true);
             // Emitter
@@ -1285,11 +1285,11 @@ namespace TemperaMental.Input
         // Playback
         private readonly InputActionMap m_Playback;
         private List<IPlaybackActions> m_PlaybackActionsCallbackInterfaces = new List<IPlaybackActions>();
-        private readonly InputAction m_Playback_PlayPosition;
         private readonly InputAction m_Playback_Play;
         private readonly InputAction m_Playback_Pause;
         private readonly InputAction m_Playback_Stop;
         private readonly InputAction m_Playback_Loop;
+        private readonly InputAction m_Playback_Reverse;
         private readonly InputAction m_Playback_PlusBpm;
         private readonly InputAction m_Playback_MinusBpm;
         /// <summary>
@@ -1303,10 +1303,6 @@ namespace TemperaMental.Input
             /// Construct a new instance of the input action map wrapper class.
             /// </summary>
             public PlaybackActions(@TemperaMentalInputActions wrapper) { m_Wrapper = wrapper; }
-            /// <summary>
-            /// Provides access to the underlying input action "Playback/PlayPosition".
-            /// </summary>
-            public InputAction @PlayPosition => m_Wrapper.m_Playback_PlayPosition;
             /// <summary>
             /// Provides access to the underlying input action "Playback/Play".
             /// </summary>
@@ -1323,6 +1319,10 @@ namespace TemperaMental.Input
             /// Provides access to the underlying input action "Playback/Loop".
             /// </summary>
             public InputAction @Loop => m_Wrapper.m_Playback_Loop;
+            /// <summary>
+            /// Provides access to the underlying input action "Playback/Reverse".
+            /// </summary>
+            public InputAction @Reverse => m_Wrapper.m_Playback_Reverse;
             /// <summary>
             /// Provides access to the underlying input action "Playback/PlusBpm".
             /// </summary>
@@ -1357,9 +1357,6 @@ namespace TemperaMental.Input
             {
                 if (instance == null || m_Wrapper.m_PlaybackActionsCallbackInterfaces.Contains(instance)) return;
                 m_Wrapper.m_PlaybackActionsCallbackInterfaces.Add(instance);
-                @PlayPosition.started += instance.OnPlayPosition;
-                @PlayPosition.performed += instance.OnPlayPosition;
-                @PlayPosition.canceled += instance.OnPlayPosition;
                 @Play.started += instance.OnPlay;
                 @Play.performed += instance.OnPlay;
                 @Play.canceled += instance.OnPlay;
@@ -1372,6 +1369,9 @@ namespace TemperaMental.Input
                 @Loop.started += instance.OnLoop;
                 @Loop.performed += instance.OnLoop;
                 @Loop.canceled += instance.OnLoop;
+                @Reverse.started += instance.OnReverse;
+                @Reverse.performed += instance.OnReverse;
+                @Reverse.canceled += instance.OnReverse;
                 @PlusBpm.started += instance.OnPlusBpm;
                 @PlusBpm.performed += instance.OnPlusBpm;
                 @PlusBpm.canceled += instance.OnPlusBpm;
@@ -1389,9 +1389,6 @@ namespace TemperaMental.Input
             /// <seealso cref="PlaybackActions" />
             private void UnregisterCallbacks(IPlaybackActions instance)
             {
-                @PlayPosition.started -= instance.OnPlayPosition;
-                @PlayPosition.performed -= instance.OnPlayPosition;
-                @PlayPosition.canceled -= instance.OnPlayPosition;
                 @Play.started -= instance.OnPlay;
                 @Play.performed -= instance.OnPlay;
                 @Play.canceled -= instance.OnPlay;
@@ -1404,6 +1401,9 @@ namespace TemperaMental.Input
                 @Loop.started -= instance.OnLoop;
                 @Loop.performed -= instance.OnLoop;
                 @Loop.canceled -= instance.OnLoop;
+                @Reverse.started -= instance.OnReverse;
+                @Reverse.performed -= instance.OnReverse;
+                @Reverse.canceled -= instance.OnReverse;
                 @PlusBpm.started -= instance.OnPlusBpm;
                 @PlusBpm.performed -= instance.OnPlusBpm;
                 @PlusBpm.canceled -= instance.OnPlusBpm;
@@ -2047,13 +2047,6 @@ namespace TemperaMental.Input
         public interface IPlaybackActions
         {
             /// <summary>
-            /// Method invoked when associated input action "PlayPosition" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
-            /// </summary>
-            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
-            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
-            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-            void OnPlayPosition(InputAction.CallbackContext context);
-            /// <summary>
             /// Method invoked when associated input action "Play" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
             /// </summary>
             /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
@@ -2081,6 +2074,13 @@ namespace TemperaMental.Input
             /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
             /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
             void OnLoop(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "Reverse" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnReverse(InputAction.CallbackContext context);
             /// <summary>
             /// Method invoked when associated input action "PlusBpm" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
             /// </summary>

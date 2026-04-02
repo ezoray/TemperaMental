@@ -211,15 +211,6 @@
             "id": "a029ab64-d92c-4901-88c8-f913a951a42c",
             "actions": [
                 {
-                    "name": "PlayPosition",
-                    "type": "Button",
-                    "id": "560e35f8-24ca-4c4b-b3bf-c13af0da72e6",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
                     "name": "Play",
                     "type": "Button",
                     "id": "5be2a0bc-520d-4d0c-baac-addfb7d4973c",
@@ -256,6 +247,15 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "Reverse",
+                    "type": "Button",
+                    "id": "75c7b19e-3f41-4285-8076-40383dab768b",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "PlusBpm",
                     "type": "Button",
                     "id": "69971adb-3825-4a1e-9419-8a2412fd8c6b",
@@ -275,17 +275,6 @@
                 }
             ],
             "bindings": [
-                {
-                    "name": "",
-                    "id": "93b68c9b-28b7-445f-8161-d5f25aceefd2",
-                    "path": "<Keyboard>/upArrow",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "PlayPosition",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
                 {
                     "name": "",
                     "id": "8c6ee5b3-d999-47a0-a719-6b0491aba353",
@@ -311,7 +300,7 @@
                 {
                     "name": "",
                     "id": "044bd456-0290-4338-b59c-da4121b0a085",
-                    "path": "<Keyboard>/downArrow",
+                    "path": "<Keyboard>/upArrow",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -322,7 +311,7 @@
                 {
                     "name": "",
                     "id": "d115ea97-d98e-4325-94ab-1f69e7bb073c",
-                    "path": "<Keyboard>/leftArrow",
+                    "path": "<Keyboard>/downArrow",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -338,6 +327,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Loop",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "077d6e56-448c-48d5-83c7-eb17fedb5a58",
+                    "path": "<Keyboard>/leftArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Reverse",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -686,7 +686,7 @@
                     "name": "",
                     "id": "e101b351-bc46-4123-955c-f5c02bf8f681",
                     "path": "<Keyboard>/a",
-                    "interactions": "",
+                    "interactions": "Press(behavior=2)",
                     "processors": "",
                     "groups": "",
                     "action": "Previous",

@@ -150,6 +150,7 @@ GameObject:
   - component: {fileID: 5622811960388233212}
   - component: {fileID: 1619660634564816621}
   - component: {fileID: 324768772995737041}
+  - component: {fileID: -8331991314001574911}
   m_Layer: 5
   m_Name: DimmableRepeatableButton
   m_TagString: Untagged
@@ -276,3 +277,17 @@ MonoBehaviour:
   m_EffectColor: {r: 0, g: 0, b: 0, a: 1}
   m_EffectDistance: {x: 2, y: -2}
   m_UseGraphicAlpha: 1
+--- !u!114 &-8331991314001574911
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4360367492202564962}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ec024c898c6e491d9c69e81cfbc7285, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TemperaMental.Applications.Core.RepeatHandler
+  button: {fileID: 4101060469761601702}
+  actionReference: {fileID: 0}
