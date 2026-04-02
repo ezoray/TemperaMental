@@ -8,6 +8,8 @@ namespace TemperaMental.UI.Frames
     public class FrameUIManager : MonoBehaviour
     {
         [SerializeField] Slider frameSlider;
+
+        [Header("Order: Blue, Red, Yellow, Green")]
         [SerializeField] List<Button> emitterButtons;
 
         // highlight image for selected colour

@@ -1,5 +1,4 @@
 using TemperaMental.Applications.Config;
-using TemperaMental.Logs;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -46,8 +45,6 @@ namespace TemperaMental.UI.Core
 
             if (Time.time >= nextEventTime)
             {
-                LogMan.Log("DimmableRepeatableButton");
-
                 onClick.Invoke();
                 nextEventTime = Time.time + repeatRate;
             }
