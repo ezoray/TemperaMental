@@ -48,20 +48,17 @@ namespace TemperaMental.Midi.Playbacks
 
         public void OnClickPause()
         {
-            playbackManager.Pause();
+            MidiFileDetail midiFileDetail = midiManager.FromFramesToMidiFiles(frameManager.GetFrames());
+            int initialFrame = frameManager.GetCurrentFrameNumber();
+
+            playbackManager.TogglePlayPause(midiFileDetail, initialFrame);
         }
 
         public void OnClickPlay()
         {
             MidiFileDetail midiFileDetail = midiManager.FromFramesToMidiFiles(frameManager.GetFrames());
-
-            playbackManager.Play(midiFileDetail);
-        }
-
-        public void OnClickPlayPosition()
-        {
             int initialFrame = frameManager.GetCurrentFrameNumber();
-            MidiFileDetail midiFileDetail = midiManager.FromFramesToMidiFiles(frameManager.GetFrames());
+
             playbackManager.Play(midiFileDetail, initialFrame);
         }
     }

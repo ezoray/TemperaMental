@@ -5,5 +5,6 @@ namespace TemperaMental.Core
         Idle,       // no playback object exists
         Playing,    // actively running
         Paused,     // stopped mid-way through
+        Stopped
     }
 }

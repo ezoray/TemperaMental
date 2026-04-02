@@ -376,8 +376,8 @@ namespace TemperaMental.Input
                 },
                 {
                     ""name"": """",
-                    ""id"": ""ac09854f-703f-4ea9-8b4e-62ab99291534"",
-                    ""path"": ""<Keyboard>/space"",
+                    ""id"": ""6d5046fc-94b5-40cc-a7ac-1cc5a18a3339"",
+                    ""path"": ""<Keyboard>/z"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -398,8 +398,30 @@ namespace TemperaMental.Input
                 },
                 {
                     ""name"": """",
+                    ""id"": ""42bd3ade-76f9-40ae-bb65-22bab4599481"",
+                    ""path"": ""<Keyboard>/space"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Pause"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""d115ea97-d98e-4325-94ab-1f69e7bb073c"",
                     ""path"": ""<Keyboard>/downArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Stop"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""bd3f2045-4b4c-435c-9ecc-b20570061b24"",
+                    ""path"": ""<Keyboard>/x"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",

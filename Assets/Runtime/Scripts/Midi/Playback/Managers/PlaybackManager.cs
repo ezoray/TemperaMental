@@ -25,7 +25,10 @@ namespace TemperaMental.Midi.Playbacks
         bool isLooped;
         bool isReversed;
 
+        // anchorFrame — the file-space position used for looping and seeking within the active playback object
+        // playStartAnchor — the display-space frame where Play was last called
         int anchorFrame;
+        int playStartAnchor;
         volatile int playFrame;
         int totalFrames;
         short ticksPerFrame;
@@ -57,9 +60,7 @@ namespace TemperaMental.Midi.Playbacks
             if (isPlaybackFinished)
             {
                 isPlaybackFinished = false;
-                ResetPlayback();
-                LogMan.Log("Playback finished");
-                SetPlaybackState(PlaybackState.Idle);
+                HandlePlaybackFinished();
             }
 
             while (frameQueue.TryDequeue(out int frameNumber))
@@ -68,15 +69,98 @@ namespace TemperaMental.Midi.Playbacks
             }
         }
 
+        // plays from current playhead position and sets that as the anchor
+        // if already playing restarts from same anchor
+        public void Play(MidiFileDetail midiFileDetail, int initialFrame = 1)
+        {
+            try
+            {
+                int frameToPlayFrom = (playbackState == PlaybackState.Playing)
+                    ? playStartAnchor : initialFrame;
+
+                InitPlaybacks(midiFileDetail, frameToPlayFrom);
+
+                playStartAnchor = frameToPlayFrom;
+                midiFileBpm = MidiUtils.GetBpmFromMidiFile(midiFileDetail.ForwardMidiFile);
+
+                ActivePlayback.Start();
+
+                LogMan.Log($"Playing from frame {playStartAnchor}");
+                SetPlaybackState(PlaybackState.Playing);
+            }
+            catch (Exception ex)
+            {
+                LogMan.LogError("Play failed: " + ex);
+                ResetPlayback();
+            }
+        }
+
+        public void TogglePlayPause(MidiFileDetail midiFileDetail, int initialFrame)
+        {
+            switch (playbackState)
+            {
+                case PlaybackState.Idle:
+                case PlaybackState.Stopped:
+                    Play(midiFileDetail, initialFrame);
+                    break;
+
+                case PlaybackState.Playing:
+                    PausePlayback();
+                    break;
+
+                case PlaybackState.Paused:
+                    ResumePlayback();
+                    break;
+            }
+        }
+
+        public void Stop()
+        {
+            try
+            {
+                switch (playbackState)
+                {
+                    case PlaybackState.Playing:
+                        ActivePlayback.Stop();
+                        LogMan.Log($"Playback stopped");
+                        SetPlaybackState(PlaybackState.Stopped);
+                        break;
+
+                    case PlaybackState.Paused:
+                        ActivePlayback.Stop();
+                        MoveToAnchor();
+                        LogMan.Log($"Playback stopped, returned to frame {playStartAnchor}");
+                        SetPlaybackState(PlaybackState.Idle);
+                        break;
+
+                    case PlaybackState.Stopped:
+                        ActivePlayback.Stop();
+                        MoveToAnchor();
+                        LogMan.Log($"Returned to frame {playStartAnchor}");
+                        SetPlaybackState(PlaybackState.Idle);
+                        break;
+      
+                    case PlaybackState.Idle:
+                        // no-op
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogMan.LogError("Stop failed: " + ex);
+            }
+        }
+
         public void SeekToFrame(int seekFrame)
         {
             if (playbackState == PlaybackState.Idle) return;
 
             playFrame = Mathf.Clamp(seekFrame, 1, totalFrames);
-
             anchorFrame = isReversed ? (totalFrames - playFrame) + 1 : playFrame;
+            playStartAnchor = playFrame; // seeking sets a new play start anchor
 
             long ticks = (anchorFrame - 1) * ticksPerFrame;
+
             ActivePlayback.MoveToTime(new MidiTimeSpan(ticks));
         }
 
@@ -127,61 +211,44 @@ namespace TemperaMental.Midi.Playbacks
             }
         }
 
-        public void Stop()
-        {
-            try
-            {
-                if (playbackState != PlaybackState.Playing && playbackState != PlaybackState.Paused) return;
-
-                ResetPlayback();
-                LogMan.Log("Playback stopped");
-            }
-            catch (Exception ex)
-            {
-                LogMan.LogError("Stop failed: " + ex);
-            }
-        }
-
-        public void Pause()
-        {
-            try
-            {
-                if (playbackState != PlaybackState.Playing) return;
-
-                ActivePlayback.Stop();
-                LogMan.Log("Playback paused");
-                SetPlaybackState(PlaybackState.Paused);
-            }
-            catch (Exception ex)
-            {
-                LogMan.LogError("Pause failed: " + ex);
-            }
-        }
-
         public void SetOutputDevice(OutputDevice outputDevice)
         {
             this.outputDevice = outputDevice;
         }
 
-        public void Play(MidiFileDetail midiFileDetail, int initialFrame = 1)
+        private void PausePlayback()
         {
-            try
-            {
-                InitPlaybacks(midiFileDetail, initialFrame);
+            if (playbackState != PlaybackState.Playing) return;
 
-                midiFileBpm = MidiUtils.GetBpmFromMidiFile(midiFileDetail.ForwardMidiFile);
+            ActivePlayback.Stop();
+            LogMan.Log("Playback paused");
+            SetPlaybackState(PlaybackState.Paused);
+        }
 
-                ActivePlayback.Start();
+        private void ResumePlayback()
+        {
+            if (playbackState != PlaybackState.Paused) return;
 
-                LogMan.Log("Playing...");
+            ActivePlayback.Start();
+            LogMan.Log("Playback resumed");
+            SetPlaybackState(PlaybackState.Playing);
+        }
 
-                SetPlaybackState(PlaybackState.Playing);
-            }
-            catch (Exception ex)
-            {
-                LogMan.LogError("Play failed: " + ex);
-                ResetPlayback();
-            }
+        private void MoveToAnchor()
+        {
+            // convert playStartAnchor (display-space) back to file-space for the active playback
+            int fileSpaceAnchor = isReversed ? (totalFrames - playStartAnchor) + 1 : playStartAnchor;
+            long ticks = (fileSpaceAnchor - 1) * ticksPerFrame;
+            ActivePlayback.MoveToTime(new MidiTimeSpan(ticks));
+            playFrame = playStartAnchor;
+            frameQueue.Enqueue(playFrame);
+        }
+
+        private void HandlePlaybackFinished()
+        {
+            ResetPlayback();
+            LogMan.Log("Playback finished");
+            SetPlaybackState(PlaybackState.Idle);
         }
 
         private void InitPlaybacks(MidiFileDetail midiFileDetail, int initialFrame)
@@ -197,15 +264,16 @@ namespace TemperaMental.Midi.Playbacks
             ticksPerFrame = ((TicksPerQuarterNoteTimeDivision)midiFileDetail.ForwardMidiFile.TimeDivision).TicksPerQuarterNote;
 
             totalFrames = MidiUtils.GetTotalFrames(midiFileDetail.ForwardMidiFile);
-            playFrame = Mathf.Clamp(initialFrame, 1, totalFrames);
-
-            if(playFrame == 1 && isReversed)
-            {
-                playFrame = totalFrames;
-            }
+            playFrame = Mathf.Clamp(initialFrame, 1, totalFrames);         
 
             if (isReversed)
             {
+                // only default to end frame if no meaningful position has been set
+                if (playFrame == 1 && playStartAnchor == 0)
+                {
+                    playFrame = totalFrames;
+                }
+
                 int reversedStartFrame = (totalFrames - playFrame) + 1;
                 long reverseTick = (reversedStartFrame - 1) * ticksPerFrame;
                 reversePlayback.MoveToTime(new MidiTimeSpan(reverseTick));
@@ -249,7 +317,7 @@ namespace TemperaMental.Midi.Playbacks
 
                     if (int.TryParse(numberPart, out var frameNumber))
                     {
-                        playFrame = frameNumber; 
+                        playFrame = frameNumber;
                         frameQueue.Enqueue(frameNumber);
                     }
                 }
@@ -278,17 +346,17 @@ namespace TemperaMental.Midi.Playbacks
             onPlaybackStateChanged?.Invoke(state);
         }
 
-        private void DisposePlayback(ref Playback pb)
+        private void DisposePlayback(ref Playback playback)
         {
-            if (pb == null) return;
+            if (playback == null) return;
 
-            pb.Stop();
-            pb.ErrorOccurred -= OnPlaybackError;
-            pb.Finished -= OnPlaybackFinished;
-            pb.EventPlayed -= OnEventPlayed;
-            pb.RepeatStarted -= OnRepeatStarted;
-            pb.Dispose();
-            pb = null;
+            playback.Stop();
+            playback.ErrorOccurred -= OnPlaybackError;
+            playback.Finished -= OnPlaybackFinished;
+            playback.EventPlayed -= OnEventPlayed;
+            playback.RepeatStarted -= OnRepeatStarted;
+            playback.Dispose();
+            playback = null;
         }
 
         private void ResetPlayback()
@@ -297,7 +365,7 @@ namespace TemperaMental.Midi.Playbacks
             DisposePlayback(ref reversePlayback);
             SetPlaybackState(PlaybackState.Idle);
 
-            // force garbage collection otherwise freed empty memory won't being released
+            // prevent app from holding on to empty memory
             GC.Collect();
             GC.WaitForPendingFinalizers();
             GC.Collect();

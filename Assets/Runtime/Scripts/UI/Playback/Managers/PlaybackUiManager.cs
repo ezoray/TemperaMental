@@ -1,6 +1,5 @@
 using TemperaMental.Applications.Config;
 using TemperaMental.Core;
-using TemperaMental.Logs;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -78,20 +77,24 @@ namespace TemperaMental.UI.Playbacks
             switch (playbackState)
             {
                 case PlaybackState.Idle:
-                    ApplyState(PlaybackFlags.Stopped);
+                    ApplyState(PlaybackUIFlags.Idle);
                     break;
 
                 case PlaybackState.Playing: 
-                    ApplyState(PlaybackFlags.Playing);
+                    ApplyState(PlaybackUIFlags.Playing);
                     break;
 
                 case PlaybackState.Paused:
-                    ApplyState(PlaybackFlags.Paused);
+                    ApplyState(PlaybackUIFlags.Paused);
+                    break;
+
+                case PlaybackState.Stopped:
+                    ApplyState(PlaybackUIFlags.Stopped);
                     break;
             }
         }
 
-        private void ApplyState(PlaybackFlags playbackFlags)
+        private void ApplyState(PlaybackUIFlags playbackFlags)
         {
             for (int i = 0; i < controlButtons.Length; i++)
             {

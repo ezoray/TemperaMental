@@ -3365,57 +3365,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 430393938}
   m_CullTransparentMesh: 1
---- !u!1 &448141344
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 448141345}
-  - component: {fileID: 448141346}
-  m_Layer: 0
-  m_Name: EmitterInputHandler
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &448141345
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 448141344}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1665524020}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &448141346
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 448141344}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1d76644d10585476a9949e6fa091b655, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TemperaMental.Input.Keyboards.EmitterInputHandler
-  actionMap:
-    m_Name: 
-    m_Id: 
-    m_Asset: {fileID: 0}
-    m_Actions: []
-    m_Bindings: []
-  frameEventController: {fileID: 1362657596}
 --- !u!1 &455917104
 GameObject:
   m_ObjectHideFlags: 0
@@ -3711,57 +3660,6 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 5331573247357082670, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
   m_PrefabInstance: {fileID: 517203224}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &541242250
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 541242251}
-  - component: {fileID: 541242252}
-  m_Layer: 0
-  m_Name: KeyboardManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &541242251
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 541242250}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1665524020}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &541242252
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 541242250}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 15e75ca0066814c3f8408426c6b04c33, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TemperaMental.Input.KeyboardInputHandler
-  inputHandlers:
-  - {fileID: 448141346}
-  - {fileID: 1975458682}
-  - {fileID: 775014838}
-  - {fileID: 1616239206}
-  - {fileID: 1573614569}
-  - {fileID: 1679775038}
 --- !u!1001 &543366975
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4100,7 +3998,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 541242252}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: TemperaMental.Input.Keyboards.KeyboardManager,
           Assembly-CSharp
         m_MethodName: ActionOnPlaybackStateChanged
@@ -5233,56 +5131,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
---- !u!1 &775014837
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 775014839}
-  - component: {fileID: 775014838}
-  m_Layer: 0
-  m_Name: ModeInputHandler
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!114 &775014838
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 775014837}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 44dac315f91c74fb19e5d14cf60b1b64, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TemperaMental.Input.Keyboards.ModeInputHandler
-  actionMap:
-    m_Name: 
-    m_Id: 
-    m_Asset: {fileID: 0}
-    m_Actions: []
-    m_Bindings: []
---- !u!4 &775014839
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 775014837}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1665524020}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &784015893
 GameObject:
   m_ObjectHideFlags: 0
@@ -9937,57 +9785,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1799877661}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1573614567
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1573614568}
-  - component: {fileID: 1573614569}
-  m_Layer: 0
-  m_Name: CreateInputHandler
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &1573614568
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1573614567}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1665524020}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1573614569
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1573614567}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6e29f1b51163245b09b413a1dbefe772, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TemperaMental.Input.Keyboards.CreateInputHandler
-  actionMap:
-    m_Name: 
-    m_Id: 
-    m_Asset: {fileID: 0}
-    m_Actions: []
-    m_Bindings: []
-  frameEventController: {fileID: 1362657596}
 --- !u!1 &1587327797
 GameObject:
   m_ObjectHideFlags: 0
@@ -10172,58 +9969,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1599832656}
   m_CullTransparentMesh: 1
---- !u!1 &1616239204
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1616239205}
-  - component: {fileID: 1616239206}
-  m_Layer: 0
-  m_Name: PlaybackInputHandler
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &1616239205
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1616239204}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1665524020}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1616239206
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1616239204}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 47630c085a62f435fb0dc2b79ea3652e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TemperaMental.Input.Keyboards.PlaybackInputHandler
-  actionMap:
-    m_Name: 
-    m_Id: 
-    m_Asset: {fileID: 0}
-    m_Actions: []
-    m_Bindings: []
-  playbackEventController: {fileID: 1561101351}
-  playbackUIManager: {fileID: 1244920275}
 --- !u!1 &1650145626
 GameObject:
   m_ObjectHideFlags: 0
@@ -10332,81 +10077,8 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 43681586}
-  - {fileID: 541242251}
-  - {fileID: 448141345}
-  - {fileID: 1975458681}
-  - {fileID: 775014839}
-  - {fileID: 1616239205}
-  - {fileID: 1573614568}
-  - {fileID: 1679775037}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1679775036
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1679775037}
-  - component: {fileID: 1679775038}
-  - component: {fileID: 1679775039}
-  m_Layer: 0
-  m_Name: SelectInputHandler
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &1679775037
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1679775036}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1665524020}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1679775038
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1679775036}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 913d2ec8bc9864293adb0cfd95bf708b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TemperaMental.Input.Keyboards.SelectInputHandler
-  actionMap:
-    m_Name: 
-    m_Id: 
-    m_Asset: {fileID: 0}
-    m_Actions: []
-    m_Bindings: []
-  frameUIManager: {fileID: 849915434}
---- !u!114 &1679775039
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1679775036}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5ec024c898c6e491d9c69e81cfbc7285, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TemperaMental.Applications.Core.RepeatHandler
-  button: {fileID: 0}
-  actionReference: {fileID: 0}
 --- !u!1 &1683433340
 GameObject:
   m_ObjectHideFlags: 0
@@ -12135,57 +11807,6 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 5331573247357082670, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
   m_PrefabInstance: {fileID: 1970725179}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &1975458680
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1975458681}
-  - component: {fileID: 1975458682}
-  m_Layer: 0
-  m_Name: FileInputHandler
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &1975458681
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1975458680}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1665524020}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1975458682
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1975458680}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 27adbb871cf3b409bb320cc4edd89b40, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TemperaMental.Input.FileInputHandler
-  actionMap:
-    m_Name: 
-    m_Id: 
-    m_Asset: {fileID: 0}
-    m_Actions: []
-    m_Bindings: []
-  fileEventController: {fileID: 1587327799}
 --- !u!1 &1991906789
 GameObject:
   m_ObjectHideFlags: 0
