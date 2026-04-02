@@ -8,7 +8,7 @@ namespace TemperaMental.UI.Core
     // due to button text not dimming when button is disabled override it and handle it ourselves
     public class DimmableTextButton : Button
     {
-        [SerializeField] AppConfig appConfig;
+        [SerializeField] UIConfig uiConfig;
 
         // hack this needs to be wired under Debug in the inspector as the field does not show normally
         [SerializeField] TextMeshProUGUI buttonText;
@@ -19,15 +19,15 @@ namespace TemperaMental.UI.Core
         {
             base.Awake();
 
-            alphaValue = appConfig.AlphaValue;
+            alphaValue = uiConfig.AlphaValue;
         }
 
         protected override void DoStateTransition(SelectionState state, bool instant)
         {
             base.DoStateTransition(state, instant);
 
-            if(state == SelectionState.Normal || state == SelectionState.Disabled) {
-
+            if(state == SelectionState.Normal || state == SelectionState.Disabled)
+            {
                 float targetAlpha = (state == SelectionState.Disabled) ? alphaValue : 1f;
 
                 Color color = buttonText.color;

@@ -7,8 +7,8 @@ namespace TemperaMental.UI.Display
 {
     public class DisplayUIManager : MonoBehaviour
     {
-        const string ON = "ON";
-        const string OFF = "OFF";
+        public string onText;
+        public string offText;
 
         [SerializeField] TextMeshProUGUI bpmText;
         [SerializeField] TextMeshProUGUI frameText;
@@ -17,17 +17,20 @@ namespace TemperaMental.UI.Display
 
         private void Awake()
         {
+            onText = ConfigRegistry.UI.OnText;
+            offText = ConfigRegistry.UI.OffText;
+
             bpmText.text = ConfigRegistry.Midi.DefaultBpm.ToString();
         }
 
         public void ActionOnReverseStateChanged(bool isReversed)
         {
-            reverseText.text = isReversed ? ON : OFF;
+            reverseText.text = isReversed ? onText : offText;
         }
 
         public void ActionOnLoopStateChanged(bool isLooping)
         {
-            loopText.text = isLooping ? ON : OFF;
+            loopText.text = isLooping ? onText : offText;
         }
 
         public void ActionOnFrameChanged(FrameDetail frameDetail)

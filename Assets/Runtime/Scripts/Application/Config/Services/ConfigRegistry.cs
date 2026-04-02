@@ -8,14 +8,16 @@ namespace TemperaMental.Applications.Config
         public static ConfigRegistry Instance { get; private set; }
 
         [SerializeField] LoggingConfig logging; 
+        [SerializeField] AppConfig app;
         [SerializeField] GridConfig grid;
         [SerializeField] MidiConfig midi;
-        [SerializeField] AppConfig app;
+        [SerializeField] UIConfig ui;
 
         public static LoggingConfig Logging => Instance.logging;
+        public static AppConfig App => Instance.app;
         public static GridConfig Grid => Instance.grid;
         public static MidiConfig Midi => Instance.midi;
-        public static AppConfig App => Instance.app;
+        public static UIConfig UI => Instance.ui;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void OnRuntimeMethodLoad()

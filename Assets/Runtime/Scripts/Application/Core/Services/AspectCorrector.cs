@@ -1,15 +1,14 @@
-using UnityEngine;
-
 namespace TemperaMental.Applications.Core
 {
+    using TemperaMental.Applications.Config;
     using UnityEngine;
 
     public class AspectCorrector : MonoBehaviour
     {
-        const float TARGET_RATIO = 3f / 4f;
+        float targetRatio = 3f / 4f;
 
-        const int MIN_WIDTH = 540;
-        const int MIN_HEIGHT = 720;
+        int minWidth = 540;
+        int minHeight = 720;
 
         int lastWidth;
         int lastHeight;
@@ -25,6 +24,12 @@ namespace TemperaMental.Applications.Core
             lastHeight = Screen.height;
         }
 
+        private void Awake()
+        {
+            targetRatio = ConfigRegistry.App.TargetRatio;
+            minWidth = ConfigRegistry.App.MinWidth;
+            minHeight = ConfigRegistry.App.MinHeight;
+        }
 
         void Update()
         {
@@ -61,11 +66,11 @@ namespace TemperaMental.Applications.Core
 
             float currentRatio = (float)width / height;
 
-            if (Mathf.Abs(currentRatio - TARGET_RATIO) < 0.01f)
+            if (Mathf.Abs(currentRatio - targetRatio) < 0.01f)
                 return;
 
-            int heightFromWidth = Mathf.RoundToInt(width / TARGET_RATIO);
-            int widthFromHeight = Mathf.RoundToInt(height * TARGET_RATIO);
+            int heightFromWidth = Mathf.RoundToInt(width / targetRatio);
+            int widthFromHeight = Mathf.RoundToInt(height * targetRatio);
 
             int newWidth, newHeight;
 
@@ -80,16 +85,16 @@ namespace TemperaMental.Applications.Core
                 newHeight = height;
             }
 
-            if (newWidth < MIN_WIDTH)
+            if (newWidth < minWidth)
             {
-                newWidth = MIN_WIDTH;
-                newHeight = Mathf.RoundToInt(newWidth / TARGET_RATIO);
+                newWidth = minWidth;
+                newHeight = Mathf.RoundToInt(newWidth / targetRatio);
             }
 
-            if (newHeight < MIN_HEIGHT)
+            if (newHeight < minHeight)
             {
-                newHeight = MIN_HEIGHT;
-                newWidth = Mathf.RoundToInt(newHeight * TARGET_RATIO);
+                newHeight = minHeight;
+                newWidth = Mathf.RoundToInt(newHeight * targetRatio);
             }
 
             lastCorrectedWidth = newWidth;

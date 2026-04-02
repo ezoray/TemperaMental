@@ -24,9 +24,9 @@ namespace TemperaMental.UI.Playbacks
 
         private void Awake()
         {
-            defaultOffColor = ConfigRegistry.Midi.DefaultOffColor;
-            loopOnColor = ConfigRegistry.Midi.LoopOnColor;
-            reverseOnColor = ConfigRegistry.Midi.ReverseOnColor;
+            defaultOffColor = ConfigRegistry.UI.DefaultOffColor;
+            loopOnColor = ConfigRegistry.UI.LoopOnColor;
+            reverseOnColor = ConfigRegistry.UI.ReverseOnColor;
 
             minBpm = ConfigRegistry.Midi.MinBpm;
             maxBpm = ConfigRegistry.Midi.MaxBpm;

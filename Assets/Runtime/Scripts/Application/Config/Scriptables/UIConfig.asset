@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 06aa637c97a0440f08b2f3d408bdb2a0, type: 3}
+  m_Name: UIConfig
+  m_EditorClassIdentifier: Assembly-CSharp::TemperaMental.Applications.Config.UIConfig
+  DefaultOffColor: {r: 0.55, g: 0.55, b: 0.55, a: 1}
+  LoopOnColor: {r: 0.4, g: 0.8, b: 0.4, a: 1}
+  ReverseOnColor: {r: 1, g: 0.5, b: 1, a: 1}
+  AlphaValue: 0.3
+  OnText: ON
+  OffText: OFF

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TemperaMental.Applications.Config;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
@@ -8,9 +9,9 @@ namespace TemperaMental.Input.Mouse
 {
     public class MouseManager : MonoBehaviour
     {
-        [SerializeField] float dragDelay = 0.15f;
-        [SerializeField] float dragDistanceThreshold = 10f;
-        [SerializeField] float processRate = 0.05f;
+        [SerializeField] float dragDelay;
+        [SerializeField] float dragDistanceThreshold;
+        [SerializeField] float processRate;
 
         TemperaMentalInputActions.MouseActions mouseActions;
 
@@ -31,6 +32,12 @@ namespace TemperaMental.Input.Mouse
 
         readonly List<RaycastResult> raycastResults = new List<RaycastResult>();
 
+        private void Awake()
+        {
+            dragDelay = ConfigRegistry.App.DragDelay;
+            dragDistanceThreshold = ConfigRegistry.App.DragDistanceThreshold;
+            processRate = ConfigRegistry.App.ProcessRate;
+        }
 
         public void InitActions(TemperaMentalInputActions inputActions)
         {
@@ -121,7 +128,9 @@ namespace TemperaMental.Input.Mouse
         private void HandleDrag(UnityEvent<Vector2> actionEvent)
         {
             Vector2 mousePosition = mouseActions.Position.ReadValue<Vector2>();
+
             if (IsInterfaceTouch(mousePosition)) return;
+
             actionEvent?.Invoke(mousePosition);
         }
 

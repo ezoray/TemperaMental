@@ -461,10 +461,6 @@ MonoBehaviour:
     m_ActionName: 'Mouse/LeftButtonDown[/Mouse/leftButton]'
   - m_PersistentCalls:
       m_Calls: []
-    m_ActionId: 560e35f8-24ca-4c4b-b3bf-c13af0da72e6
-    m_ActionName: Playback/New action
-  - m_PersistentCalls:
-      m_Calls: []
     m_ActionId: 97a86160-2ee2-465b-a808-8761bed44e54
     m_ActionName: 'Mouse/Position[/Mouse/position]'
   - m_PersistentCalls:
@@ -559,6 +555,10 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: 3bbf563c-1e7c-403e-9e7f-acc39b9bc74e
     m_ActionName: 'Select/End[/Keyboard/c]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 75c7b19e-3f41-4285-8076-40383dab768b
+    m_ActionName: 'Playback/Reverse[/Keyboard/leftArrow]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: 
@@ -4109,6 +4109,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6cb96750a361418da20b2d37b129fa3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Tempera.Mental.UI.Display.DisplayUIManager
+  onText: 
+  offText: 
   bpmText: {fileID: 1599832658}
   frameText: {fileID: 1352273670}
   reverseText: {fileID: 275228283}
@@ -5620,9 +5622,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Tempera.Mental.Tempera.Mental.Core.AppConfig
   logging: {fileID: 11400000, guid: 601f790cda9874f149dbfedb19e8b941, type: 2}
+  app: {fileID: 11400000, guid: 86b1ab0289c4447f28ed878a70782edb, type: 2}
   grid: {fileID: 11400000, guid: 43beffe8dccf44d92b4b7a876aeceb97, type: 2}
   midi: {fileID: 11400000, guid: 0eee31c52a2f84d9596adfe87e5f1614, type: 2}
-  app: {fileID: 11400000, guid: 86b1ab0289c4447f28ed878a70782edb, type: 2}
+  ui: {fileID: 11400000, guid: e59a02da33e8f484596c9908f49e0736, type: 2}
 --- !u!1 &964812233
 GameObject:
   m_ObjectHideFlags: 0

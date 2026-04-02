@@ -138,7 +138,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
-  appConfig: {fileID: 11400000, guid: 86b1ab0289c4447f28ed878a70782edb, type: 2}
+  uiConfig: {fileID: 11400000, guid: e59a02da33e8f484596c9908f49e0736, type: 2}
   buttonText: {fileID: 1175797879279421861}
 --- !u!114 &-8221449181886604918
 MonoBehaviour:

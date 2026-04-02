@@ -223,6 +223,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   appConfig: {fileID: 11400000, guid: 86b1ab0289c4447f28ed878a70782edb, type: 2}
+  uiConfig: {fileID: 11400000, guid: e59a02da33e8f484596c9908f49e0736, type: 2}
   buttonText: {fileID: 5190707205867261536}
 --- !u!222 &5622811960388233212
 CanvasRenderer:

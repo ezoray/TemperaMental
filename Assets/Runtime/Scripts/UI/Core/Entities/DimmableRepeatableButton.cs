@@ -9,6 +9,7 @@ namespace TemperaMental.UI.Core
     public class DimmableRepeatableButton : Button
     {
         [SerializeField] AppConfig appConfig;
+        [SerializeField] UIConfig uiConfig;
         [SerializeField] TextMeshProUGUI buttonText;
 
         float alphaValue;
@@ -20,7 +21,7 @@ namespace TemperaMental.UI.Core
         protected override void Awake()
         {
             base.Awake();
-            alphaValue = appConfig.AlphaValue;
+            alphaValue = uiConfig.AlphaValue;
             initialDelay = appConfig.InitialDelay;
             repeatRate = appConfig.RepeatRate;
         }

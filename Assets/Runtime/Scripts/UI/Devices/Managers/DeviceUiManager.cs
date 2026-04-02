@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TemperaMental.Applications.Config;
 using TemperaMental.Logs;
 using TMPro;
 using UnityEngine;
@@ -12,8 +13,14 @@ namespace TemperaMental.UI.Devices
         [SerializeField] UnityEvent<string> onDeviceChanged;
 
         // option placeholders
-        const string NO_DEVICES_TEXT = "No Devices";
-        const string SELECT_DEVICE_TEXT = "Select Device";
+        string noDevicesText = "No Devices";
+        string selectDeviceText = "Select Device";
+
+        private void Awake()
+        {
+            noDevicesText = ConfigRegistry.UI.NoDevicesText;
+            selectDeviceText = ConfigRegistry.UI.SelectDeviceText;
+        }
 
         public void OnDropdownValueChanged(int index)
         {
@@ -21,9 +28,9 @@ namespace TemperaMental.UI.Devices
 
             string device = deviceDropdown.options[index].text;
 
-            if (device == NO_DEVICES_TEXT || device == SELECT_DEVICE_TEXT) return;
+            if (device == noDevicesText || device == selectDeviceText) return;
 
-            int selectIndex = deviceDropdown.options.FindIndex(option => option.text == SELECT_DEVICE_TEXT);
+            int selectIndex = deviceDropdown.options.FindIndex(option => option.text == selectDeviceText);
 
             // remove placeholder option
             if (selectIndex != -1)
@@ -56,7 +63,7 @@ namespace TemperaMental.UI.Devices
 
             if (newList == null || newList.Count == 0)
             {
-                deviceDropdown.AddOptions(new List<string> { NO_DEVICES_TEXT });
+                deviceDropdown.AddOptions(new List<string> { noDevicesText });
                 deviceDropdown.interactable = false;
                 deviceDropdown.SetValueWithoutNotify(0);
                 deviceDropdown.RefreshShownValue();
@@ -65,7 +72,7 @@ namespace TemperaMental.UI.Devices
 
             deviceDropdown.interactable = true;
 
-            List<string> options = new List<string> { SELECT_DEVICE_TEXT };
+            List<string> options = new List<string> { selectDeviceText };
             options.AddRange(newList);
 
             deviceDropdown.AddOptions(options);

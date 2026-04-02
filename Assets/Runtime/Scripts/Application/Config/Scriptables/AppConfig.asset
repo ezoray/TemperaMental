@@ -13,3 +13,8 @@ MonoBehaviour:
   m_Name: AppConfig
   m_EditorClassIdentifier: Assembly-CSharp::TemperaMental.Applications.Config.AppConfig
   FrameRate: 60
+  DragDelay: 0.15
+  DragDistanceThreshold: 10
+  ProcessRate: 0.025
+  InitialDelay: 0.3
+  RepeatRate: 0.1
