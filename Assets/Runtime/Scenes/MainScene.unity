@@ -3680,6 +3680,11 @@ MonoBehaviour:
   frameText: {fileID: 1352273670}
   reverseText: {fileID: 275228283}
   loopText: {fileID: 1697593385}
+  logText: {fileID: 1143660886}
+  tempTitle: {fileID: 0}
+  tempMessage: {fileID: 0}
+  tempMessageDuration: 2
+  tempMessageFadeDuration: 0.5
 --- !u!4 &597592034
 Transform:
   m_ObjectHideFlags: 0
@@ -3850,6 +3855,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 916561832909158435, guid: 0287ee39a94d34a6e8b5a6d8390a950e, type: 3}
   m_PrefabInstance: {fileID: 1097878511}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &671505711 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6750162432999983620, guid: 0287ee39a94d34a6e8b5a6d8390a950e, type: 3}
+  m_PrefabInstance: {fileID: 1097878511}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
 --- !u!1 &678083030
 GameObject:
   m_ObjectHideFlags: 0
@@ -4955,10 +4971,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Tempera.Mental.UI.GridManager
   frameSlider: {fileID: 1309759012}
   emitterButtons:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 2059945476}
+  - {fileID: 1226631313}
+  - {fileID: 2009707540}
+  - {fileID: 671505711}
   selectionRing: {fileID: 691874080}
 --- !u!4 &849915435
 Transform:
@@ -5276,7 +5292,36 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 13e15c528c9c04ad484ca581d9dab2ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Tempera.Mental.Logs.LogMan
-  logDisplay: {fileID: 1143660886}
+  onLogMessage:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 597592033}
+        m_TargetAssemblyTypeName: TemperaMental.UI.Display.DisplayUIManager, Assembly-CSharp
+        m_MethodName: ActionOnLogMessage
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  onTempMessage:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 597592033}
+        m_TargetAssemblyTypeName: TemperaMental.UI.Display.DisplayUIManager, Assembly-CSharp
+        m_MethodName: ActionOnTempMessage
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!4 &1001891066
 Transform:
   m_ObjectHideFlags: 0
@@ -6125,7 +6170,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
   m_AnchoredPosition: {x: 0, y: -18}
-  m_SizeDelta: {x: 75, y: 50}
+  m_SizeDelta: {x: 75, y: 25}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1135178756
 MonoBehaviour:
@@ -7090,6 +7135,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 916561832909158435, guid: 0287ee39a94d34a6e8b5a6d8390a950e, type: 3}
   m_PrefabInstance: {fileID: 572873219}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1226631313 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6750162432999983620, guid: 0287ee39a94d34a6e8b5a6d8390a950e, type: 3}
+  m_PrefabInstance: {fileID: 572873219}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
 --- !u!1 &1241625189
 GameObject:
   m_ObjectHideFlags: 0
@@ -8011,7 +8067,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
   m_AnchoredPosition: {x: 0, y: -45}
-  m_SizeDelta: {x: 200, y: 50}
+  m_SizeDelta: {x: 200, y: 25}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1352273670
 MonoBehaviour:
@@ -9036,9 +9092,9 @@ Camera:
   m_NormalizedViewPortRect:
     serializedVersion: 2
     x: 0
-    y: 0
-    width: 1
-    height: 1
+    y: 0.27812502
+    width: 0.68611115
+    height: 0.68611115
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 60
@@ -9176,8 +9232,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: -204, y: -18}
-  m_SizeDelta: {x: 75, y: 50}
+  m_AnchoredPosition: {x: -200, y: -18}
+  m_SizeDelta: {x: 75, y: 25}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1560068331
 MonoBehaviour:
@@ -9408,8 +9464,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: -204, y: -45}
-  m_SizeDelta: {x: 75, y: 50}
+  m_AnchoredPosition: {x: -200, y: -45}
+  m_SizeDelta: {x: 75, y: 25}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1599832658
 MonoBehaviour:
@@ -11406,6 +11462,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 916561832909158435, guid: 0287ee39a94d34a6e8b5a6d8390a950e, type: 3}
   m_PrefabInstance: {fileID: 1907208782}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &2009707540 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6750162432999983620, guid: 0287ee39a94d34a6e8b5a6d8390a950e, type: 3}
+  m_PrefabInstance: {fileID: 1907208782}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
 --- !u!1 &2027373323
 GameObject:
   m_ObjectHideFlags: 0
@@ -11731,6 +11798,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 916561832909158435, guid: 0287ee39a94d34a6e8b5a6d8390a950e, type: 3}
   m_PrefabInstance: {fileID: 775730896}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &2059945476 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6750162432999983620, guid: 0287ee39a94d34a6e8b5a6d8390a950e, type: 3}
+  m_PrefabInstance: {fileID: 775730896}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
 --- !u!1 &2069221092
 GameObject:
   m_ObjectHideFlags: 0

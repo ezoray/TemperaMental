@@ -1,9 +1,10 @@
-using UnityEngine;
-using TMPro;
 using TemperaMental.Applications.Config;
+using UnityEngine;
+using UnityEngine.Events;
 
 namespace TemperaMental.Logs
 {
+    [DefaultExecutionOrder(-99)]
     public class LogMan : MonoBehaviour
     {
         static string info;
@@ -11,7 +12,9 @@ namespace TemperaMental.Logs
         static string error;
 
         public static LogMan Instance;
-        public TextMeshProUGUI logDisplay;
+
+        [SerializeField] UnityEvent<string> onLogMessage;
+        [SerializeField] UnityEvent<string> onTempMessage;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void OnRuntimeMethodLoad()
@@ -34,6 +37,11 @@ namespace TemperaMental.Logs
             error = ConfigRegistry.Logging.ColorError;
         }
 
+        public static void LogTemp(string message)
+        {
+            Instance.LogTempToDisplay(message);
+        }
+
         public static void Log(string message)
         {
             ProcessLog(message, info, LogType.Log);
@@ -54,7 +62,7 @@ namespace TemperaMental.Logs
             if (Instance == null) return;
 
             string formattedMessage = $"<color={colorHex}>{message}</color>";
-            Instance.LogToUI(formattedMessage);
+            Instance.LogToDisplay(formattedMessage);
 
             switch (type)
             {
@@ -69,13 +77,14 @@ namespace TemperaMental.Logs
             }
         }
 
-        private void LogToUI(string message)
+        private void LogTempToDisplay(string message)
         {
-            if (logDisplay != null)
-            {
-                // Add new log to the bottom
-                logDisplay.text = message;
-            }
+            onTempMessage?.Invoke(message);
+        }
+
+        private void LogToDisplay(string message)
+        {
+            onLogMessage?.Invoke(message);
         }
     }
 }

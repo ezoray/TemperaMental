@@ -4,15 +4,16 @@ using UnityEngine.UI;
 
 namespace TemperaMental.UI.Core
 {
-    public class ButtonKeyHandler : MonoBehaviour
+    public class ButtonKeyHandler : KeyHandlerBase
     {        
         [SerializeField] Button button;
-        [SerializeField] InputActionReference actionReference;
 
-        private CanvasGroup canvasGroup;
+        CanvasGroup canvasGroup;
 
-        void Awake()
+        protected override void Awake()
         {
+            base.Awake();
+
             canvasGroup = GetComponentInParent<CanvasGroup>();
 
             actionReference.action.performed += PerformedHandler;
@@ -27,10 +28,10 @@ namespace TemperaMental.UI.Core
             }
         }
 
-        void OnDestroy()
+        private void OnDestroy()
         {
             actionReference.action.performed -= PerformedHandler;
             actionReference.action.Disable();
-        }
+        } 
     }
 }

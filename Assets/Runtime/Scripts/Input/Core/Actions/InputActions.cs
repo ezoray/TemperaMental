@@ -794,17 +794,6 @@ namespace TemperaMental.Input
                 },
                 {
                     ""name"": """",
-                    ""id"": ""e101b351-bc46-4123-955c-f5c02bf8f681"",
-                    ""path"": ""<Keyboard>/a"",
-                    ""interactions"": ""Press(behavior=2)"",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Previous"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
                     ""id"": ""9aab069e-0f86-4f19-83ae-e9c031ad5c95"",
                     ""path"": ""<Keyboard>/d"",
                     ""interactions"": """",
@@ -822,6 +811,17 @@ namespace TemperaMental.Input
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""End"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""331afc9e-51b3-442b-95bc-42833288c301"",
+                    ""path"": ""<Keyboard>/a"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Previous"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }

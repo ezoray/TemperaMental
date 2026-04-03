@@ -21,5 +21,12 @@ namespace TemperaMental.Applications.Config
         public string NoDevicesText = "No Devices";
         public string SelectDeviceText = "Select Device";
 
+        // fading log message
+        public float TempMessageDuration = 2f;
+        public float TempMessageFadeDuration = 0.5f;
+
+        // shortcut logging
+        public string ShortcutText = "Keyboard shortcut:";
+        public float ShortcutMessageDelay = 2f;
     }
 }

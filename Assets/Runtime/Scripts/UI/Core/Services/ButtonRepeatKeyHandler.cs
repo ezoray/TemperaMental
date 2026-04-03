@@ -3,16 +3,18 @@ using UnityEngine.InputSystem;
 
 namespace TemperaMental.UI.Core
 {
-    public class ButtonRepeatKeyHandler : MonoBehaviour
+    public class ButtonRepeatKeyHandler :KeyHandlerBase
     {
         [SerializeField] DimmableRepeatableButton button;
-        [SerializeField] InputActionReference actionReference;
 
-        private CanvasGroup canvasGroup;
+        CanvasGroup canvasGroup;
 
-        void Awake()
+        protected override void Awake()
         {
+            base.Awake();
+
             canvasGroup = GetComponentInParent<CanvasGroup>();
+
             actionReference.action.started += StartedHandler;
             actionReference.action.canceled += CanceledHandler;
             actionReference.action.Enable();
