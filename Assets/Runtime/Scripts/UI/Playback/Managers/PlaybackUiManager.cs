@@ -7,6 +7,7 @@ namespace TemperaMental.UI.Playbacks
 {
     public class PlaybackUIManager : MonoBehaviour
     {
+        [SerializeField] CanvasGroup transportCanvasGroup;
         [SerializeField] Image loopButtonImage;
         [SerializeField] Image reverseButtonImage;
 
@@ -24,6 +25,8 @@ namespace TemperaMental.UI.Playbacks
 
         private void Awake()
         {
+            transportCanvasGroup.interactable = false;
+
             defaultOffColor = ConfigRegistry.UI.DefaultOffColor;
             loopOnColor = ConfigRegistry.UI.LoopOnColor;
             reverseOnColor = ConfigRegistry.UI.ReverseOnColor;
@@ -92,6 +95,11 @@ namespace TemperaMental.UI.Playbacks
                     ApplyState(PlaybackUIFlags.Stopped);
                     break;
             }
+        }
+
+        public void ActionOnOutputDeviceChanged(bool isSet)
+        {
+            transportCanvasGroup.interactable = isSet;
         }
 
         private void ApplyState(PlaybackUIFlags playbackFlags)

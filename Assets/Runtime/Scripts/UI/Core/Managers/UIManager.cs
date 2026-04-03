@@ -35,6 +35,10 @@ namespace TemperaMental.UI.Core
                 case PlaybackState.Paused:
                     ApplyState(UiStateFlags.Paused);
                     break;
+
+                case PlaybackState.Stopped:
+                    ApplyState(UiStateFlags.All);
+                    break;
             }
         }
     }

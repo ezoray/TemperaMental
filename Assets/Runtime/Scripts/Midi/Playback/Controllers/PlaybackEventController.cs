@@ -16,35 +16,17 @@ namespace TemperaMental.Midi.Playbacks
         // frame slider
         public void ActionOnSelectedFrameChanged(float selectedFrame) => playbackManager.SeekToFrame(Mathf.RoundToInt(selectedFrame));
 
-        public void ActionOnBpmChanged(int newBpm)
-        {
-            playbackManager.ChangeBpm(newBpm);
-        }
+        public void ActionOnBpmChanged(int newBpm) => playbackManager.ChangeBpm(newBpm);
 
-        public void ActionOnDeviceRemoved()
-        {
-            playbackManager.Stop();
-        }
+        public void ActionOnDeviceRemoved() => playbackManager.ClearOutputDevice();
 
-        public void ActionOnDeviceChanged(OutputDevice device)
-        {
-            playbackManager.SetOutputDevice(device);
-        }
+        public void ActionOnDeviceChanged(OutputDevice device) => playbackManager.SetOutputDevice(device);
 
-        public void OnClickToggleReverse()
-        {
-            playbackManager.ToggleReverse();
-        }
+        public void OnClickToggleReverse() => playbackManager.ToggleReverse();
 
-        public void OnClickChangeLoopState()    
-        {
-            playbackManager.ToggleLooping();
-        }
+        public void OnClickChangeLoopState() => playbackManager.ToggleLooping();
 
-        public void OnClickStop()
-        {
-            playbackManager.Stop();
-        }
+        public void OnClickStop() => playbackManager.Stop();
 
         public void OnClickPause()
         {

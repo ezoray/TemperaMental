@@ -82,6 +82,7 @@ namespace TemperaMental.Midi.Devices
             }
 
             connectedDevices = hardware;
+
             onDevicesUpdated?.Invoke(connectedDevices);
 
             if (isInitialSync)
@@ -155,19 +156,6 @@ namespace TemperaMental.Midi.Devices
             catch (Exception ex)
             {
                 LogMan.LogError($"Failed to open device {deviceName}: {ex.Message}");
-            }
-        }
-
-        public OutputDevice GetOutputDevice(string deviceName)
-        {
-            try
-            {
-                return OutputDevice.GetByName(deviceName);
-            }
-            catch (Exception ex)
-            {
-                LogMan.LogError($"Could not open device: {ex.Message}");
-                return null;
             }
         }
 

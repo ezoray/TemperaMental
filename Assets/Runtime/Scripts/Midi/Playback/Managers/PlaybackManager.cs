@@ -37,6 +37,7 @@ namespace TemperaMental.Midi.Playbacks
         PlaybackState playbackState;
         ConcurrentQueue<int> frameQueue;
 
+        [SerializeField] UnityEvent<bool> onOutputDeviceChanged;
         [SerializeField] UnityEvent<int> onPlaybackFrameChanged;
         [SerializeField] UnityEvent<PlaybackState> onPlaybackStateChanged;
         [SerializeField] UnityEvent<bool> onLoopStateChanged;
@@ -73,10 +74,11 @@ namespace TemperaMental.Midi.Playbacks
         // if already playing restarts from same anchor
         public void Play(MidiFileDetail midiFileDetail, int initialFrame = 1)
         {
+            if (outputDevice == null) return;
+
             try
             {
-                int frameToPlayFrom = (playbackState == PlaybackState.Playing)
-                    ? playStartAnchor : initialFrame;
+                int frameToPlayFrom = (playbackState == PlaybackState.Playing) ? playStartAnchor : initialFrame;
 
                 InitPlaybacks(midiFileDetail, frameToPlayFrom);
 
@@ -211,9 +213,19 @@ namespace TemperaMental.Midi.Playbacks
             }
         }
 
+        public void ClearOutputDevice()
+        {
+            outputDevice = null;
+            Stop();
+
+            onOutputDeviceChanged?.Invoke(false);
+        }
+
         public void SetOutputDevice(OutputDevice outputDevice)
         {
             this.outputDevice = outputDevice;
+
+            onOutputDeviceChanged?.Invoke(true);
         }
 
         private void PausePlayback()
