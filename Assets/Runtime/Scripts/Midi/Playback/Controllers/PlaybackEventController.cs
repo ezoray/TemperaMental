@@ -1,4 +1,5 @@
 using Melanchall.DryWetMidi.Multimedia;
+using TemperaMental.Core;
 using TemperaMental.Frames;
 using TemperaMental.Midi.Core;
 using TemperaMental.Midi.Devices;
@@ -18,7 +19,7 @@ namespace TemperaMental.Midi.Playbacks
 
         public void ActionOnBpmChanged(int newBpm) => playbackManager.ChangeBpm(newBpm);
 
-        public void ActionOnDeviceRemoved() => playbackManager.ClearOutputDevice();
+        public void ActionOnCurrentDeviceRemoved() => playbackManager.ClearOutputDevice();
 
         public void ActionOnDeviceChanged(OutputDevice device) => playbackManager.SetOutputDevice(device);
 

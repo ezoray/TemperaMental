@@ -31,12 +31,12 @@ namespace TemperaMental.Grid
         public void ActionOnFrameChanged(FrameDetail frameDetail)
         {
             emitterTilemapManager.ClearTiles();
-            emitterTilemapManager.AddTiles(frameDetail.EmitterDetails);
+            emitterTilemapManager.AddTiles(frameDetail.EmitterGroups);
         }
 
         public void ActionOnRemoveEmitter(Vector2Int position)
         {
-            emitterTilemapManager.RemoveTile(new Vector3Int(position.x, position.y));
+            emitterTilemapManager.RemoveTile(position);
         }
 
 

@@ -738,6 +738,34 @@
                     "isPartOfComposite": false
                 }
             ]
+        },
+        {
+            "name": "System",
+            "id": "6031bd1b-b99f-4bf4-a068-be5be97fdf23",
+            "actions": [
+                {
+                    "name": "Quit",
+                    "type": "Button",
+                    "id": "4361c7f2-572f-4502-a939-c52edf119111",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "f05dd0b3-90ea-4476-a215-e9fc2dff0532",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Quit",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": []

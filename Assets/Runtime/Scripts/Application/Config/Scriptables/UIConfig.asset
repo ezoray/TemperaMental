@@ -18,3 +18,9 @@ MonoBehaviour:
   AlphaValue: 0.3
   OnText: ON
   OffText: OFF
+  NoDevicesText: Connect Midi Device
+  SelectDeviceText: Select Midi Device
+  TempMessageDuration: 2
+  TempMessageFadeDuration: 0.5
+  ShortcutText: 'Keyboard shortcut:'
+  ShortcutMessageDelay: 5

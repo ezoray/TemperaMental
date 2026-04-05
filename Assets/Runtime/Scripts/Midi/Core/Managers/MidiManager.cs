@@ -39,7 +39,7 @@ namespace TemperaMental.Midi.Core
             return transformService.FromMidiFileToFrames(midiFile);
         }
 
-        public MidiFile FromFramesToMidiFile(IReadOnlyList<Frame> frames, int startFrame = 1)
+        public MidiFile FromFramesToMidiFile(IReadOnlyList<Frame> frames)
         {
             return transformService.FromFramesToMidiFile(frames, bpm, false);
         }

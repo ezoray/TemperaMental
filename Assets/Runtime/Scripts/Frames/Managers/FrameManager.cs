@@ -18,10 +18,7 @@ namespace TemperaMental.Frames
         int currentEmitterId;
         Frame copiedFrame;
 
-        // reusable list
-        List<EmitterDetail> emitterDetails;
-
-        bool isPlaybackActive;
+        PlaybackState playbackState;
 
         [SerializeField] UnityEvent<int> onEmitterTypeChanged;
         [SerializeField] UnityEvent<EmitterDetail> onAddEmitter;
@@ -31,7 +28,6 @@ namespace TemperaMental.Frames
         private void Awake()
         {
             frames = new List<Frame>();
-            emitterDetails = new List<EmitterDetail>();
 
             gridWidth = ConfigRegistry.Grid.GridWidth;
             gridHeight = ConfigRegistry.Grid.GridHeight;
@@ -44,9 +40,9 @@ namespace TemperaMental.Frames
             AddFrame();
         }
 
-        public void SetPlaybackActive(bool isActive)
+        public void SetPlaybackState(PlaybackState newPlaybackState)
         {
-            isPlaybackActive = isActive;
+            playbackState = newPlaybackState;
         }
 
         public void DeleteFrame()
@@ -117,7 +113,7 @@ namespace TemperaMental.Frames
 
         public void GoToSelectedFrame(int frameNumber)
         {
-            if (isPlaybackActive) return;
+            if (playbackState == PlaybackState.Playing) return;
 
             SetCurrentFrame(frameNumber - 1);
         }
@@ -144,24 +140,28 @@ namespace TemperaMental.Frames
                 LogMan.LogWarning("No frames found");
                 return;
             }
- 
+
             frames = new List<Frame>(newFrames);
 
-            SetCurrentFrame(0);           
+            SetCurrentFrame(0);
         }
 
         public void SetEmitterType(int emitterId)
         {
+            if (playbackState == PlaybackState.Playing || playbackState == PlaybackState.Paused) return;
+
             if (emitterId != currentEmitterId)
             {
                 currentEmitterId = emitterId;
 
                 onEmitterTypeChanged?.Invoke(currentEmitterId);
             }
-        }    
+        }
 
         public void RemoveEmitter(Vector2Int position)
         {
+            if (playbackState == PlaybackState.Playing || playbackState == PlaybackState.Paused) return;
+
             if (currentFrame.TryRemoveEmitter(position))
             {
                 onRemoveEmitter?.Invoke(position);
@@ -170,6 +170,8 @@ namespace TemperaMental.Frames
 
         public void AddEmitter(Vector2Int cellPosition)
         {
+            if (playbackState == PlaybackState.Playing || playbackState == PlaybackState.Paused) return;
+
             if (!currentFrame.CheckSameEmitterAtPosition(cellPosition, currentEmitterId))
             {
                 EmitterDetail emitterDetail = new EmitterDetail(cellPosition, currentEmitterId);
@@ -203,16 +205,7 @@ namespace TemperaMental.Frames
 
         private FrameDetail GetFrameDetail(Frame frame)
         {
-            emitterDetails.Clear();
-
-            frame.ActionActiveEmitters(CreateFrameDetail);
-
-            return new FrameDetail(currentFrameIndex + 1, frames.Count, emitterDetails);
-        }
-
-        private void CreateFrameDetail(EmitterDetail detail)
-        {
-            emitterDetails.Add(detail);
+            return new FrameDetail(currentFrameIndex + 1, frames.Count, frame.GetEmitterGroups());
         }
 
         private void SetCurrentFrame(int index)

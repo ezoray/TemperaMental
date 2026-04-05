@@ -1,11 +1,12 @@
-using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
+using System.Diagnostics;
+using System.Threading;
 using Melanchall.DryWetMidi.Common;
 using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Multimedia;
 using TemperaMental.Applications.Config;
 using TemperaMental.Core;
-using TemperaMental.Logs;
+using TemperaMental.Utils;
 using UnityEngine;
 
 namespace TemperaMental.Midi.Core
@@ -17,17 +18,19 @@ namespace TemperaMental.Midi.Core
         int activateCC;
         int placeCC;
         int removeCC;
-        int gridWidth;
-        int gridHeight;
-        int gridSize;
         int emitterCount;
+        int gridSize;
 
-        // reusable bitmask buffers, one ulong per emitter (bits 0–63 map to grid positions)
-        // comparison between last frame and new determines what emitters to add/remove
-        ulong[] previousGroups;
-        ulong[] currentGroups;
+        // tracks playback state to determine whether to send midi immediately
+        PlaybackState playbackState;
 
-        bool isEnabled;
+        Stopwatch stopwatch;
+        Thread sendThread;
+        ConcurrentQueue<(int commandCC, int value)> messageQueue;
+        volatile bool isSendThreadRunning;
+
+        // delay between midi messages in milliseconds
+        long midiSendIntervalMS;
 
         private void OnEnable()
         {
@@ -35,106 +38,105 @@ namespace TemperaMental.Midi.Core
             placeCC = ConfigRegistry.Midi.PlaceCC;
             removeCC = ConfigRegistry.Midi.RemoveCC;
 
-            gridWidth = ConfigRegistry.Grid.GridWidth;
-            gridHeight = ConfigRegistry.Grid.GridHeight;
-            gridSize = gridWidth * gridHeight;
-
             emitterCount = ConfigRegistry.Grid.EmitterCount;
             currentEmitterId = ConfigRegistry.Grid.DefaultEmitterId;
+            gridSize = ConfigRegistry.Grid.GridWidth * ConfigRegistry.Grid.GridHeight;
 
-            previousGroups = new ulong[emitterCount];
-            currentGroups = new ulong[emitterCount];
+            midiSendIntervalMS = ConfigRegistry.Midi.MidiSendIntervalMS;
 
-            // set bitmask to show all cells populated to force clear on Tempera for very first frame so app and Tempera are in sync
-            for (int i = 0; i < emitterCount; i++)
-            {
-                previousGroups[i] = ulong.MaxValue;
-            }
+            playbackState = PlaybackState.Idle;
 
-            isEnabled = true;
+            messageQueue = new ConcurrentQueue<(int, int)>();
+            StartSendThread();
         }
 
-        // send only when playback is off
-        public void EnableSendingByPlaybackState(PlaybackState playbackState)
-        { 
-            switch (playbackState)
-            {
-                case PlaybackState.Idle:
-                    isEnabled = true;
-                    break;
-
-                case PlaybackState.Playing:
-                    isEnabled = false;
-                    break;
-
-                case PlaybackState.Paused:
-                    isEnabled = false;
-                    break;
-            }
-        }
-
-        // send placed emitters, don't send emitters that are already lit
-        public void SendEmitters(List<EmitterDetail> emitterDetails)
+        public void SetPlaybackState(PlaybackState newPlaybackState)
         {
-            FillGroups(currentGroups, emitterDetails);
+            playbackState = newPlaybackState;
+        }
 
+        public void SendFrame(ulong[] emitterGroups)
+        {
+            if (playbackState == PlaybackState.Playing) return;
+
+            // clear the queue and restart
+            while (messageQueue.TryDequeue(out _)) { }
+
+            // enqueue clears
             for (byte emitterId = 0; emitterId < emitterCount; emitterId++)
             {
-                ulong toRemove = previousGroups[emitterId] & ~currentGroups[emitterId];
-                ulong toAdd = currentGroups[emitterId] & ~previousGroups[emitterId];
+                messageQueue.Enqueue((activateCC, emitterId));
+                messageQueue.Enqueue((removeCC, ConfigRegistry.Midi.ClearEmittersValue));
+            }
 
-                if (toRemove == 0 && toAdd == 0) continue;
+            // enqueue placements
+            for (byte emitterId = 0; emitterId < emitterCount; emitterId++)
+            {
+                ulong group = emitterGroups[emitterId];
 
-                if (emitterId != currentEmitterId)
-                {
-                    currentEmitterId = emitterId;
-                    SendEmitterChangeMessage(emitterId);
-                }
+                if (group == 0) continue;
+
+                messageQueue.Enqueue((activateCC, emitterId));
 
                 for (byte pos = 0; pos < gridSize; pos++)
                 {
-                    bool remove = (toRemove & (1UL << pos)) != 0;
-                    bool add = (toAdd & (1UL << pos)) != 0;
-
-                    if (add)
-                        SendEmitterMessage(placeCC, pos);
-                    else if (remove)
-                        SendEmitterMessage(removeCC, pos);
+                    if ((group & (1UL << pos)) != 0)
+                    {
+                        messageQueue.Enqueue((placeCC, pos));
+                    }
                 }
             }
+        }
 
-            CopyGroups(currentGroups, previousGroups);
+        private void StartSendThread()
+        {
+            isSendThreadRunning = true;
+            stopwatch = Stopwatch.StartNew();
+            sendThread = new Thread(SendThreadLoop) { IsBackground = true };
+            sendThread.Start();
+        }
+
+        private void SendThreadLoop()
+        {
+            long nextMessageTime = 0;
+
+            while (isSendThreadRunning)
+            {
+                if (stopwatch.ElapsedMilliseconds >= nextMessageTime)
+                {
+                    if (messageQueue.TryDequeue(out var message))
+                    {
+                        if (outputDevice != null)
+                        {
+                            outputDevice.SendEvent(new ControlChangeEvent(
+                                (SevenBitNumber)message.commandCC,
+                                (SevenBitNumber)message.value));
+                        }
+
+                        nextMessageTime = stopwatch.ElapsedMilliseconds + midiSendIntervalMS;
+                    }
+                }
+
+                Thread.Sleep(1);
+            }
+        }
+
+        private void StopSendThread()
+        {
+            isSendThreadRunning = false;
+            sendThread?.Join();
+            sendThread = null;
         }
 
         public void RemoveEmitter(Vector2Int position)
         {
-            byte pos = (byte)PositionToIndex(position);
-
-            // clear any emitter set
-            for (byte emitterId = 0; emitterId < emitterCount; emitterId++)
-                previousGroups[emitterId] &= ~(1UL << pos);
-
-            SendEmitterMessage(removeCC, pos);
+            SendEmitterMessage(removeCC, EmitterUtils.PositionToIndex(position));
         }
 
         public void AddEmitter(EmitterDetail emitterDetail)
         {
-            byte emitterId = (byte)emitterDetail.EmitterId;
-            byte pos = (byte)PositionToIndex(emitterDetail.Position);
-
-            // clear this position from all emitters first, then set the correct one
-            for (byte i = 0; i < emitterCount; i++)
-                previousGroups[i] &= ~(1UL << pos);
-
-            previousGroups[emitterId] |= 1UL << pos;
-
-            if (emitterId != currentEmitterId)
-            {
-                currentEmitterId = emitterId;
-                SendEmitterChangeMessage(emitterId);
-            }
-
-            SendEmitterMessage(placeCC, pos);
+            SendEmitterChangeMessage(emitterDetail.EmitterId);
+            SendEmitterMessage(placeCC, EmitterUtils.PositionToIndex(emitterDetail.Position));
         }
 
         public void SetEmitterType(int emitterId)
@@ -156,52 +158,27 @@ namespace TemperaMental.Midi.Core
             this.outputDevice = outputDevice;
         }
 
-        // fill current groups with set emitters for this frame
-        private void FillGroups(ulong[] groups, List<EmitterDetail> emitters)
-        {
-            for (int i = 0; i < groups.Length; i++)
-            {
-                groups[i] = 0;
-            }
-
-            for (int i = 0; i < emitters.Count; i++)
-            {
-                byte emitterId = (byte)emitters[i].EmitterId;
-                byte pos = (byte)PositionToIndex(emitters[i].Position);
-                groups[emitterId] |= 1UL << pos;
-            }
-        }
-
-        // move current set emitters to previous for comparison when new emitters added
-        private static void CopyGroups(ulong[] source, ulong[] dest)
-        {
-            for (int i = 0; i < source.Length; i++)
-                dest[i] = source[i];
-        }
-
-        // hack we're not honouring isEnabled here to allow emitter change during playback (drawing is allowed during playback)
-        // this is a quick fix and needs a better solution
         private void SendEmitterChangeMessage(int emitterId)
         {
+            currentEmitterId = emitterId;
+
             if (outputDevice != null)
             {
                 outputDevice.SendEvent(new ControlChangeEvent((SevenBitNumber)activateCC, (SevenBitNumber)emitterId));
             }
         }
 
-        private void SendEmitterMessage(int cmdCC, int value)
+        private void SendEmitterMessage(int commandCC, int value)
         {
-            if (outputDevice != null && isEnabled)
+            if (outputDevice != null)
             {
-                outputDevice.SendEvent(new ControlChangeEvent((SevenBitNumber)cmdCC, (SevenBitNumber)value));
+                outputDevice.SendEvent(new ControlChangeEvent((SevenBitNumber)commandCC, (SevenBitNumber)value));
             }
         }
 
-        // change tilemap-based position to cc value index
-        private int PositionToIndex(Vector2Int pos)
+        private void OnDisable()
         {
-            int flippedY = (gridHeight - 1) - pos.y;
-            return pos.x * gridHeight + flippedY;
+            StopSendThread();
         }
     }
 }

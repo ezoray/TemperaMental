@@ -9,7 +9,7 @@ namespace TemperaMental.Midi.Core
         [SerializeField] MidiManager midiManager;
         [SerializeField] MidiImmediateService immediateService;
 
-        public void ActionOnPlaybackStateChanged(PlaybackState playbackState) => immediateService.EnableSendingByPlaybackState(playbackState);
+        public void ActionOnPlaybackStateChanged(PlaybackState playbackState) => immediateService.SetPlaybackState(playbackState);
 
         public void ActionOnRemoveEmitter(Vector2Int position) => immediateService.RemoveEmitter(position);
 
@@ -17,11 +17,11 @@ namespace TemperaMental.Midi.Core
 
         public void ActionOnEmitterTypeChanged(int emitterId) => immediateService.SetEmitterType(emitterId);
 
-        public void ActionOnFrameChanged(FrameDetail frameDetail) => immediateService.SendEmitters(frameDetail.EmitterDetails);
+        public void ActionOnFrameChanged(FrameDetail frameDetail) => immediateService.SendFrame(frameDetail.EmitterGroups);
 
         public void ActionOnBpmValueChanged(float bpm) => midiManager.SetBpm(Mathf.RoundToInt(bpm));
 
-        public void ActionOnDeviceRemoved() => immediateService.ClearOutputDevice();
+        public void ActionOnCurrentDeviceRemoved() => immediateService.ClearOutputDevice();
 
         public void ActionOnDeviceChanged(OutputDevice device) => immediateService.SetOutputDevice(device);
     }

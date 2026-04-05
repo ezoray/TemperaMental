@@ -9,9 +9,9 @@ namespace TemperaMental.Midi.IO
 {
     public class MidiFileService : MonoBehaviour
     {
-        string appendTitle = "Append Midi File";
-        string loadTitle = "Open Midi File";
-        string saveTitle = "Save Midi File";
+        string appendTitle;
+        string loadTitle;
+        string saveTitle;
 
         ExtensionFilter[] fileExtensions;
 

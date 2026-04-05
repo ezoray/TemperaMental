@@ -30,5 +30,8 @@ namespace TemperaMental.Applications.Config
         // markers in midifile
         public string FrameStartPrefix = "START_FRAME_NO_";
         public string SeqEndMarker = "END_SEQ";
+
+        // real time midi send interval
+        public long MidiSendIntervalMS = 2;
     }
 }

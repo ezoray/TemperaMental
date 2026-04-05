@@ -1,6 +1,6 @@
-using System.Collections.Generic;
 using TemperaMental.Applications.Config;
 using TemperaMental.Core;
+using TemperaMental.Utils;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -11,17 +11,22 @@ namespace TemperaMental.Grid
         [SerializeField] Tilemap emitterTilemap;
         [SerializeField] TileBase tile;
 
-        List<Color> emitterColors;
+        Color[] emitterColors;
+        int emitterCount;
+        int gridSize;
 
         private void Awake()
         {
-            emitterColors = new List<Color>
+            emitterColors = new Color[]
             {
                 ConfigRegistry.Grid.EmitterBlue,
                 ConfigRegistry.Grid.EmitterRed,
                 ConfigRegistry.Grid.EmitterYellow,
                 ConfigRegistry.Grid.EmitterGreen
             };
+
+            emitterCount = ConfigRegistry.Grid.EmitterCount;
+            gridSize = ConfigRegistry.Grid.GridWidth * ConfigRegistry.Grid.GridHeight;
         }
 
         public void ClearTiles()
@@ -29,27 +34,41 @@ namespace TemperaMental.Grid
             emitterTilemap.ClearAllTiles();
         }
 
-        public void RemoveTile(Vector3Int position)
+        public void RemoveTile(Vector2Int position)
         {
-            emitterTilemap.SetTile(position, null);
+            emitterTilemap.SetTile(new Vector3Int(position.x, position.y), null);
         }
 
         public void AddTile(EmitterDetail emitterDetail)
         {
-            Vector3Int position = new Vector3Int(emitterDetail.Position.x, emitterDetail.Position.y);
-
-            emitterTilemap.SetTile(position, tile);
-
-            emitterTilemap.SetTileFlags(position, TileFlags.None);
-            emitterTilemap.SetColor(position, emitterColors[emitterDetail.EmitterId]);
+            SetTile(emitterDetail.Position, emitterDetail.EmitterId);
         }
 
-        public void AddTiles(List<EmitterDetail> emitterDetails)
+        // draw all emitters from ulong groups
+        public void AddTiles(ulong[] emitterGroups)
         {
-            foreach (var emitterDetail in emitterDetails)
+            for (byte emitterId = 0; emitterId < emitterCount; emitterId++)
             {
-                AddTile(emitterDetail);
+                ulong group = emitterGroups[emitterId];
+
+                if (group == 0) continue;
+
+                for (byte pos = 0; pos < gridSize; pos++)
+                {
+                    if ((group & (1UL << pos)) != 0)
+                    {
+                        SetTile(EmitterUtils.IndexToPosition(pos), emitterId);
+                    }
+                }
             }
+        }
+
+        private void SetTile(Vector2Int position, int emitterId)
+        {
+            Vector3Int tilePosition = new Vector3Int(position.x, position.y);
+            emitterTilemap.SetTile(tilePosition, tile);
+            emitterTilemap.SetTileFlags(tilePosition, TileFlags.None);
+            emitterTilemap.SetColor(tilePosition, emitterColors[emitterId]);
         }
     }
 }

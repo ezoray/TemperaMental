@@ -72,7 +72,7 @@ namespace TemperaMental.Midi.Playbacks
 
         // plays from current playhead position and sets that as the anchor
         // if already playing restarts from same anchor
-        public void Play(MidiFileDetail midiFileDetail, int initialFrame = 1)
+        public void Play(MidiFileDetail midiFileDetail, int initialFrame)
         {
             if (outputDevice == null) return;
 

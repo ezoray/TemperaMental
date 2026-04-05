@@ -1,5 +1,7 @@
 using System;
+using TemperaMental.Applications.Config;
 using TemperaMental.Core;
+using TemperaMental.Utils;
 using UnityEngine;
 
 namespace TemperaMental.Frames
@@ -8,69 +10,70 @@ namespace TemperaMental.Frames
     {
         readonly int width;
         readonly int height;
+        readonly int emitterCount;
 
-        private readonly EmitterDetail?[] grid;
+        // one ulong per emitter, bits map to Tempera grid positions
+        readonly ulong[] emitterGroups;
 
         public Frame(int width, int height)
         {
             this.width = width;
             this.height = height;
-            grid = new EmitterDetail?[width * height];
+
+            emitterCount = ConfigRegistry.Grid.EmitterCount;
+            emitterGroups = new ulong[emitterCount];
         }
 
         public Frame(Frame otherFrame)
         {
             width = otherFrame.width;
             height = otherFrame.height;
-            grid = new EmitterDetail?[width * height];
+            emitterCount = otherFrame.emitterCount;
 
-            Array.Copy(otherFrame.grid, grid, grid.Length);
-        }   
+            emitterGroups = new ulong[emitterCount];
+            Array.Copy(otherFrame.emitterGroups, emitterGroups, emitterGroups.Length);
+        }
+
+        // returns the ulong bitmask array directly so callers can iterate by emitter without conversion
+        public ulong[] GetEmitterGroups()
+        {
+            return emitterGroups;
+        }
 
         public void AddEmitter(EmitterDetail emitterDetail)
         {
-            grid[GetIndex(emitterDetail.Position.x, emitterDetail.Position.y)] = emitterDetail;
+            int pos = EmitterUtils.PositionToIndex(emitterDetail.Position);
+            emitterGroups[emitterDetail.EmitterId] |= 1UL << pos;
         }
 
         public bool TryRemoveEmitter(Vector2Int position)
         {
-            int index = GetIndex(position.x, position.y);
+            int pos = EmitterUtils.PositionToIndex(position);
 
-            if (!grid[index].HasValue) return false;
+            for (int emitterId = 0; emitterId < emitterCount; emitterId++)
+            {
+                if ((emitterGroups[emitterId] & (1UL << pos)) != 0)
+                {
+                    emitterGroups[emitterId] &= ~(1UL << pos);
+                    return true;
+                }
+            }
 
-            grid[index] = null;
-            return true;
+            return false;
         }
 
-        public bool CheckSameEmitterAtPosition(Vector2Int pos, int currentEmitterId)
+        public bool CheckSameEmitterAtPosition(Vector2Int position, int currentEmitterId)
         {
-            return grid[GetIndex(pos.x, pos.y)]?.EmitterId == currentEmitterId;
+            int pos = EmitterUtils.PositionToIndex(position);
+            return (emitterGroups[currentEmitterId] & (1UL << pos)) != 0;
         }
 
         public void ClearEmitters()
         {
-            Array.Clear(grid, 0, grid.Length);
-        }
-
-        // pass in action method as parameter to process active emitters rather than having to pass out a list
-        public void ActionActiveEmitters(Action<EmitterDetail> action)
-        {
-            for (int i = 0; i < grid.Length; i++)
+            for (int i = 0; i < emitterCount; i++)
             {
-                if (grid[i].HasValue)
-                    action(grid[i].Value);
+                emitterGroups[i] = 0;
             }
-        }
-
-        private int GetIndex(int x, int y)
-        {
-#if UNITY_EDITOR
-            if (x < 0 || x >= width || y < 0 || y >= height)
-            {
-                throw new System.ArgumentOutOfRangeException($"Position ({x},{y}) out of grid bounds");
-            }
-#endif
-            return y * width + x;
         }
     }
 }

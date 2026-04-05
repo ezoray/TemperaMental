@@ -826,6 +826,34 @@ namespace TemperaMental.Input
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""System"",
+            ""id"": ""6031bd1b-b99f-4bf4-a068-be5be97fdf23"",
+            ""actions"": [
+                {
+                    ""name"": ""Quit"",
+                    ""type"": ""Button"",
+                    ""id"": ""4361c7f2-572f-4502-a939-c52edf119111"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""f05dd0b3-90ea-4476-a215-e9fc2dff0532"",
+                    ""path"": """",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Quit"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": []
@@ -877,6 +905,9 @@ namespace TemperaMental.Input
             m_Select_Previous = m_Select.FindAction("Previous", throwIfNotFound: true);
             m_Select_Next = m_Select.FindAction("Next", throwIfNotFound: true);
             m_Select_End = m_Select.FindAction("End", throwIfNotFound: true);
+            // System
+            m_System = asset.FindActionMap("System", throwIfNotFound: true);
+            m_System_Quit = m_System.FindAction("Quit", throwIfNotFound: true);
         }
 
         ~@TemperaMentalInputActions()
@@ -889,6 +920,7 @@ namespace TemperaMental.Input
             UnityEngine.Debug.Assert(!m_Mode.enabled, "This will cause a leak and performance issues, TemperaMentalInputActions.Mode.Disable() has not been called.");
             UnityEngine.Debug.Assert(!m_Create.enabled, "This will cause a leak and performance issues, TemperaMentalInputActions.Create.Disable() has not been called.");
             UnityEngine.Debug.Assert(!m_Select.enabled, "This will cause a leak and performance issues, TemperaMentalInputActions.Select.Disable() has not been called.");
+            UnityEngine.Debug.Assert(!m_System.enabled, "This will cause a leak and performance issues, TemperaMentalInputActions.System.Disable() has not been called.");
         }
 
         /// <summary>
@@ -1981,6 +2013,102 @@ namespace TemperaMental.Input
         /// Provides a new <see cref="SelectActions" /> instance referencing this action map.
         /// </summary>
         public SelectActions @Select => new SelectActions(this);
+
+        // System
+        private readonly InputActionMap m_System;
+        private List<ISystemActions> m_SystemActionsCallbackInterfaces = new List<ISystemActions>();
+        private readonly InputAction m_System_Quit;
+        /// <summary>
+        /// Provides access to input actions defined in input action map "System".
+        /// </summary>
+        public struct SystemActions
+        {
+            private @TemperaMentalInputActions m_Wrapper;
+
+            /// <summary>
+            /// Construct a new instance of the input action map wrapper class.
+            /// </summary>
+            public SystemActions(@TemperaMentalInputActions wrapper) { m_Wrapper = wrapper; }
+            /// <summary>
+            /// Provides access to the underlying input action "System/Quit".
+            /// </summary>
+            public InputAction @Quit => m_Wrapper.m_System_Quit;
+            /// <summary>
+            /// Provides access to the underlying input action map instance.
+            /// </summary>
+            public InputActionMap Get() { return m_Wrapper.m_System; }
+            /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Enable()" />
+            public void Enable() { Get().Enable(); }
+            /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Disable()" />
+            public void Disable() { Get().Disable(); }
+            /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.enabled" />
+            public bool enabled => Get().enabled;
+            /// <summary>
+            /// Implicitly converts an <see ref="SystemActions" /> to an <see ref="InputActionMap" /> instance.
+            /// </summary>
+            public static implicit operator InputActionMap(SystemActions set) { return set.Get(); }
+            /// <summary>
+            /// Adds <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+            /// </summary>
+            /// <param name="instance">Callback instance.</param>
+            /// <remarks>
+            /// If <paramref name="instance" /> is <c>null</c> or <paramref name="instance"/> have already been added this method does nothing.
+            /// </remarks>
+            /// <seealso cref="SystemActions" />
+            public void AddCallbacks(ISystemActions instance)
+            {
+                if (instance == null || m_Wrapper.m_SystemActionsCallbackInterfaces.Contains(instance)) return;
+                m_Wrapper.m_SystemActionsCallbackInterfaces.Add(instance);
+                @Quit.started += instance.OnQuit;
+                @Quit.performed += instance.OnQuit;
+                @Quit.canceled += instance.OnQuit;
+            }
+
+            /// <summary>
+            /// Removes <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+            /// </summary>
+            /// <remarks>
+            /// Calling this method when <paramref name="instance" /> have not previously been registered has no side-effects.
+            /// </remarks>
+            /// <seealso cref="SystemActions" />
+            private void UnregisterCallbacks(ISystemActions instance)
+            {
+                @Quit.started -= instance.OnQuit;
+                @Quit.performed -= instance.OnQuit;
+                @Quit.canceled -= instance.OnQuit;
+            }
+
+            /// <summary>
+            /// Unregisters <param cref="instance" /> and unregisters all input action callbacks via <see cref="SystemActions.UnregisterCallbacks(ISystemActions)" />.
+            /// </summary>
+            /// <seealso cref="SystemActions.UnregisterCallbacks(ISystemActions)" />
+            public void RemoveCallbacks(ISystemActions instance)
+            {
+                if (m_Wrapper.m_SystemActionsCallbackInterfaces.Remove(instance))
+                    UnregisterCallbacks(instance);
+            }
+
+            /// <summary>
+            /// Replaces all existing callback instances and previously registered input action callbacks associated with them with callbacks provided via <param cref="instance" />.
+            /// </summary>
+            /// <remarks>
+            /// If <paramref name="instance" /> is <c>null</c>, calling this method will only unregister all existing callbacks but not register any new callbacks.
+            /// </remarks>
+            /// <seealso cref="SystemActions.AddCallbacks(ISystemActions)" />
+            /// <seealso cref="SystemActions.RemoveCallbacks(ISystemActions)" />
+            /// <seealso cref="SystemActions.UnregisterCallbacks(ISystemActions)" />
+            public void SetCallbacks(ISystemActions instance)
+            {
+                foreach (var item in m_Wrapper.m_SystemActionsCallbackInterfaces)
+                    UnregisterCallbacks(item);
+                m_Wrapper.m_SystemActionsCallbackInterfaces.Clear();
+                AddCallbacks(instance);
+            }
+        }
+        /// <summary>
+        /// Provides a new <see cref="SystemActions" /> instance referencing this action map.
+        /// </summary>
+        public SystemActions @System => new SystemActions(this);
         /// <summary>
         /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Player" which allows adding and removing callbacks.
         /// </summary>
@@ -2261,6 +2389,21 @@ namespace TemperaMental.Input
             /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
             /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
             void OnEnd(InputAction.CallbackContext context);
+        }
+        /// <summary>
+        /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "System" which allows adding and removing callbacks.
+        /// </summary>
+        /// <seealso cref="SystemActions.AddCallbacks(ISystemActions)" />
+        /// <seealso cref="SystemActions.RemoveCallbacks(ISystemActions)" />
+        public interface ISystemActions
+        {
+            /// <summary>
+            /// Method invoked when associated input action "Quit" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnQuit(InputAction.CallbackContext context);
         }
     }
 }

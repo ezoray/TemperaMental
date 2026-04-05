@@ -21,9 +21,7 @@ namespace TemperaMental.Frames
 
         public void OnClickPasteFrame() => frameManager.PasteOntoFrame();
 
-        public void OnClickCopyFrame() => frameManager.CopyFrame();
-
-      
+        public void OnClickCopyFrame() => frameManager.CopyFrame();      
 
         public void OnClickChangeEmitter(int emitterId) => frameManager.SetEmitterType(emitterId);
 
@@ -56,7 +54,7 @@ namespace TemperaMental.Frames
 
         public void ActionOnPlaybackStateChanged(PlaybackState playbackState)
         {
-            frameManager.SetPlaybackActive(playbackState == PlaybackState.Playing);
+            frameManager.SetPlaybackState(playbackState);
         }
     }
 }

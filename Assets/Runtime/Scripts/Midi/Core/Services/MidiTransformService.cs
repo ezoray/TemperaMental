@@ -5,7 +5,7 @@ using Melanchall.DryWetMidi.Interaction;
 using TemperaMental.Applications.Config;
 using TemperaMental.Core;
 using TemperaMental.Frames;
-using TemperaMental.Logs;
+using TemperaMental.Utils;
 using UnityEngine;
 
 namespace TemperaMental.Midi.Transforms
@@ -28,10 +28,6 @@ namespace TemperaMental.Midi.Transforms
         int gridSize;
         int emitterCount;
 
-        // reusable bitmask buffers, one ulong per emitter (bits 0–63 map to grid positions)
-        ulong[] previousGroups;
-        ulong[] currentGroups;
-
         private void OnEnable()
         {
             frameStartPrefix = ConfigRegistry.Midi.FrameStartPrefix;
@@ -43,15 +39,12 @@ namespace TemperaMental.Midi.Transforms
             placeCC = ConfigRegistry.Midi.PlaceCC;
             removeCC = ConfigRegistry.Midi.RemoveCC;
             clearEmittersValue = ConfigRegistry.Midi.ClearEmittersValue;
+
             emitterCount = ConfigRegistry.Grid.EmitterCount;
 
             gridWidth = ConfigRegistry.Grid.GridWidth;
             gridHeight = ConfigRegistry.Grid.GridHeight;
             gridSize = gridWidth * gridHeight;
-
-
-            previousGroups = new ulong[emitterCount];
-            currentGroups = new ulong[emitterCount];
         }
 
         public MidiFile FromFramesToMidiFileReversed(IReadOnlyList<Frame> sourceFrames, int bpm)
@@ -72,7 +65,6 @@ namespace TemperaMental.Midi.Transforms
 
             return reversed;
         }
-
 
         public MidiFile FromFramesToMidiFile(IReadOnlyList<Frame> sourceFrames, int bpm, bool isReversed)
         {
@@ -108,8 +100,6 @@ namespace TemperaMental.Midi.Transforms
 
         private void WriteFrames(TimedObjectsManager<TimedEvent> manager, IReadOnlyList<Frame> sourceFrames, bool isReversed)
         {
-            ClearGroups(previousGroups);
-
             for (int i = 0; i < sourceFrames.Count; i++)
             {
                 long frameTick = i * ticksPerFrame;
@@ -118,17 +108,11 @@ namespace TemperaMental.Midi.Transforms
 
                 frameTick = WriteFrameStart(manager, frameTick, frameNumber);
 
-                if (i == 0)
-                {
-                    frameTick = ClearAllEmitters(manager, frameTick);
-                }
+                // clear all emitters at the start of every frame so each frame is absolute
+                // this allows seeking to any frame without depending upon previous frame state
+                frameTick = ClearAllEmitters(manager, frameTick);
 
-                FillGroups(currentGroups, sourceFrames[i]);
-
-                frameTick = WriteRemovals(manager, frameTick);
-                WriteAdditions(manager, frameTick);
-
-                CopyGroups(currentGroups, previousGroups);
+                WriteAllEmitters(manager, frameTick, sourceFrames[i]);
             }
 
             // set marker at end of last frame/quarter note to force playback to play to the end before looping
@@ -144,43 +128,27 @@ namespace TemperaMental.Midi.Transforms
             return tick;
         }
 
-        // remove any emitters that exist in the previous frame but not in the current frame
-        private long WriteRemovals(TimedObjectsManager<TimedEvent> manager, long tick)
+        // write emitters in turn by type
+        private void WriteAllEmitters(TimedObjectsManager<TimedEvent> manager, long tick, Frame frame)
         {
+            ulong[] emitterGroups = frame.GetEmitterGroups();
+
             for (byte emitterId = 0; emitterId < emitterCount; emitterId++)
             {
-                ulong toRemove = previousGroups[emitterId] & ~currentGroups[emitterId];
+                ulong group = emitterGroups[emitterId];
 
-                if (toRemove == 0) continue;
-
-                for (byte pos = 0; pos < gridSize; pos++)
-                {
-                    if ((toRemove & (1UL << pos)) != 0)
-                    {
-                        tick = WriteEmitterEvent(manager, tick, removeCC, pos);
-                    }
-                }
-            }
-            return tick;
-        }
-
-        // write emitters that exist in the current frame that don't exist in the previous frame
-        private long WriteAdditions(TimedObjectsManager<TimedEvent> manager, long tick)
-        {
-            for (byte emitterId = 0; emitterId < emitterCount; emitterId++)
-            {
-                ulong toAdd = currentGroups[emitterId] & ~previousGroups[emitterId];
-                if (toAdd == 0) continue;
+                if (group == 0) continue;
 
                 tick = WriteActivateEmitter(manager, tick, emitterId);
 
                 for (byte pos = 0; pos < gridSize; pos++)
                 {
-                    if ((toAdd & (1UL << pos)) != 0)
+                    if ((group & (1UL << pos)) != 0)
+                    {
                         tick = WriteEmitterEvent(manager, tick, placeCC, pos);
+                    }
                 }
             }
-            return tick;
         }
 
         private long WriteActivateEmitter(TimedObjectsManager<TimedEvent> manager, long tick, byte emitter)
@@ -204,9 +172,9 @@ namespace TemperaMental.Midi.Transforms
                 tick = WriteActivateEmitter(manager, tick, emitterId);
                 tick = WriteEmitterEvent(manager, tick, removeCC, clearEmittersValue);
             }
+
             return tick;
         }
-
 
         public List<Frame> FromMidiFileToFrames(MidiFile midiFile)
         {
@@ -231,8 +199,8 @@ namespace TemperaMental.Midi.Transforms
                         frames.Add(currentFrame);
                     }
 
-                    // use the last frame as the basis for the new frame as events represent the difference between the two
-                    currentFrame = currentFrame != null ? new Frame(currentFrame): new Frame(gridWidth, gridHeight);
+                    // each frame is now absolute so start fresh rather than copying previous
+                    currentFrame = new Frame(gridWidth, gridHeight);
 
                     currentFrameTick = frameTick;
                     currentEmitterId = 0;
@@ -248,20 +216,11 @@ namespace TemperaMental.Midi.Transforms
                 }
                 else if (controlNumber == placeCC)
                 {
-                    currentFrame.AddEmitter(new EmitterDetail(IndexToPosition((byte)cc.ControlValue), currentEmitterId));
+                    currentFrame.AddEmitter(new EmitterDetail(EmitterUtils.IndexToPosition((byte)cc.ControlValue), currentEmitterId));
                 }
                 else if (controlNumber == removeCC)
                 {
-                    byte value = (byte)cc.ControlValue;
-
-                    if (value == clearEmittersValue)
-                    {
-                        currentFrame.ClearEmitters();
-                    }
-                    else
-                    {
-                        currentFrame.TryRemoveEmitter(IndexToPosition(value));
-                    }
+                    // clear messages can be ignored on load as each frame starts fresh
                 }
             }
 
@@ -278,55 +237,6 @@ namespace TemperaMental.Midi.Transforms
             short tpqn = (midiFile.TimeDivision as TicksPerQuarterNoteTimeDivision)?.TicksPerQuarterNote ?? ticksPerFrame;
 
             return tpqn;
-        }
-
-        // populate groups by frame's active emitters
-        private void FillGroups(ulong[] groups, Frame frame)
-        {
-            ClearGroups(groups);
-
-            // instead of getting a list of active emitters from frame, pass in the method that acts upon them
-            frame.ActionActiveEmitters(AddEmitterToGroup);
-        }
-
-        // sets the bit position that represents an active emitter for that colour
-        private void AddEmitterToGroup(EmitterDetail emitterDetail)
-        {
-            byte pos = PositionToIndex(emitterDetail.Position);
-            currentGroups[emitterDetail.EmitterId] |= 1UL << pos;
-        }
-
-        private static void ClearGroups(ulong[] groups)
-        {
-            for (int i = 0; i < groups.Length; i++)
-            {
-                groups[i] = 0;
-            }
-        }
-
-        private static void CopyGroups(ulong[] source, ulong[] dest)
-        {
-            for (int i = 0; i < source.Length; i++)
-            {
-                dest[i] = source[i];
-            }
-        }
-
-        // change tilemap-based position to cc value index
-        private byte PositionToIndex(Vector2Int pos)
-        {
-            int flippedY = (gridHeight -1) - pos.y;
-
-            return (byte)(pos.x * gridHeight + flippedY);
-        }
-
-        // change cc value index to tilemap-based position
-        private Vector2Int IndexToPosition(byte index)
-        {
-            int x = index / gridHeight;
-            int y = (gridHeight -1) - (index % gridHeight);
-
-            return new Vector2Int(x, y);
-        }
+        }   
     }
 }
