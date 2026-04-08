@@ -5,10 +5,11 @@ namespace TemperaMental.Applications.Config
     [CreateAssetMenu(fileName = "UIConfig", menuName = "Scriptable Objects/UIConfig")]
     public class UIConfig : ScriptableObject
     {
-        // loop & reverse button colours
-        public Color DefaultOffColor = new Color(0.55f, 0.55f, 0.55f);
-        public Color LoopOnColor = new Color(0.4f, 0.8f, 0.4f);
-        public Color ReverseOnColor = new Color(1.0f, 0.5f, 1f);
+        // button colours
+        public Color DefaultColor = new Color(0.55f, 0.55f, 0.55f);
+        public Color GreenColor = new Color(0.4f, 0.8f, 0.4f);
+        public Color PurpleColor = new Color(1.0f, 0.5f, 1f);
+        public Color CyanColor = new Color(0.5f, 0.8f, 1f);
 
         // dimmable button text value
         public float AlphaValue = 0.3f;

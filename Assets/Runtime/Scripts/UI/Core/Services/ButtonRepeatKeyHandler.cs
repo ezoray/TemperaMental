@@ -24,7 +24,7 @@ namespace TemperaMental.UI.Core
         {
             if (canvasGroup == null || canvasGroup.interactable)
             {
-                button.OnPress(true);
+                button.OnPress();
             }
         }
 

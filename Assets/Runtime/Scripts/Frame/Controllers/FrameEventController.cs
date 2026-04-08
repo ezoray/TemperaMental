@@ -10,6 +10,8 @@ namespace TemperaMental.Frames
         [SerializeField] GridManager gridManager;
         [SerializeField] FrameManager frameManager;
 
+     
+        public void OnClickToggleWrapping() => frameManager.ToggleWrapping();
 
         public void OnClickDeleteFrame() => frameManager.DeleteFrame();
 
@@ -26,6 +28,8 @@ namespace TemperaMental.Frames
         public void OnClickChangeEmitter(int emitterId) => frameManager.SetEmitterType(emitterId);
 
         public void OnClickNewFrame() => frameManager.InsertFrame();
+
+        public void ActionOnFrameShift(ShiftDirectionFlags directionFlags) => frameManager.ShiftCurrentFrame(directionFlags);
 
         // frame slider
         public void ActionOnSelectedFrameChanged(float selectedFrame) => frameManager.GoToSelectedFrame(Mathf.RoundToInt(selectedFrame));

@@ -4,10 +4,9 @@ using UnityEngine;
 
 namespace TemperaMental.UI.Core
 {
-    // todo seeing an error stopping play mode, we might need to clear this list
     public class UIManager : MonoBehaviour
     {
-        [Header("Order: Device, File, Mode, Playback, Create, Select")]
+        [Header("Order: Device, File, Mode, Frame, FrameShift, Playback, Create, Select")]
         [SerializeField] List<CanvasGroup> panels;
 
         private void ApplyState(UiStateFlags uiState)
@@ -40,6 +39,11 @@ namespace TemperaMental.UI.Core
                     ApplyState(UiStateFlags.All);
                     break;
             }
+        }
+
+        private void OnDestroy()
+        {
+            panels.Clear();
         }
     }
 }

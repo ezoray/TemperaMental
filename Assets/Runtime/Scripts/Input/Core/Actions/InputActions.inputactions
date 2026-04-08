@@ -277,17 +277,6 @@
             "bindings": [
                 {
                     "name": "",
-                    "id": "8c6ee5b3-d999-47a0-a719-6b0491aba353",
-                    "path": "<Keyboard>/rightArrow",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Play",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "6d5046fc-94b5-40cc-a7ac-1cc5a18a3339",
                     "path": "<Keyboard>/z",
                     "interactions": "",
@@ -299,34 +288,12 @@
                 },
                 {
                     "name": "",
-                    "id": "044bd456-0290-4338-b59c-da4121b0a085",
-                    "path": "<Keyboard>/upArrow",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Pause",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "42bd3ade-76f9-40ae-bb65-22bab4599481",
                     "path": "<Keyboard>/space",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
                     "action": "Pause",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "d115ea97-d98e-4325-94ab-1f69e7bb073c",
-                    "path": "<Keyboard>/downArrow",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Stop",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -349,17 +316,6 @@
                     "processors": "",
                     "groups": "",
                     "action": "Loop",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "077d6e56-448c-48d5-83c7-eb17fedb5a58",
-                    "path": "<Keyboard>/leftArrow",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Reverse",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -762,6 +718,134 @@
                     "processors": "",
                     "groups": "",
                     "action": "Quit",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "FrameShift",
+            "id": "8cfc6de0-fa50-43f8-bb88-aae6a71d1366",
+            "actions": [
+                {
+                    "name": "Up",
+                    "type": "Button",
+                    "id": "79b98095-642b-4961-ab53-76dbaaf2a85d",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Down",
+                    "type": "Button",
+                    "id": "69d323dd-8652-4733-b7ac-9a51f4df8eea",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Left",
+                    "type": "Button",
+                    "id": "5717734f-2678-43d1-a2f2-907404812b0b",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Right",
+                    "type": "Button",
+                    "id": "f70c9c10-c501-4747-b627-52be5a0036a0",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Wrap",
+                    "type": "Button",
+                    "id": "30cb6ae7-0136-48b1-800f-3c2cb1a051a5",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Latch",
+                    "type": "Button",
+                    "id": "89071647-e050-4e40-ac96-f2b11d5f5feb",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "a7b33fc2-12a6-42ae-a258-846583aca494",
+                    "path": "<Keyboard>/upArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Up",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "544f6beb-3660-40b7-9f0f-3671a4cf5c5f",
+                    "path": "<Keyboard>/downArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Down",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5030a97b-34bd-4e25-8f22-ff9b64fa8f35",
+                    "path": "<Keyboard>/leftArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Left",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "bbc25992-758e-40e7-beac-4651bd8469e2",
+                    "path": "<Keyboard>/rightArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Right",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b4f112f8-e723-42dc-941a-93801795afc0",
+                    "path": "<Keyboard>/slash",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Wrap",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e3e33903-aa2e-4892-91e3-5922bdf0ddfd",
+                    "path": "<Keyboard>/k",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Latch",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

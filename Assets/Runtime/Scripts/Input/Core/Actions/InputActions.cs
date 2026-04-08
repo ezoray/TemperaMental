@@ -365,17 +365,6 @@ namespace TemperaMental.Input
             ""bindings"": [
                 {
                     ""name"": """",
-                    ""id"": ""8c6ee5b3-d999-47a0-a719-6b0491aba353"",
-                    ""path"": ""<Keyboard>/rightArrow"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Play"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
                     ""id"": ""6d5046fc-94b5-40cc-a7ac-1cc5a18a3339"",
                     ""path"": ""<Keyboard>/z"",
                     ""interactions"": """",
@@ -387,34 +376,12 @@ namespace TemperaMental.Input
                 },
                 {
                     ""name"": """",
-                    ""id"": ""044bd456-0290-4338-b59c-da4121b0a085"",
-                    ""path"": ""<Keyboard>/upArrow"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Pause"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
                     ""id"": ""42bd3ade-76f9-40ae-bb65-22bab4599481"",
                     ""path"": ""<Keyboard>/space"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Pause"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""d115ea97-d98e-4325-94ab-1f69e7bb073c"",
-                    ""path"": ""<Keyboard>/downArrow"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Stop"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -437,17 +404,6 @@ namespace TemperaMental.Input
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Loop"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""077d6e56-448c-48d5-83c7-eb17fedb5a58"",
-                    ""path"": ""<Keyboard>/leftArrow"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Reverse"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -854,6 +810,134 @@ namespace TemperaMental.Input
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""FrameShift"",
+            ""id"": ""8cfc6de0-fa50-43f8-bb88-aae6a71d1366"",
+            ""actions"": [
+                {
+                    ""name"": ""Up"",
+                    ""type"": ""Button"",
+                    ""id"": ""79b98095-642b-4961-ab53-76dbaaf2a85d"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Down"",
+                    ""type"": ""Button"",
+                    ""id"": ""69d323dd-8652-4733-b7ac-9a51f4df8eea"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Left"",
+                    ""type"": ""Button"",
+                    ""id"": ""5717734f-2678-43d1-a2f2-907404812b0b"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Right"",
+                    ""type"": ""Button"",
+                    ""id"": ""f70c9c10-c501-4747-b627-52be5a0036a0"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Wrap"",
+                    ""type"": ""Button"",
+                    ""id"": ""30cb6ae7-0136-48b1-800f-3c2cb1a051a5"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Latch"",
+                    ""type"": ""Button"",
+                    ""id"": ""89071647-e050-4e40-ac96-f2b11d5f5feb"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""a7b33fc2-12a6-42ae-a258-846583aca494"",
+                    ""path"": ""<Keyboard>/upArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Up"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""544f6beb-3660-40b7-9f0f-3671a4cf5c5f"",
+                    ""path"": ""<Keyboard>/downArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Down"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""5030a97b-34bd-4e25-8f22-ff9b64fa8f35"",
+                    ""path"": ""<Keyboard>/leftArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Left"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""bbc25992-758e-40e7-beac-4651bd8469e2"",
+                    ""path"": ""<Keyboard>/rightArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Right"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""b4f112f8-e723-42dc-941a-93801795afc0"",
+                    ""path"": ""<Keyboard>/slash"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Wrap"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""e3e33903-aa2e-4892-91e3-5922bdf0ddfd"",
+                    ""path"": ""<Keyboard>/k"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Latch"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": []
@@ -908,6 +992,14 @@ namespace TemperaMental.Input
             // System
             m_System = asset.FindActionMap("System", throwIfNotFound: true);
             m_System_Quit = m_System.FindAction("Quit", throwIfNotFound: true);
+            // FrameShift
+            m_FrameShift = asset.FindActionMap("FrameShift", throwIfNotFound: true);
+            m_FrameShift_Up = m_FrameShift.FindAction("Up", throwIfNotFound: true);
+            m_FrameShift_Down = m_FrameShift.FindAction("Down", throwIfNotFound: true);
+            m_FrameShift_Left = m_FrameShift.FindAction("Left", throwIfNotFound: true);
+            m_FrameShift_Right = m_FrameShift.FindAction("Right", throwIfNotFound: true);
+            m_FrameShift_Wrap = m_FrameShift.FindAction("Wrap", throwIfNotFound: true);
+            m_FrameShift_Latch = m_FrameShift.FindAction("Latch", throwIfNotFound: true);
         }
 
         ~@TemperaMentalInputActions()
@@ -921,6 +1013,7 @@ namespace TemperaMental.Input
             UnityEngine.Debug.Assert(!m_Create.enabled, "This will cause a leak and performance issues, TemperaMentalInputActions.Create.Disable() has not been called.");
             UnityEngine.Debug.Assert(!m_Select.enabled, "This will cause a leak and performance issues, TemperaMentalInputActions.Select.Disable() has not been called.");
             UnityEngine.Debug.Assert(!m_System.enabled, "This will cause a leak and performance issues, TemperaMentalInputActions.System.Disable() has not been called.");
+            UnityEngine.Debug.Assert(!m_FrameShift.enabled, "This will cause a leak and performance issues, TemperaMentalInputActions.FrameShift.Disable() has not been called.");
         }
 
         /// <summary>
@@ -2109,6 +2202,157 @@ namespace TemperaMental.Input
         /// Provides a new <see cref="SystemActions" /> instance referencing this action map.
         /// </summary>
         public SystemActions @System => new SystemActions(this);
+
+        // FrameShift
+        private readonly InputActionMap m_FrameShift;
+        private List<IFrameShiftActions> m_FrameShiftActionsCallbackInterfaces = new List<IFrameShiftActions>();
+        private readonly InputAction m_FrameShift_Up;
+        private readonly InputAction m_FrameShift_Down;
+        private readonly InputAction m_FrameShift_Left;
+        private readonly InputAction m_FrameShift_Right;
+        private readonly InputAction m_FrameShift_Wrap;
+        private readonly InputAction m_FrameShift_Latch;
+        /// <summary>
+        /// Provides access to input actions defined in input action map "FrameShift".
+        /// </summary>
+        public struct FrameShiftActions
+        {
+            private @TemperaMentalInputActions m_Wrapper;
+
+            /// <summary>
+            /// Construct a new instance of the input action map wrapper class.
+            /// </summary>
+            public FrameShiftActions(@TemperaMentalInputActions wrapper) { m_Wrapper = wrapper; }
+            /// <summary>
+            /// Provides access to the underlying input action "FrameShift/Up".
+            /// </summary>
+            public InputAction @Up => m_Wrapper.m_FrameShift_Up;
+            /// <summary>
+            /// Provides access to the underlying input action "FrameShift/Down".
+            /// </summary>
+            public InputAction @Down => m_Wrapper.m_FrameShift_Down;
+            /// <summary>
+            /// Provides access to the underlying input action "FrameShift/Left".
+            /// </summary>
+            public InputAction @Left => m_Wrapper.m_FrameShift_Left;
+            /// <summary>
+            /// Provides access to the underlying input action "FrameShift/Right".
+            /// </summary>
+            public InputAction @Right => m_Wrapper.m_FrameShift_Right;
+            /// <summary>
+            /// Provides access to the underlying input action "FrameShift/Wrap".
+            /// </summary>
+            public InputAction @Wrap => m_Wrapper.m_FrameShift_Wrap;
+            /// <summary>
+            /// Provides access to the underlying input action "FrameShift/Latch".
+            /// </summary>
+            public InputAction @Latch => m_Wrapper.m_FrameShift_Latch;
+            /// <summary>
+            /// Provides access to the underlying input action map instance.
+            /// </summary>
+            public InputActionMap Get() { return m_Wrapper.m_FrameShift; }
+            /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Enable()" />
+            public void Enable() { Get().Enable(); }
+            /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Disable()" />
+            public void Disable() { Get().Disable(); }
+            /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.enabled" />
+            public bool enabled => Get().enabled;
+            /// <summary>
+            /// Implicitly converts an <see ref="FrameShiftActions" /> to an <see ref="InputActionMap" /> instance.
+            /// </summary>
+            public static implicit operator InputActionMap(FrameShiftActions set) { return set.Get(); }
+            /// <summary>
+            /// Adds <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+            /// </summary>
+            /// <param name="instance">Callback instance.</param>
+            /// <remarks>
+            /// If <paramref name="instance" /> is <c>null</c> or <paramref name="instance"/> have already been added this method does nothing.
+            /// </remarks>
+            /// <seealso cref="FrameShiftActions" />
+            public void AddCallbacks(IFrameShiftActions instance)
+            {
+                if (instance == null || m_Wrapper.m_FrameShiftActionsCallbackInterfaces.Contains(instance)) return;
+                m_Wrapper.m_FrameShiftActionsCallbackInterfaces.Add(instance);
+                @Up.started += instance.OnUp;
+                @Up.performed += instance.OnUp;
+                @Up.canceled += instance.OnUp;
+                @Down.started += instance.OnDown;
+                @Down.performed += instance.OnDown;
+                @Down.canceled += instance.OnDown;
+                @Left.started += instance.OnLeft;
+                @Left.performed += instance.OnLeft;
+                @Left.canceled += instance.OnLeft;
+                @Right.started += instance.OnRight;
+                @Right.performed += instance.OnRight;
+                @Right.canceled += instance.OnRight;
+                @Wrap.started += instance.OnWrap;
+                @Wrap.performed += instance.OnWrap;
+                @Wrap.canceled += instance.OnWrap;
+                @Latch.started += instance.OnLatch;
+                @Latch.performed += instance.OnLatch;
+                @Latch.canceled += instance.OnLatch;
+            }
+
+            /// <summary>
+            /// Removes <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+            /// </summary>
+            /// <remarks>
+            /// Calling this method when <paramref name="instance" /> have not previously been registered has no side-effects.
+            /// </remarks>
+            /// <seealso cref="FrameShiftActions" />
+            private void UnregisterCallbacks(IFrameShiftActions instance)
+            {
+                @Up.started -= instance.OnUp;
+                @Up.performed -= instance.OnUp;
+                @Up.canceled -= instance.OnUp;
+                @Down.started -= instance.OnDown;
+                @Down.performed -= instance.OnDown;
+                @Down.canceled -= instance.OnDown;
+                @Left.started -= instance.OnLeft;
+                @Left.performed -= instance.OnLeft;
+                @Left.canceled -= instance.OnLeft;
+                @Right.started -= instance.OnRight;
+                @Right.performed -= instance.OnRight;
+                @Right.canceled -= instance.OnRight;
+                @Wrap.started -= instance.OnWrap;
+                @Wrap.performed -= instance.OnWrap;
+                @Wrap.canceled -= instance.OnWrap;
+                @Latch.started -= instance.OnLatch;
+                @Latch.performed -= instance.OnLatch;
+                @Latch.canceled -= instance.OnLatch;
+            }
+
+            /// <summary>
+            /// Unregisters <param cref="instance" /> and unregisters all input action callbacks via <see cref="FrameShiftActions.UnregisterCallbacks(IFrameShiftActions)" />.
+            /// </summary>
+            /// <seealso cref="FrameShiftActions.UnregisterCallbacks(IFrameShiftActions)" />
+            public void RemoveCallbacks(IFrameShiftActions instance)
+            {
+                if (m_Wrapper.m_FrameShiftActionsCallbackInterfaces.Remove(instance))
+                    UnregisterCallbacks(instance);
+            }
+
+            /// <summary>
+            /// Replaces all existing callback instances and previously registered input action callbacks associated with them with callbacks provided via <param cref="instance" />.
+            /// </summary>
+            /// <remarks>
+            /// If <paramref name="instance" /> is <c>null</c>, calling this method will only unregister all existing callbacks but not register any new callbacks.
+            /// </remarks>
+            /// <seealso cref="FrameShiftActions.AddCallbacks(IFrameShiftActions)" />
+            /// <seealso cref="FrameShiftActions.RemoveCallbacks(IFrameShiftActions)" />
+            /// <seealso cref="FrameShiftActions.UnregisterCallbacks(IFrameShiftActions)" />
+            public void SetCallbacks(IFrameShiftActions instance)
+            {
+                foreach (var item in m_Wrapper.m_FrameShiftActionsCallbackInterfaces)
+                    UnregisterCallbacks(item);
+                m_Wrapper.m_FrameShiftActionsCallbackInterfaces.Clear();
+                AddCallbacks(instance);
+            }
+        }
+        /// <summary>
+        /// Provides a new <see cref="FrameShiftActions" /> instance referencing this action map.
+        /// </summary>
+        public FrameShiftActions @FrameShift => new FrameShiftActions(this);
         /// <summary>
         /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Player" which allows adding and removing callbacks.
         /// </summary>
@@ -2404,6 +2648,56 @@ namespace TemperaMental.Input
             /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
             /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
             void OnQuit(InputAction.CallbackContext context);
+        }
+        /// <summary>
+        /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "FrameShift" which allows adding and removing callbacks.
+        /// </summary>
+        /// <seealso cref="FrameShiftActions.AddCallbacks(IFrameShiftActions)" />
+        /// <seealso cref="FrameShiftActions.RemoveCallbacks(IFrameShiftActions)" />
+        public interface IFrameShiftActions
+        {
+            /// <summary>
+            /// Method invoked when associated input action "Up" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnUp(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "Down" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnDown(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "Left" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnLeft(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "Right" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnRight(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "Wrap" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnWrap(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "Latch" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnLatch(InputAction.CallbackContext context);
         }
     }
 }

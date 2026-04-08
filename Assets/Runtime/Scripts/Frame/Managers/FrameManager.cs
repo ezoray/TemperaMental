@@ -9,6 +9,7 @@ namespace TemperaMental.Frames
 {
     public class FrameManager : MonoBehaviour
     {
+        [SerializeField] FrameShiftService frameShiftService;
         int gridWidth;
         int gridHeight;
 
@@ -20,10 +21,13 @@ namespace TemperaMental.Frames
 
         PlaybackState playbackState;
 
+        bool doWrap;
+
         [SerializeField] UnityEvent<int> onEmitterTypeChanged;
         [SerializeField] UnityEvent<EmitterDetail> onAddEmitter;
         [SerializeField] UnityEvent<Vector2Int> onRemoveEmitter;
         [SerializeField] UnityEvent<FrameDetail> onFrameChanged;
+        [SerializeField] UnityEvent<bool> onWrapStateChanged;
 
         private void Awake()
         {
@@ -38,6 +42,27 @@ namespace TemperaMental.Frames
         private void Start()
         {
             AddFrame();
+        }
+
+        public void ShiftCurrentFrame(ShiftDirectionFlags directions)
+        {
+            if (playbackState == PlaybackState.Playing || playbackState == PlaybackState.Paused) return;
+
+            for (int i = 0; i < 4; i++)
+            {
+                ShiftDirectionFlags flag = (ShiftDirectionFlags)(1 << i);
+                if (directions.HasFlag(flag))
+                    frames[currentFrameIndex] = frameShiftService.Shift(frames[currentFrameIndex], (ShiftDirection)i, doWrap);
+            }
+
+            SetCurrentFrame(currentFrameIndex);
+        }
+
+        public void ToggleWrapping()
+        {
+            doWrap = !doWrap;
+
+            onWrapStateChanged?.Invoke(doWrap);
         }
 
         public void SetPlaybackState(PlaybackState newPlaybackState)

@@ -225,6 +225,8 @@ MonoBehaviour:
   appConfig: {fileID: 11400000, guid: 86b1ab0289c4447f28ed878a70782edb, type: 2}
   uiConfig: {fileID: 11400000, guid: e59a02da33e8f484596c9908f49e0736, type: 2}
   buttonText: {fileID: 5190707205867261536}
+  doRepeat: 1
+  initialDelay: 0
 --- !u!222 &5622811960388233212
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -290,5 +292,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ec024c898c6e491d9c69e81cfbc7285, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TemperaMental.Applications.Core.RepeatHandler
-  button: {fileID: 4101060469761601702}
   actionReference: {fileID: 0}
+  button: {fileID: 4101060469761601702}

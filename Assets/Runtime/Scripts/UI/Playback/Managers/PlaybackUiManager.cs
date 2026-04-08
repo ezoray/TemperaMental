@@ -27,9 +27,9 @@ namespace TemperaMental.UI.Playbacks
         {
             transportCanvasGroup.interactable = false;
 
-            defaultOffColor = ConfigRegistry.UI.DefaultOffColor;
-            loopOnColor = ConfigRegistry.UI.LoopOnColor;
-            reverseOnColor = ConfigRegistry.UI.ReverseOnColor;
+            defaultOffColor = ConfigRegistry.UI.DefaultColor;
+            loopOnColor = ConfigRegistry.UI.GreenColor;
+            reverseOnColor = ConfigRegistry.UI.PurpleColor;
 
             minBpm = ConfigRegistry.Midi.MinBpm;
             maxBpm = ConfigRegistry.Midi.MaxBpm;

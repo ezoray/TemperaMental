@@ -43,6 +43,14 @@ namespace TemperaMental.Frames
         public void AddEmitter(EmitterDetail emitterDetail)
         {
             int pos = EmitterUtils.PositionToIndex(emitterDetail.Position);
+
+            // evict any other emitter at this position
+            for (int i = 0; i < emitterCount; i++)
+            {
+                if (i == emitterDetail.EmitterId) continue;
+                emitterGroups[i] &= ~(1UL << pos);
+            }
+
             emitterGroups[emitterDetail.EmitterId] |= 1UL << pos;
         }
 
