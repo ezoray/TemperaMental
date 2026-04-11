@@ -15,13 +15,13 @@ MonoBehaviour:
   PrimaryDevice: Tempera
   FilterName: Midi
   FilterType: mid
-  DefaultOffColor: {r: 0.55, g: 0.55, b: 0.55, a: 1}
-  LoopOnColor: {r: 0.4, g: 0.8, b: 0.4, a: 1}
-  ReverseOnColor: {r: 1, g: 0.5, b: 1, a: 1}
+  AppendTitle: Append Midi File
+  LoadTitle: Open Midi File
+  SaveTitle: Save Midi File
   DefaultBpm: 400
   MinBpm: 10
   MaxBpm: 2000
-  TicksPerFrame: 480
+  TicksPerFrame: 960
   ActivateCC: 10
   PlaceCC: 11
   RemoveCC: 12

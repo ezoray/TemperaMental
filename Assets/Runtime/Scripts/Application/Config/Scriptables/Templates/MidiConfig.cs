@@ -18,7 +18,9 @@ namespace TemperaMental.Applications.Config
         public int MinBpm = 10;
         public int MaxBpm = 2000;
 
+        // tick resolution and interval between ticks
         public short TicksPerFrame = 960;
+        public float EventIntervalMS = 0.0001f;
 
         // cc numbers for emitters
         public int ActivateCC = 10;
