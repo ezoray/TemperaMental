@@ -34,6 +34,8 @@ namespace TemperaMental.Frames
         // frame slider
         public void ActionOnSelectedFrameChanged(float selectedFrame) => frameManager.GoToSelectedFrame(Mathf.RoundToInt(selectedFrame));
 
+        public void ActionOnPlaybackStateChanged(PlaybackState playbackState) => frameManager.SetPlaybackState(playbackState);
+
         public void ActionOnPlaybackFrameChanged(int playbackFrame) => frameManager.GoToPlaybackFrame(playbackFrame);
 
         public void OnMouseLeftClick(Vector2 mousePosition)
@@ -54,11 +56,6 @@ namespace TemperaMental.Frames
             {
                 frameManager.RemoveEmitter(new Vector2Int(cellPosition.x, cellPosition.y));
             }
-        }
-
-        public void ActionOnPlaybackStateChanged(PlaybackState playbackState)
-        {
-            frameManager.SetPlaybackState(playbackState);
         }
     }
 }

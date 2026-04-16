@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Interaction;
 using Melanchall.DryWetMidi.Multimedia;
@@ -37,6 +38,30 @@ namespace TemperaMental.Midi.Playbacks
         PlaybackState playbackState;
         ConcurrentQueue<int> frameQueue;
 
+        // diagnostics
+        long[] _eventTimestamps = new long[128];
+        long _frameStartTimestamp;
+        volatile int _diagEventCount;
+        bool _diagFrameReady;
+        string _diagFrameLabel;
+        ConcurrentQueue<DiagSnapshot> _diagQueue = new ConcurrentQueue<DiagSnapshot>();
+
+        readonly struct DiagSnapshot
+        {
+            public readonly string FrameLabel;
+            public readonly long FrameStartTimestamp;
+            public readonly long[] EventTimestamps;
+            public readonly int EventCount;
+
+            public DiagSnapshot(string frameLabel, long frameStartTimestamp, long[] eventTimestamps, int eventCount)
+            {
+                FrameLabel = frameLabel;
+                FrameStartTimestamp = frameStartTimestamp;
+                EventTimestamps = eventTimestamps;
+                EventCount = eventCount;
+            }
+        }
+
         [SerializeField] UnityEvent<bool> onOutputDeviceChanged;
         [SerializeField] UnityEvent<int> onPlaybackFrameChanged;
         [SerializeField] UnityEvent<PlaybackState> onPlaybackStateChanged;
@@ -49,7 +74,7 @@ namespace TemperaMental.Midi.Playbacks
         {
             frameQueue = new ConcurrentQueue<int>();
             frameNoPrefix = ConfigRegistry.Midi.FrameStartPrefix;
-            playbackState = PlaybackState.Idle;
+            playbackState = PlaybackState.Reset;
 
             isPlaybackFinished = false;
             isLooped = false;
@@ -67,6 +92,11 @@ namespace TemperaMental.Midi.Playbacks
             while (frameQueue.TryDequeue(out int frameNumber))
             {
                 onPlaybackFrameChanged?.Invoke(frameNumber);
+            }
+
+            while (_diagQueue.TryDequeue(out DiagSnapshot snapshot))
+            {
+                ProcessDiagnostics(snapshot);
             }
         }
 
@@ -101,7 +131,7 @@ namespace TemperaMental.Midi.Playbacks
         {
             switch (playbackState)
             {
-                case PlaybackState.Idle:
+                case PlaybackState.Reset:
                 case PlaybackState.Stopped:
                     Play(midiFileDetail, initialFrame);
                     break;
@@ -132,17 +162,17 @@ namespace TemperaMental.Midi.Playbacks
                         ActivePlayback.Stop();
                         MoveToAnchor();
                         LogMan.Log($"Playback stopped, returned to frame {playStartAnchor}");
-                        SetPlaybackState(PlaybackState.Idle);
+                        SetPlaybackState(PlaybackState.Reset);
                         break;
 
                     case PlaybackState.Stopped:
                         ActivePlayback.Stop();
                         MoveToAnchor();
                         LogMan.Log($"Returned to frame {playStartAnchor}");
-                        SetPlaybackState(PlaybackState.Idle);
+                        SetPlaybackState(PlaybackState.Reset);
                         break;
-      
-                    case PlaybackState.Idle:
+
+                    case PlaybackState.Reset:
                         // no-op
                         break;
                 }
@@ -155,7 +185,7 @@ namespace TemperaMental.Midi.Playbacks
 
         public void SeekToFrame(int seekFrame)
         {
-            if (playbackState == PlaybackState.Idle) return;
+            if (playbackState == PlaybackState.Reset) return;
 
             playFrame = Mathf.Clamp(seekFrame, 1, totalFrames);
             anchorFrame = isReversed ? (totalFrames - playFrame) + 1 : playFrame;
@@ -170,7 +200,7 @@ namespace TemperaMental.Midi.Playbacks
         {
             isReversed = !isReversed;
 
-            if (playbackState != PlaybackState.Idle)
+            if (playbackState != PlaybackState.Reset)
             {
                 Playback outgoing = isReversed ? forwardPlayback : reversePlayback;
                 Playback incoming = isReversed ? reversePlayback : forwardPlayback;
@@ -195,7 +225,7 @@ namespace TemperaMental.Midi.Playbacks
         {
             isLooped = !isLooped;
 
-            if (playbackState != PlaybackState.Idle)
+            if (playbackState != PlaybackState.Reset)
             {
                 forwardPlayback.Loop = isLooped;
                 reversePlayback.Loop = isLooped;
@@ -260,12 +290,12 @@ namespace TemperaMental.Midi.Playbacks
         {
             ResetPlayback();
             LogMan.Log("Playback finished");
-            SetPlaybackState(PlaybackState.Idle);
+            SetPlaybackState(PlaybackState.Reset);
         }
 
         private void InitPlaybacks(MidiFileDetail midiFileDetail, int initialFrame)
         {
-            if (playbackState != PlaybackState.Idle)
+            if (playbackState != PlaybackState.Reset)
             {
                 ResetPlayback();
             }
@@ -276,7 +306,7 @@ namespace TemperaMental.Midi.Playbacks
             ticksPerFrame = ((TicksPerQuarterNoteTimeDivision)midiFileDetail.ForwardMidiFile.TimeDivision).TicksPerQuarterNote;
 
             totalFrames = MidiUtils.GetTotalFrames(midiFileDetail.ForwardMidiFile);
-            playFrame = Mathf.Clamp(initialFrame, 1, totalFrames);         
+            playFrame = Mathf.Clamp(initialFrame, 1, totalFrames);
 
             if (isReversed)
             {
@@ -319,6 +349,14 @@ namespace TemperaMental.Midi.Playbacks
 
         private void OnEventPlayed(object sender, MidiEventPlayedEventArgs eventArgs)
         {
+            // timestamp every CC event for inter-event diagnostics
+            if (eventArgs.Event is ControlChangeEvent)
+            {
+                int idx = _diagEventCount++;
+                if (idx < _eventTimestamps.Length)
+                    _eventTimestamps[idx] = Stopwatch.GetTimestamp();
+            }
+
             if (eventArgs.Event is MarkerEvent marker)
             {
                 string markerText = marker.Text;
@@ -329,11 +367,57 @@ namespace TemperaMental.Midi.Playbacks
 
                     if (int.TryParse(numberPart, out var frameNumber))
                     {
+                        // flush diagnostics for the previous frame before starting the new one
+                        if (_diagFrameReady)
+                            EnqueueDiagSnapshot();
+
+                        // reset for new frame
+                        _diagEventCount = 0;
+                        _frameStartTimestamp = Stopwatch.GetTimestamp();
+                        _diagFrameLabel = markerText;
+                        _diagFrameReady = true;
+
                         playFrame = frameNumber;
                         frameQueue.Enqueue(frameNumber);
                     }
                 }
+                else if (markerText == ConfigRegistry.Midi.SeqEndMarker)
+                {
+                    // flush the final frame on END_SEQ
+                    if (_diagFrameReady)
+                        EnqueueDiagSnapshot();
+                }
             }
+        }
+
+        private void EnqueueDiagSnapshot()
+        {
+            _diagFrameReady = false;
+            _diagQueue.Enqueue(new DiagSnapshot(
+                _diagFrameLabel,
+                _frameStartTimestamp,
+                (long[])_eventTimestamps.Clone(),
+                _diagEventCount
+            ));
+        }
+
+        private void ProcessDiagnostics(DiagSnapshot snapshot)
+        {
+            if (snapshot.EventCount == 0) return;
+
+            double ticksPerMs = Stopwatch.Frequency / 1000.0;
+
+            double startLatency = (snapshot.EventTimestamps[0] - snapshot.FrameStartTimestamp) / ticksPerMs;
+            LogMan.Log($"[{snapshot.FrameLabel}] Marker → first CC: {startLatency:F3}ms");
+
+            for (int i = 1; i < snapshot.EventCount; i++)
+            {
+                double delta = (snapshot.EventTimestamps[i] - snapshot.EventTimestamps[i - 1]) / ticksPerMs;
+                LogMan.Log($"[{snapshot.FrameLabel}] CC {i - 1} → {i}: {delta:F3}ms");
+            }
+
+            double total = (snapshot.EventTimestamps[snapshot.EventCount - 1] - snapshot.FrameStartTimestamp) / ticksPerMs;
+            LogMan.Log($"[{snapshot.FrameLabel}] Total frame CC duration: {total:F3}ms");
         }
 
         private void OnRepeatStarted(object sender, EventArgs e)
@@ -375,7 +459,7 @@ namespace TemperaMental.Midi.Playbacks
         {
             DisposePlayback(ref forwardPlayback);
             DisposePlayback(ref reversePlayback);
-            SetPlaybackState(PlaybackState.Idle);
+            SetPlaybackState(PlaybackState.Reset);
 
             // prevent app from holding on to empty memory
             GC.Collect();

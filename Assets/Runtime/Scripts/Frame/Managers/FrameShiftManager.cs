@@ -1,83 +1,85 @@
 using TemperaMental.Applications.Config;
-using TemperaMental.Frames;
 using UnityEngine;
 using UnityEngine.Events;
 
-public class FrameShiftManager : MonoBehaviour
+namespace TemperaMental.Frames
 {
-    int bpm;
-    bool isLatched;
-    float nextEventTime;
-    float repeatRate;
-    ShiftDirectionFlags directionFlags;
-
-    [SerializeField] UnityEvent<ShiftDirectionFlags> onFrameShift;
-    [SerializeField] UnityEvent<bool> onLatchStateChanged;
-    [SerializeField] UnityEvent<int, bool> onShiftButtonLatchChanged;
-
-
-    private void Awake()
+    public class FrameShiftManager : MonoBehaviour
     {
-        bpm = ConfigRegistry.Midi.DefaultBpm;
-        repeatRate = 60f / bpm;
-        nextEventTime = Time.time + repeatRate;
-    }
+        int bpm;
+        bool isLatched;
+        float nextEventTime;
+        float repeatRate;
+        ShiftDirectionFlags directionFlags;
 
-    void Update()
-    {
-        if (!isLatched || directionFlags == 0) return;
+        [SerializeField] UnityEvent<ShiftDirectionFlags> onFrameShift;
+        [SerializeField] UnityEvent<bool> onLatchStateChanged;
+        [SerializeField] UnityEvent<int, bool> onShiftButtonLatchChanged;
 
-        if (Time.time >= nextEventTime)
+
+        private void Awake()
         {
-            onFrameShift?.Invoke(directionFlags);
+            bpm = ConfigRegistry.Midi.DefaultBpm;
+            repeatRate = 60f / bpm;
             nextEventTime = Time.time + repeatRate;
         }
-    }
 
-    public void OnClickLatchToggle()
-    {
-        isLatched = !isLatched;
-        if (!isLatched)
-            directionFlags = 0;
-
-        onLatchStateChanged?.Invoke(isLatched);
-    }
-
-    public void OnClickShiftFrame(int direction)
-    {
-        // use flags to allows two directions at once, diagonal shifting
-        ShiftDirectionFlags directionFlag = (ShiftDirectionFlags)(1 << direction);
-
-        // if not latched just send click on as normal
-        if (!isLatched)
+        void Update()
         {
-            onFrameShift?.Invoke(directionFlag);
-            return;
+            if (!isLatched || directionFlags == 0) return;
+
+            if (Time.time >= nextEventTime)
+            {
+                onFrameShift?.Invoke(directionFlags);
+                nextEventTime = Time.time + repeatRate;
+            }
         }
 
-        // latched enabled and direction already latched, clear it
-        if (directionFlags.HasFlag(directionFlag))
+        public void OnClickLatchToggle()
         {
-            directionFlags &= ~directionFlag;
+            isLatched = !isLatched;
+            if (!isLatched)
+                directionFlags = 0;
 
-            onShiftButtonLatchChanged?.Invoke(direction, false);
-            return;
+            onLatchStateChanged?.Invoke(isLatched);
         }
 
-        // otherwise direction not already latched, set it and clear opposing direction
-        directionFlags &= ~(ShiftDirectionFlags)(1 << (direction ^ 1));
-        onShiftButtonLatchChanged?.Invoke(direction ^ 1, false);
+        public void OnClickShiftFrame(int direction)
+        {
+            // use flags to allows two directions at once, diagonal shifting
+            ShiftDirectionFlags directionFlag = (ShiftDirectionFlags)(1 << direction);
 
-        directionFlags |= directionFlag;
-        onShiftButtonLatchChanged?.Invoke(direction, true);
+            // if not latched just send click on as normal
+            if (!isLatched)
+            {
+                onFrameShift?.Invoke(directionFlag);
+                return;
+            }
 
-        nextEventTime = Time.time;
-    }
+            // latched enabled and direction already latched, clear it
+            if (directionFlags.HasFlag(directionFlag))
+            {
+                directionFlags &= ~directionFlag;
 
-    public void ActionOnBpmChanged(int newBpm)
-    {
-        bpm = newBpm;
-        repeatRate = 60f / bpm;
-        nextEventTime = Time.time + (repeatRate / 4);
+                onShiftButtonLatchChanged?.Invoke(direction, false);
+                return;
+            }
+
+            // otherwise direction not already latched, set it and clear opposing direction
+            directionFlags &= ~(ShiftDirectionFlags)(1 << (direction ^ 1));
+            onShiftButtonLatchChanged?.Invoke(direction ^ 1, false);
+
+            directionFlags |= directionFlag;
+            onShiftButtonLatchChanged?.Invoke(direction, true);
+
+            nextEventTime = Time.time;
+        }
+
+        public void ActionOnBpmChanged(int newBpm)
+        {
+            bpm = newBpm;
+            repeatRate = 60f / bpm;
+            nextEventTime = Time.time + (repeatRate / 4);
+        }
     }
 }

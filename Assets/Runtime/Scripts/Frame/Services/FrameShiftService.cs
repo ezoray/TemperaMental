@@ -16,10 +16,8 @@ namespace TemperaMental.Frames
             gridHeight = ConfigRegistry.Grid.GridHeight;
         }
 
-        /// <summary>
-        /// Returns a new Frame with all emitter bitmasks shifted in the given direction.
-        /// The source frame is not mutated.
-        /// </summary>
+        // returns a new Frame with all emitter bitmasks shifted in the given direction.
+        // todo do not create new frame, modify existing
         public Frame Shift(Frame source, ShiftDirection direction, bool wrap)
         {
             Frame result = new Frame(source);
@@ -29,17 +27,16 @@ namespace TemperaMental.Frames
             for (int i = 0; i < groups.Length; i++)
                 shifted[i] = ShiftBitmask(groups[i], direction, wrap);
 
-            // Build mask of all positions occupied after shifting
+            // build mask of all positions occupied after shifting
             ulong allShifted = 0;
             for (int i = 0; i < shifted.Length; i++)
                 allShifted |= shifted[i];
 
-            // Write shifted results, but evict those positions from emitters that didn't shift there
+            // write shifted results, but evict those positions from emitters that didn't shift there
             for (int i = 0; i < groups.Length; i++)
             {
-                // Positions this emitter shifted into
-                ulong movedInto = shifted[i] & ~groups[i];  // bits that are new after shifting
-                                                            // Clear positions being moved into from all other emitters
+                // positions this emitter shifted into
+                ulong movedInto = shifted[i] & ~groups[i]; 
                 for (int j = 0; j < groups.Length; j++)
                 {
                     if (i == j) continue;
@@ -63,10 +60,7 @@ namespace TemperaMental.Frames
             };
         }
 
-        // -------------------------------------------------------------------------
-        // Left — move emitters to lower x (subtract one column)
-        // In index space: bits move down by gridHeight positions
-        // -------------------------------------------------------------------------
+        // move emitters to lower x(subtract one column)
         ulong ShiftLeft(ulong mask, bool wrap)
         {
             ulong lost = mask & ColumnMask(0);
@@ -78,10 +72,7 @@ namespace TemperaMental.Frames
             return shifted;
         }
 
-        // -------------------------------------------------------------------------
-        // Right — move emitters to higher x (add one column)
-        // In index space: bits move up by gridHeight positions
-        // -------------------------------------------------------------------------
+        // move emitters to higher x(add one column)
         ulong ShiftRight(ulong mask, bool wrap)
         {
             ulong lost = mask & ColumnMask(gridWidth - 1);
@@ -93,10 +84,7 @@ namespace TemperaMental.Frames
             return shifted;
         }
 
-        // -------------------------------------------------------------------------
-        // Up — move emitters to higher y (decrease index within each column)
-        // Processed per column to prevent bleed across column boundaries
-        // -------------------------------------------------------------------------
+        // move emitters to higher y(decrease index within each column)
         ulong ShiftUp(ulong mask, bool wrap)
         {
             ulong result = 0;
@@ -117,10 +105,7 @@ namespace TemperaMental.Frames
             return result;
         }
 
-        // -------------------------------------------------------------------------
-        // Down — move emitters to lower y (increase index within each column)
-        // Processed per column to prevent bleed across column boundaries
-        // -------------------------------------------------------------------------
+        // move emitters to lower y(increase index within each column)
         ulong ShiftDown(ulong mask, bool wrap)
         {
             ulong result = 0;
@@ -142,17 +127,13 @@ namespace TemperaMental.Frames
             return result;
         }
 
-        // -------------------------------------------------------------------------
-        // Mask helpers
-        // -------------------------------------------------------------------------
-
-        ulong ValidMask()
+        private ulong ValidMask()
         {
             int totalBits = gridWidth * gridHeight;
             return totalBits >= 64 ? ulong.MaxValue : (1UL << totalBits) - 1;
         }
 
-        ulong ColumnMask(int column)
+        private ulong ColumnMask(int column)
         {
             ulong colMask = (1UL << gridHeight) - 1;
             return colMask << (column * gridHeight);

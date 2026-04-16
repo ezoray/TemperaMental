@@ -21,7 +21,8 @@ MonoBehaviour:
   DefaultBpm: 400
   MinBpm: 10
   MaxBpm: 2000
-  TicksPerFrame: 960
+  TicksPerFrame: 120
+  EventIntervalMS: 0.0001
   ActivateCC: 10
   PlaceCC: 11
   RemoveCC: 12

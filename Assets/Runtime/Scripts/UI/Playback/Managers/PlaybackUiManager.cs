@@ -79,7 +79,7 @@ namespace TemperaMental.UI.Playbacks
         {
             switch (playbackState)
             {
-                case PlaybackState.Idle:
+                case PlaybackState.Reset:
                     ApplyState(PlaybackUIFlags.Idle);
                     break;
 

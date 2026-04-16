@@ -13,7 +13,7 @@ namespace TemperaMental.Frames
         int gridWidth;
         int gridHeight;
 
-        List<Frame> frames;
+        readonly List<Frame> frames = new List<Frame>();
         Frame currentFrame;
         int currentFrameIndex;
         int currentEmitterId;
@@ -31,17 +31,17 @@ namespace TemperaMental.Frames
 
         private void Awake()
         {
-            frames = new List<Frame>();
-
             gridWidth = ConfigRegistry.Grid.GridWidth;
             gridHeight = ConfigRegistry.Grid.GridHeight;
 
             currentEmitterId = ConfigRegistry.Grid.DefaultEmitterId;
+
+            AddFrame();
         }
 
         private void Start()
         {
-            AddFrame();
+
         }
 
         public void ShiftCurrentFrame(ShiftDirectionFlags directions)
@@ -166,15 +166,14 @@ namespace TemperaMental.Frames
                 return;
             }
 
-            frames = new List<Frame>(newFrames);
+            frames.Clear();
+            frames.AddRange(newFrames);
 
             SetCurrentFrame(0);
         }
 
         public void SetEmitterType(int emitterId)
         {
-            if (playbackState == PlaybackState.Playing || playbackState == PlaybackState.Paused) return;
-
             if (emitterId != currentEmitterId)
             {
                 currentEmitterId = emitterId;
@@ -185,8 +184,6 @@ namespace TemperaMental.Frames
 
         public void RemoveEmitter(Vector2Int position)
         {
-            if (playbackState == PlaybackState.Playing || playbackState == PlaybackState.Paused) return;
-
             if (currentFrame.TryRemoveEmitter(position))
             {
                 onRemoveEmitter?.Invoke(position);
@@ -195,8 +192,6 @@ namespace TemperaMental.Frames
 
         public void AddEmitter(Vector2Int cellPosition)
         {
-            if (playbackState == PlaybackState.Playing || playbackState == PlaybackState.Paused) return;
-
             if (!currentFrame.CheckSameEmitterAtPosition(cellPosition, currentEmitterId))
             {
                 EmitterDetail emitterDetail = new EmitterDetail(cellPosition, currentEmitterId);

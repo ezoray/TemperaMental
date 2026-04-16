@@ -1,10 +1,9 @@
-using Melanchall.DryWetMidi.Multimedia;
 using TemperaMental.Core;
 using UnityEngine;
 
 namespace TemperaMental.Midi.Core
 {
-    public class MidiEventController : MonoBehaviour
+    public class MidiImmediateEventController : MonoBehaviour
     {
         [SerializeField] MidiManager midiManager;
         [SerializeField] MidiImmediateService immediateService;
@@ -20,9 +19,5 @@ namespace TemperaMental.Midi.Core
         public void ActionOnFrameChanged(FrameDetail frameDetail) => immediateService.SendFrame(frameDetail.EmitterGroups);
 
         public void ActionOnBpmValueChanged(float bpm) => midiManager.SetBpm(Mathf.RoundToInt(bpm));
-
-        public void ActionOnCurrentDeviceRemoved() => immediateService.ClearOutputDevice();
-
-        public void ActionOnDeviceChanged(OutputDevice device) => immediateService.SetOutputDevice(device);
     }
 }

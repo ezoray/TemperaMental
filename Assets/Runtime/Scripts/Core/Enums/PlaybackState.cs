@@ -2,9 +2,12 @@ namespace TemperaMental.Core
 {
     public enum PlaybackState
     {
-        Idle,       // no playback object exists
-        Playing,    // actively running
-        Paused,     // stopped mid-way through
+        Reset,
+        Playing,
+        Seeking,
+        Pausing,
+        Paused,
+        Stopping,
         Stopped
     }
 }
