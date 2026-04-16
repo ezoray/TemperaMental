@@ -17,26 +17,17 @@ namespace TemperaMental.Frames
         }
 
         // returns a new Frame with all emitter bitmasks shifted in the given direction.
-        // todo do not create new frame, modify existing
-        public Frame Shift(Frame source, ShiftDirection direction, bool wrap)
+        public Frame Shift(Frame frame, ShiftDirection direction, bool wrap)
         {
-            Frame result = new Frame(source);
-            ulong[] groups = result.GetEmitterGroups();
+            ulong[] groups = frame.GetEmitterGroups(); // direct ref to backing array
 
             ulong[] shifted = new ulong[groups.Length];
             for (int i = 0; i < groups.Length; i++)
                 shifted[i] = ShiftBitmask(groups[i], direction, wrap);
 
-            // build mask of all positions occupied after shifting
-            ulong allShifted = 0;
             for (int i = 0; i < shifted.Length; i++)
-                allShifted |= shifted[i];
-
-            // write shifted results, but evict those positions from emitters that didn't shift there
-            for (int i = 0; i < groups.Length; i++)
             {
-                // positions this emitter shifted into
-                ulong movedInto = shifted[i] & ~groups[i]; 
+                ulong movedInto = shifted[i] & ~groups[i];
                 for (int j = 0; j < groups.Length; j++)
                 {
                     if (i == j) continue;
@@ -45,7 +36,7 @@ namespace TemperaMental.Frames
                 groups[i] = shifted[i];
             }
 
-            return result;
+            return frame;
         }
 
         ulong ShiftBitmask(ulong mask, ShiftDirection direction, bool wrap)

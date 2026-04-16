@@ -445,6 +445,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4101060469761601702, guid: 8f84a6d1f41244324a958063cb8070b0, type: 3}
+      propertyPath: initialDelay
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4101060469761601702, guid: 8f84a6d1f41244324a958063cb8070b0, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
       value: 1
       objectReference: {fileID: 0}
@@ -455,7 +459,7 @@ PrefabInstance:
     - target: {fileID: 4101060469761601702, guid: 8f84a6d1f41244324a958063cb8070b0, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 691349918}
+      objectReference: {fileID: 1362657596}
     - target: {fileID: 4101060469761601702, guid: 8f84a6d1f41244324a958063cb8070b0, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2
@@ -466,7 +470,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4101060469761601702, guid: 8f84a6d1f41244324a958063cb8070b0, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: FrameShiftManager, Assembly-CSharp
+      value: TemperaMental.Frames.FrameEventController, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 4101060469761601702, guid: 8f84a6d1f41244324a958063cb8070b0, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_IntArgument
@@ -4716,7 +4720,7 @@ GameObject:
   - component: {fileID: 691349917}
   - component: {fileID: 691349918}
   m_Layer: 0
-  m_Name: FrameShiftManager
+  m_Name: FrameShiftController
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4749,21 +4753,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efd71b6bb020b423daf702b9fb644b71, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FrameShiftManager
-  onFrameShift:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1362657596}
-        m_TargetAssemblyTypeName: TemperaMental.Frames.FrameEventController, Assembly-CSharp
-        m_MethodName: ActionOnFrameShift
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
   onLatchStateChanged:
     m_PersistentCalls:
       m_Calls:
@@ -4779,12 +4768,42 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  onWrapStateChanged:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 2066420536}
+        m_TargetAssemblyTypeName: TemperaMental.UI.Frames.FrameShiftUIManager, Assembly-CSharp
+        m_MethodName: ActionWrapStateChanged
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   onShiftButtonLatchChanged:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 2066420536}
         m_TargetAssemblyTypeName: TemperaMental.UI.Frames.FrameShiftUIManager, Assembly-CSharp
         m_MethodName: ActionOnShiftButtonLatched
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  onShiftFrame:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1362657596}
+        m_TargetAssemblyTypeName: TemperaMental.Frames.FrameEventController, Assembly-CSharp
+        m_MethodName: ActionOnShiftFrame
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -9305,6 +9324,7 @@ MonoBehaviour:
   mainCamera: {fileID: 1553216987}
   gridManager: {fileID: 1166318856}
   frameManager: {fileID: 1457006301}
+  frameShiftController: {fileID: 691349918}
 --- !u!4 &1362657597
 Transform:
   m_ObjectHideFlags: 0
@@ -10069,18 +10089,18 @@ PrefabInstance:
     - target: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 691349918}
+      objectReference: {fileID: 1362657596}
     - target: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: OnClickLatchToggle
+      value: OnClickToggleLatch
       objectReference: {fileID: 0}
     - target: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: FrameShiftManager, Assembly-CSharp
+      value: TemperaMental.Frames.FrameEventController, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
@@ -10308,6 +10328,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4101060469761601702, guid: 8f84a6d1f41244324a958063cb8070b0, type: 3}
+      propertyPath: initialDelay
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4101060469761601702, guid: 8f84a6d1f41244324a958063cb8070b0, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
       value: 1
       objectReference: {fileID: 0}
@@ -10318,7 +10342,7 @@ PrefabInstance:
     - target: {fileID: 4101060469761601702, guid: 8f84a6d1f41244324a958063cb8070b0, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 691349918}
+      objectReference: {fileID: 1362657596}
     - target: {fileID: 4101060469761601702, guid: 8f84a6d1f41244324a958063cb8070b0, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2
@@ -10329,7 +10353,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4101060469761601702, guid: 8f84a6d1f41244324a958063cb8070b0, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: FrameShiftManager, Assembly-CSharp
+      value: TemperaMental.Frames.FrameEventController, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 4101060469761601702, guid: 8f84a6d1f41244324a958063cb8070b0, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
@@ -10560,9 +10584,9 @@ Camera:
   m_NormalizedViewPortRect:
     serializedVersion: 2
     x: 0
-    y: 0
-    width: 1
-    height: 1
+    y: 0.065625004
+    width: 0.9541667
+    height: 0.9541667
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 60
@@ -11483,6 +11507,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4101060469761601702, guid: 8f84a6d1f41244324a958063cb8070b0, type: 3}
+      propertyPath: initialDelay
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4101060469761601702, guid: 8f84a6d1f41244324a958063cb8070b0, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
       value: 1
       objectReference: {fileID: 0}
@@ -11493,7 +11521,7 @@ PrefabInstance:
     - target: {fileID: 4101060469761601702, guid: 8f84a6d1f41244324a958063cb8070b0, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 691349918}
+      objectReference: {fileID: 1362657596}
     - target: {fileID: 4101060469761601702, guid: 8f84a6d1f41244324a958063cb8070b0, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2
@@ -11504,7 +11532,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4101060469761601702, guid: 8f84a6d1f41244324a958063cb8070b0, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: FrameShiftManager, Assembly-CSharp
+      value: TemperaMental.Frames.FrameEventController, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 4101060469761601702, guid: 8f84a6d1f41244324a958063cb8070b0, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_IntArgument
@@ -12793,6 +12821,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4101060469761601702, guid: 8f84a6d1f41244324a958063cb8070b0, type: 3}
+      propertyPath: initialDelay
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4101060469761601702, guid: 8f84a6d1f41244324a958063cb8070b0, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
       value: 1
       objectReference: {fileID: 0}
@@ -12803,7 +12835,7 @@ PrefabInstance:
     - target: {fileID: 4101060469761601702, guid: 8f84a6d1f41244324a958063cb8070b0, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 691349918}
+      objectReference: {fileID: 1362657596}
     - target: {fileID: 4101060469761601702, guid: 8f84a6d1f41244324a958063cb8070b0, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2
@@ -12814,7 +12846,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4101060469761601702, guid: 8f84a6d1f41244324a958063cb8070b0, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: FrameShiftManager, Assembly-CSharp
+      value: TemperaMental.Frames.FrameEventController, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 4101060469761601702, guid: 8f84a6d1f41244324a958063cb8070b0, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_IntArgument

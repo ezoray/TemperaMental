@@ -21,8 +21,6 @@ namespace TemperaMental.Frames
 
         PlaybackState playbackState;
 
-        bool doWrap;
-
         [SerializeField] UnityEvent<int> onEmitterTypeChanged;
         [SerializeField] UnityEvent<EmitterDetail> onAddEmitter;
         [SerializeField] UnityEvent<Vector2Int> onRemoveEmitter;
@@ -44,25 +42,21 @@ namespace TemperaMental.Frames
 
         }
 
-        public void ShiftCurrentFrame(ShiftDirectionFlags directions)
+        public void ShiftCurrentFrame(ShiftDirectionFlags directions, bool doWrap)
         {
-            if (playbackState == PlaybackState.Playing || playbackState == PlaybackState.Paused) return;
+   //         if (playbackState == PlaybackState.Playing || playbackState == PlaybackState.Paused) return;
 
             for (int i = 0; i < 4; i++)
             {
                 ShiftDirectionFlags flag = (ShiftDirectionFlags)(1 << i);
+
                 if (directions.HasFlag(flag))
-                    frames[currentFrameIndex] = frameShiftService.Shift(frames[currentFrameIndex], (ShiftDirection)i, doWrap);
+                {
+                    frameShiftService.Shift(frames[currentFrameIndex], (ShiftDirection)i, doWrap);
+                }
             }
 
-            SetCurrentFrame(currentFrameIndex);
-        }
-
-        public void ToggleWrapping()
-        {
-            doWrap = !doWrap;
-
-            onWrapStateChanged?.Invoke(doWrap);
+            NotifyFrameChanged();
         }
 
         public void SetPlaybackState(PlaybackState newPlaybackState)

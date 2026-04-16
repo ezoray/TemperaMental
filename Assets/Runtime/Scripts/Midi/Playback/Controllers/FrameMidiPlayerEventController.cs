@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace TemperaMental.Midi.Playbacks
 {
-    public class FrameMidiPlayerEventService : MonoBehaviour
+    public class FrameMidiPlayerEventController : MonoBehaviour
     {
         [SerializeField] FrameMidiPlayer midiPlayer;
 

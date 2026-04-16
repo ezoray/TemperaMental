@@ -9,7 +9,7 @@ namespace TemperaMental.UI.Core
         [Header("Order: Device, File, Mode, Frame, FrameShift, Playback, Create, Select")]
         [SerializeField] List<CanvasGroup> panels;
 
-        private void ApplyState(UiStateFlags uiState)
+        private void ApplyState(UIStateFlags uiState)
         {
             for (int i = 0; i < panels.Count; i++)
             {
@@ -24,19 +24,19 @@ namespace TemperaMental.UI.Core
             switch (playbackState)
             {
                 case PlaybackState.Reset:
-                    ApplyState(UiStateFlags.All);
+                    ApplyState(UIStateFlags.All);
                     break;
 
                 case PlaybackState.Playing:
-                    ApplyState(UiStateFlags.Playing);
+                    ApplyState(UIStateFlags.Playing);
                     break;
 
                 case PlaybackState.Paused:
-                    ApplyState(UiStateFlags.Paused);
+                    ApplyState(UIStateFlags.Paused);
                     break;
 
                 case PlaybackState.Stopped:
-                    ApplyState(UiStateFlags.All);
+                    ApplyState(UIStateFlags.All);
                     break;
             }
         }

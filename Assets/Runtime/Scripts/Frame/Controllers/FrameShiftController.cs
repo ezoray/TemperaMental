@@ -4,17 +4,20 @@ using UnityEngine.Events;
 
 namespace TemperaMental.Frames
 {
-    public class FrameShiftManager : MonoBehaviour
+    public class FrameShiftController: MonoBehaviour
     {
-        int bpm;
         bool isLatched;
-        float nextEventTime;
-        float repeatRate;
+        bool doWrap;
         ShiftDirectionFlags directionFlags;
 
-        [SerializeField] UnityEvent<ShiftDirectionFlags> onFrameShift;
+        int bpm;
+        float nextEventTime;
+        float repeatRate;
+
         [SerializeField] UnityEvent<bool> onLatchStateChanged;
+        [SerializeField] UnityEvent<bool> onWrapStateChanged;
         [SerializeField] UnityEvent<int, bool> onShiftButtonLatchChanged;
+        [SerializeField] UnityEvent<ShiftDirectionFlags, bool> onShiftFrame;
 
 
         private void Awake()
@@ -30,12 +33,19 @@ namespace TemperaMental.Frames
 
             if (Time.time >= nextEventTime)
             {
-                onFrameShift?.Invoke(directionFlags);
+                onShiftFrame?.Invoke(directionFlags, doWrap);
                 nextEventTime = Time.time + repeatRate;
             }
         }
 
-        public void OnClickLatchToggle()
+        public void ToggleWrapping()
+        {
+            doWrap = !doWrap;
+
+            onWrapStateChanged?.Invoke(doWrap);
+        }
+
+        public void ToggleLatch()
         {
             isLatched = !isLatched;
             if (!isLatched)
@@ -44,15 +54,15 @@ namespace TemperaMental.Frames
             onLatchStateChanged?.Invoke(isLatched);
         }
 
-        public void OnClickShiftFrame(int direction)
+        public void ShiftFrame(int direction)
         {
-            // use flags to allows two directions at once, diagonal shifting
+            // use flags to allow two directions at once, diagonal shifting
             ShiftDirectionFlags directionFlag = (ShiftDirectionFlags)(1 << direction);
 
             // if not latched just send click on as normal
             if (!isLatched)
             {
-                onFrameShift?.Invoke(directionFlag);
+                onShiftFrame?.Invoke(directionFlag, doWrap);
                 return;
             }
 
