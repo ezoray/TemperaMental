@@ -12,6 +12,19 @@ namespace TemperaMental.Utils
             gridHeight = ConfigRegistry.Grid.GridHeight;
         }
 
+        public static int GetEmitterCount(ulong[] emitterGroups)
+        {
+            int placedEmitterCount = 0;
+
+            foreach (ulong mask in emitterGroups)
+            {
+                ulong v = mask;
+                while (v != 0) { v &= v - 1; placedEmitterCount++; }
+            }
+
+            return placedEmitterCount;
+        }
+
         // tilemap to Tempera grid conversion
         public static int PositionToIndex(Vector2Int position)
         {

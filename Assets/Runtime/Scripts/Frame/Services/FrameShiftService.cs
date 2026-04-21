@@ -16,6 +16,58 @@ namespace TemperaMental.Frames
             gridHeight = ConfigRegistry.Grid.GridHeight;
         }
 
+        public void Transpose(Frame frame)
+        {
+            ulong[] groups = frame.GetEmitterGroups();
+
+            for (int i = 0; i < groups.Length; i++)
+            {
+                ulong mask = groups[i];
+                ulong result = 0;
+
+                for (int x = 0; x < gridWidth; x++)
+                {
+                    for (int y = 0; y < gridHeight; y++)
+                    {
+                        int index = x * gridHeight + y;
+                        if ((mask & (1UL << index)) == 0) continue;
+
+                        int newIndex = y * gridHeight + x;
+                        result |= 1UL << newIndex;
+                    }
+                }
+
+                groups[i] = result;
+            }
+        }
+
+        public void Rotate(Frame frame)
+        {
+            ulong[] groups = frame.GetEmitterGroups();
+
+            for (int i = 0; i < groups.Length; i++)
+            {
+                ulong mask = groups[i];
+                ulong result = 0;
+
+                for (int x = 0; x < gridWidth; x++)
+                {
+                    for (int y = 0; y < gridHeight; y++)
+                    {
+                        int index = x * gridHeight + y;
+                        if ((mask & (1UL << index)) == 0) continue;
+
+                        int newX = (gridHeight - 1) - y;
+                        int newY = x;
+                        int newIndex = newX * gridHeight + newY;
+                        result |= 1UL << newIndex;
+                    }
+                }
+
+                groups[i] = result;
+            }
+        }
+
         // returns a new Frame with all emitter bitmasks shifted in the given direction.
         public Frame Shift(Frame frame, ShiftDirection direction, bool wrap)
         {

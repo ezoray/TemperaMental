@@ -19,9 +19,11 @@ namespace TemperaMental.UI.Core
         {
             base.Awake();
 
-            alphaValue = uiConfig.AlphaValue;
+            alphaValue = uiConfig.DimAlphaValue;
         }
 
+        // adjust alpha rather than replace colour as DoStateTransition can be called in editor and before Awake
+        // if colour is set at run time that can lead to all text set to an unset Color (black)
         protected override void DoStateTransition(SelectionState state, bool instant)
         {
             base.DoStateTransition(state, instant);

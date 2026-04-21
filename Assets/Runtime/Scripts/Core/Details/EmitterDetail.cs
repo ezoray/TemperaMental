@@ -4,13 +4,15 @@ namespace TemperaMental.Core
 {
     public struct EmitterDetail
     {
-        readonly public Vector2Int Position;
-        readonly public int EmitterId;
+        public Vector2Int Position { get; }
+        public int EmitterId { get; }
+        public ulong[] EmitterGroups { get; }
 
-        public EmitterDetail(Vector2Int position, int emitterId)
+        public EmitterDetail(Vector2Int position, int emitterId, ulong[] emitterGroups = default)
         {
             Position = position;
             EmitterId = emitterId;
+            EmitterGroups = emitterGroups;
         }
     }
 }

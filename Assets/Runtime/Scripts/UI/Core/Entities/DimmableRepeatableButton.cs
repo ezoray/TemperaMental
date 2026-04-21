@@ -14,6 +14,7 @@ namespace TemperaMental.UI.Core
 
         [SerializeField] bool doRepeat;
         [SerializeField] float initialDelay;
+
         float alphaValue;
         float repeatRate;
         bool isPressed;
@@ -22,7 +23,7 @@ namespace TemperaMental.UI.Core
         protected override void Awake()
         {
             base.Awake();
-            alphaValue = uiConfig.AlphaValue;
+            alphaValue = uiConfig.DimAlphaValue;
             initialDelay = appConfig.InitialDelay;
             repeatRate = appConfig.RepeatRate;
         }

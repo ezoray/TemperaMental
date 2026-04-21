@@ -938,6 +938,114 @@ namespace TemperaMental.Input
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""Transform"",
+            ""id"": ""22b43ec7-56aa-4f29-a8b9-187be462af9e"",
+            ""actions"": [
+                {
+                    ""name"": ""Random"",
+                    ""type"": ""Button"",
+                    ""id"": ""1c7b4e83-de04-415e-b15f-bc3ed1274072"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Flip"",
+                    ""type"": ""Button"",
+                    ""id"": ""b90a849e-dd6d-460a-a8a6-450bc5ed6449"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Rotate"",
+                    ""type"": ""Button"",
+                    ""id"": ""057e93d5-1e33-444d-9c02-5b5ac5431d55"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Switch"",
+                    ""type"": ""Button"",
+                    ""id"": ""56ccb06b-efa6-42c7-848c-d13e6dac362a"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Shift"",
+                    ""type"": ""Button"",
+                    ""id"": ""a564ef14-8dff-48bb-a73d-1e19f7dc543c"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""e2b891ed-fff2-40d5-beac-0bef7b6de50e"",
+                    ""path"": """",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Random"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""4eee25b5-c097-4d47-9b5a-97f01e1e5c83"",
+                    ""path"": """",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Flip"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""2dba437b-dd8f-4c72-af30-6874abcfd5e4"",
+                    ""path"": """",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Rotate"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""5df494e7-36f1-42b3-a121-3c5be3754765"",
+                    ""path"": """",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Switch"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""caff2019-c072-43e2-9bb1-4798e44ff04e"",
+                    ""path"": """",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Shift"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": []
@@ -1000,6 +1108,13 @@ namespace TemperaMental.Input
             m_FrameShift_Right = m_FrameShift.FindAction("Right", throwIfNotFound: true);
             m_FrameShift_Wrap = m_FrameShift.FindAction("Wrap", throwIfNotFound: true);
             m_FrameShift_Latch = m_FrameShift.FindAction("Latch", throwIfNotFound: true);
+            // Transform
+            m_Transform = asset.FindActionMap("Transform", throwIfNotFound: true);
+            m_Transform_Random = m_Transform.FindAction("Random", throwIfNotFound: true);
+            m_Transform_Flip = m_Transform.FindAction("Flip", throwIfNotFound: true);
+            m_Transform_Rotate = m_Transform.FindAction("Rotate", throwIfNotFound: true);
+            m_Transform_Switch = m_Transform.FindAction("Switch", throwIfNotFound: true);
+            m_Transform_Shift = m_Transform.FindAction("Shift", throwIfNotFound: true);
         }
 
         ~@TemperaMentalInputActions()
@@ -1014,6 +1129,7 @@ namespace TemperaMental.Input
             UnityEngine.Debug.Assert(!m_Select.enabled, "This will cause a leak and performance issues, TemperaMentalInputActions.Select.Disable() has not been called.");
             UnityEngine.Debug.Assert(!m_System.enabled, "This will cause a leak and performance issues, TemperaMentalInputActions.System.Disable() has not been called.");
             UnityEngine.Debug.Assert(!m_FrameShift.enabled, "This will cause a leak and performance issues, TemperaMentalInputActions.FrameShift.Disable() has not been called.");
+            UnityEngine.Debug.Assert(!m_Transform.enabled, "This will cause a leak and performance issues, TemperaMentalInputActions.Transform.Disable() has not been called.");
         }
 
         /// <summary>
@@ -2353,6 +2469,146 @@ namespace TemperaMental.Input
         /// Provides a new <see cref="FrameShiftActions" /> instance referencing this action map.
         /// </summary>
         public FrameShiftActions @FrameShift => new FrameShiftActions(this);
+
+        // Transform
+        private readonly InputActionMap m_Transform;
+        private List<ITransformActions> m_TransformActionsCallbackInterfaces = new List<ITransformActions>();
+        private readonly InputAction m_Transform_Random;
+        private readonly InputAction m_Transform_Flip;
+        private readonly InputAction m_Transform_Rotate;
+        private readonly InputAction m_Transform_Switch;
+        private readonly InputAction m_Transform_Shift;
+        /// <summary>
+        /// Provides access to input actions defined in input action map "Transform".
+        /// </summary>
+        public struct TransformActions
+        {
+            private @TemperaMentalInputActions m_Wrapper;
+
+            /// <summary>
+            /// Construct a new instance of the input action map wrapper class.
+            /// </summary>
+            public TransformActions(@TemperaMentalInputActions wrapper) { m_Wrapper = wrapper; }
+            /// <summary>
+            /// Provides access to the underlying input action "Transform/Random".
+            /// </summary>
+            public InputAction @Random => m_Wrapper.m_Transform_Random;
+            /// <summary>
+            /// Provides access to the underlying input action "Transform/Flip".
+            /// </summary>
+            public InputAction @Flip => m_Wrapper.m_Transform_Flip;
+            /// <summary>
+            /// Provides access to the underlying input action "Transform/Rotate".
+            /// </summary>
+            public InputAction @Rotate => m_Wrapper.m_Transform_Rotate;
+            /// <summary>
+            /// Provides access to the underlying input action "Transform/Switch".
+            /// </summary>
+            public InputAction @Switch => m_Wrapper.m_Transform_Switch;
+            /// <summary>
+            /// Provides access to the underlying input action "Transform/Shift".
+            /// </summary>
+            public InputAction @Shift => m_Wrapper.m_Transform_Shift;
+            /// <summary>
+            /// Provides access to the underlying input action map instance.
+            /// </summary>
+            public InputActionMap Get() { return m_Wrapper.m_Transform; }
+            /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Enable()" />
+            public void Enable() { Get().Enable(); }
+            /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Disable()" />
+            public void Disable() { Get().Disable(); }
+            /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.enabled" />
+            public bool enabled => Get().enabled;
+            /// <summary>
+            /// Implicitly converts an <see ref="TransformActions" /> to an <see ref="InputActionMap" /> instance.
+            /// </summary>
+            public static implicit operator InputActionMap(TransformActions set) { return set.Get(); }
+            /// <summary>
+            /// Adds <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+            /// </summary>
+            /// <param name="instance">Callback instance.</param>
+            /// <remarks>
+            /// If <paramref name="instance" /> is <c>null</c> or <paramref name="instance"/> have already been added this method does nothing.
+            /// </remarks>
+            /// <seealso cref="TransformActions" />
+            public void AddCallbacks(ITransformActions instance)
+            {
+                if (instance == null || m_Wrapper.m_TransformActionsCallbackInterfaces.Contains(instance)) return;
+                m_Wrapper.m_TransformActionsCallbackInterfaces.Add(instance);
+                @Random.started += instance.OnRandom;
+                @Random.performed += instance.OnRandom;
+                @Random.canceled += instance.OnRandom;
+                @Flip.started += instance.OnFlip;
+                @Flip.performed += instance.OnFlip;
+                @Flip.canceled += instance.OnFlip;
+                @Rotate.started += instance.OnRotate;
+                @Rotate.performed += instance.OnRotate;
+                @Rotate.canceled += instance.OnRotate;
+                @Switch.started += instance.OnSwitch;
+                @Switch.performed += instance.OnSwitch;
+                @Switch.canceled += instance.OnSwitch;
+                @Shift.started += instance.OnShift;
+                @Shift.performed += instance.OnShift;
+                @Shift.canceled += instance.OnShift;
+            }
+
+            /// <summary>
+            /// Removes <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+            /// </summary>
+            /// <remarks>
+            /// Calling this method when <paramref name="instance" /> have not previously been registered has no side-effects.
+            /// </remarks>
+            /// <seealso cref="TransformActions" />
+            private void UnregisterCallbacks(ITransformActions instance)
+            {
+                @Random.started -= instance.OnRandom;
+                @Random.performed -= instance.OnRandom;
+                @Random.canceled -= instance.OnRandom;
+                @Flip.started -= instance.OnFlip;
+                @Flip.performed -= instance.OnFlip;
+                @Flip.canceled -= instance.OnFlip;
+                @Rotate.started -= instance.OnRotate;
+                @Rotate.performed -= instance.OnRotate;
+                @Rotate.canceled -= instance.OnRotate;
+                @Switch.started -= instance.OnSwitch;
+                @Switch.performed -= instance.OnSwitch;
+                @Switch.canceled -= instance.OnSwitch;
+                @Shift.started -= instance.OnShift;
+                @Shift.performed -= instance.OnShift;
+                @Shift.canceled -= instance.OnShift;
+            }
+
+            /// <summary>
+            /// Unregisters <param cref="instance" /> and unregisters all input action callbacks via <see cref="TransformActions.UnregisterCallbacks(ITransformActions)" />.
+            /// </summary>
+            /// <seealso cref="TransformActions.UnregisterCallbacks(ITransformActions)" />
+            public void RemoveCallbacks(ITransformActions instance)
+            {
+                if (m_Wrapper.m_TransformActionsCallbackInterfaces.Remove(instance))
+                    UnregisterCallbacks(instance);
+            }
+
+            /// <summary>
+            /// Replaces all existing callback instances and previously registered input action callbacks associated with them with callbacks provided via <param cref="instance" />.
+            /// </summary>
+            /// <remarks>
+            /// If <paramref name="instance" /> is <c>null</c>, calling this method will only unregister all existing callbacks but not register any new callbacks.
+            /// </remarks>
+            /// <seealso cref="TransformActions.AddCallbacks(ITransformActions)" />
+            /// <seealso cref="TransformActions.RemoveCallbacks(ITransformActions)" />
+            /// <seealso cref="TransformActions.UnregisterCallbacks(ITransformActions)" />
+            public void SetCallbacks(ITransformActions instance)
+            {
+                foreach (var item in m_Wrapper.m_TransformActionsCallbackInterfaces)
+                    UnregisterCallbacks(item);
+                m_Wrapper.m_TransformActionsCallbackInterfaces.Clear();
+                AddCallbacks(instance);
+            }
+        }
+        /// <summary>
+        /// Provides a new <see cref="TransformActions" /> instance referencing this action map.
+        /// </summary>
+        public TransformActions @Transform => new TransformActions(this);
         /// <summary>
         /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Player" which allows adding and removing callbacks.
         /// </summary>
@@ -2698,6 +2954,49 @@ namespace TemperaMental.Input
             /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
             /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
             void OnLatch(InputAction.CallbackContext context);
+        }
+        /// <summary>
+        /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Transform" which allows adding and removing callbacks.
+        /// </summary>
+        /// <seealso cref="TransformActions.AddCallbacks(ITransformActions)" />
+        /// <seealso cref="TransformActions.RemoveCallbacks(ITransformActions)" />
+        public interface ITransformActions
+        {
+            /// <summary>
+            /// Method invoked when associated input action "Random" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnRandom(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "Flip" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnFlip(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "Rotate" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnRotate(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "Switch" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnSwitch(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "Shift" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnShift(InputAction.CallbackContext context);
         }
     }
 }

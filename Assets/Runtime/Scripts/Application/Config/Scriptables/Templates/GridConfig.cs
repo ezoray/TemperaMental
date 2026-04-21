@@ -20,5 +20,7 @@ namespace TemperaMental.Applications.Config
         public int EmitterCount = 4;
 
         public int DefaultEmitterId = 0;
+
+        public int MaxEmitters = 64;
     }
 }

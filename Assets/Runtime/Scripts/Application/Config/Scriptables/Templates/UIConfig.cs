@@ -11,8 +11,11 @@ namespace TemperaMental.Applications.Config
         public Color PurpleColor = new Color(1.0f, 0.5f, 1f);
         public Color CyanColor = new Color(0.5f, 0.8f, 1f);
 
-        // dimmable button text value
-        public float AlphaValue = 0.3f;
+        // dimmable button text alpha value
+        public float DimAlphaValue = 0.3f;
+
+        // dimmable button image colour reduction
+        public float ColorDimFactor = 0.75f;
 
         // display text
         public string OnText = "ON";

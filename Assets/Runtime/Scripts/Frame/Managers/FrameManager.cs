@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using TemperaMental.Applications.Config;
 using TemperaMental.Core;
+using TemperaMental.Emitters;
 using TemperaMental.Logs;
 using UnityEngine;
 using UnityEngine.Events;
@@ -25,7 +27,6 @@ namespace TemperaMental.Frames
         [SerializeField] UnityEvent<EmitterDetail> onAddEmitter;
         [SerializeField] UnityEvent<Vector2Int> onRemoveEmitter;
         [SerializeField] UnityEvent<FrameDetail> onFrameChanged;
-        [SerializeField] UnityEvent<bool> onWrapStateChanged;
 
         private void Awake()
         {
@@ -42,10 +43,32 @@ namespace TemperaMental.Frames
 
         }
 
+        public void UpdateCurrentFrame(ulong[] emitterGroups)
+        {
+            NotifyFrameChanged();
+        }
+
+        public ulong[] GetCurrentFrameEmitters()
+        {
+            return currentFrame.GetEmitterGroups();
+        }
+
+        public void TransposeFrame()
+        {
+            frameShiftService.Transpose(frames[currentFrameIndex]);
+
+            NotifyFrameChanged();
+        }
+
+        public void RotateFrame()
+        {
+            frameShiftService.Rotate(frames[currentFrameIndex]);
+
+            NotifyFrameChanged();
+        }
+
         public void ShiftCurrentFrame(ShiftDirectionFlags directions, bool doWrap)
         {
-   //         if (playbackState == PlaybackState.Playing || playbackState == PlaybackState.Paused) return;
-
             for (int i = 0; i < 4; i++)
             {
                 ShiftDirectionFlags flag = (ShiftDirectionFlags)(1 << i);
@@ -188,7 +211,7 @@ namespace TemperaMental.Frames
         {
             if (!currentFrame.CheckSameEmitterAtPosition(cellPosition, currentEmitterId))
             {
-                EmitterDetail emitterDetail = new EmitterDetail(cellPosition, currentEmitterId);
+                EmitterDetail emitterDetail = new EmitterDetail(cellPosition, currentEmitterId, currentFrame.GetEmitterGroups());
 
                 currentFrame.AddEmitter(emitterDetail);
 
