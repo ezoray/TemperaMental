@@ -17,7 +17,7 @@ MonoBehaviour:
   PurpleColor: {r: 1, g: 0.5, b: 1, a: 1}
   CyanColor: {r: 0.5, g: 0.8, b: 1, a: 1}
   DimAlphaValue: 0.3
-  ColorDimFactor: 0.7
+  ColorDimFactor: 0.6
   OnText: ON
   OffText: OFF
   NoDevicesText: Connect Midi Device

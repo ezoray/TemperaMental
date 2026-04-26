@@ -216,7 +216,7 @@ namespace TemperaMental.Midi.Transforms
                 }
                 else if (controlNumber == placeCC)
                 {
-                    currentFrame.AddEmitter(new EmitterDetail(EmitterUtils.IndexToPosition((byte)cc.ControlValue), currentEmitterId, default));
+                    currentFrame.AddEmitter(new EmitterDetail(EmitterUtils.IndexToPosition((byte)cc.ControlValue), currentEmitterId));
                 }
                 else if (controlNumber == removeCC)
                 {

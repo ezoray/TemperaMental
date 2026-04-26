@@ -11,16 +11,6 @@ namespace TemperaMental.Frames
         [SerializeField] FrameManager frameManager;
         [SerializeField] FrameShiftController frameShiftController;
 
-        public void OnClickTransposeFrame() => frameManager.TransposeFrame();
-
-        public void OnClickRotateFrame() => frameManager.RotateFrame();
-
-        public void OnClickShiftFrame(int direction) => frameShiftController.ShiftFrame(direction);
-
-        public void OnClickToggleLatch() => frameShiftController.ToggleLatch();
-
-        public void OnClickToggleWrapping() => frameShiftController.ToggleWrapping();
-
         public void OnClickDeleteFrame() => frameManager.DeleteFrame();
 
         public void OnClickDeleteAllFrames() => frameManager.DeleteAllFrames();
@@ -37,12 +27,7 @@ namespace TemperaMental.Frames
 
         public void OnClickNewFrame() => frameManager.InsertFrame();
 
-        public void ActionOnEmittersRandomised(ulong[] emitterGroup)
-        {
-            frameManager.UpdateCurrentFrame(emitterGroup);
-        }
-
-        public void ActionOnShiftFrame(ShiftDirectionFlags directionFlags, bool doWrap) => frameManager.ShiftCurrentFrame(directionFlags, doWrap);
+        public void ActionOnEmittersTransformed(ulong[] emitterGroup) => frameManager.UpdateCurrentFrame(emitterGroup);
 
         // frame slider
         public void ActionOnSelectedFrameChanged(float selectedFrame) => frameManager.GoToSelectedFrame(Mathf.RoundToInt(selectedFrame));

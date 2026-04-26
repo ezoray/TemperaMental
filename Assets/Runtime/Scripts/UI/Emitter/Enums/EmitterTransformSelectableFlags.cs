@@ -10,7 +10,10 @@ namespace TemperaMental.UI.Emitters
         Wrap = 32,
         RandomSlider = 64,
 
-        Random = RandomSlider,
-        Flip = Up | Down | Left | Right
+        Random = RandomSlider | Left | Right | Latch,
+        Flip = Up | Down | Left | Right | Latch,
+        Rotate = Left | Right | Latch,
+        Swap = Up | Down | Left | Right | Latch,
+        Shift = Up | Down | Left | Right | Wrap | Latch
     }
 }

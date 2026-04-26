@@ -1,8 +1,6 @@
-using System;
 using System.Collections.Generic;
 using TemperaMental.Applications.Config;
 using TemperaMental.Core;
-using TemperaMental.Emitters;
 using TemperaMental.Logs;
 using UnityEngine;
 using UnityEngine.Events;
@@ -11,7 +9,6 @@ namespace TemperaMental.Frames
 {
     public class FrameManager : MonoBehaviour
     {
-        [SerializeField] FrameShiftService frameShiftService;
         int gridWidth;
         int gridHeight;
 
@@ -44,42 +41,17 @@ namespace TemperaMental.Frames
         }
 
         public void UpdateCurrentFrame(ulong[] emitterGroups)
-        {
+        {  
+            currentFrame.SetEmitterGroups(emitterGroups);
+
+          //  if (playbackState == PlaybackState.Playing) return;
+
             NotifyFrameChanged();
         }
 
         public ulong[] GetCurrentFrameEmitters()
         {
             return currentFrame.GetEmitterGroups();
-        }
-
-        public void TransposeFrame()
-        {
-            frameShiftService.Transpose(frames[currentFrameIndex]);
-
-            NotifyFrameChanged();
-        }
-
-        public void RotateFrame()
-        {
-            frameShiftService.Rotate(frames[currentFrameIndex]);
-
-            NotifyFrameChanged();
-        }
-
-        public void ShiftCurrentFrame(ShiftDirectionFlags directions, bool doWrap)
-        {
-            for (int i = 0; i < 4; i++)
-            {
-                ShiftDirectionFlags flag = (ShiftDirectionFlags)(1 << i);
-
-                if (directions.HasFlag(flag))
-                {
-                    frameShiftService.Shift(frames[currentFrameIndex], (ShiftDirection)i, doWrap);
-                }
-            }
-
-            NotifyFrameChanged();
         }
 
         public void SetPlaybackState(PlaybackState newPlaybackState)

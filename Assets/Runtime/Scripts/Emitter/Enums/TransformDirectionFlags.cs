@@ -1,9 +1,9 @@
 using System;
 
-namespace TemperaMental.Frames
+namespace TemperaMental.Emitters
 {
     [Flags]
-    public enum ShiftDirectionFlags
+    public enum TransformDirectionFlags
     {
         None = 0,
         Up = 1,

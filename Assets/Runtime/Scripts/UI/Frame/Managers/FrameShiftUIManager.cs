@@ -8,47 +8,47 @@
     {
         public class FrameShiftUIManager : MonoBehaviour
         {
-            [SerializeField] List<DimmableRepeatableButton> shiftButtons;
+            //[SerializeField] List<DimmableRepeatableButton> shiftButtons;
 
-            [SerializeField] Image latchButtonImage;
-            [SerializeField] Image wrapButtonImage;
+            //[SerializeField] Image latchButtonImage;
+            //[SerializeField] Image wrapButtonImage;
 
-            Color defaultOffColor;
-            Color latchOnColor;
-            Color wrapOnColor;
-            Color shiftOnColor;
+            //Color defaultOffColor;
+            //Color latchOnColor;
+            //Color wrapOnColor;
+            //Color shiftOnColor;
 
-            private void Awake()
-            {
-                defaultOffColor = ConfigRegistry.UI.DefaultColor;
-                latchOnColor = ConfigRegistry.UI.GreenColor;
-                wrapOnColor = ConfigRegistry.UI.PurpleColor;
-                shiftOnColor = ConfigRegistry.UI.CyanColor;
-            }
+            //private void Awake()
+            //{
+            //    defaultOffColor = ConfigRegistry.UI.DefaultColor;
+            //    latchOnColor = ConfigRegistry.UI.GreenColor;
+            //    wrapOnColor = ConfigRegistry.UI.PurpleColor;
+            //    shiftOnColor = ConfigRegistry.UI.CyanColor;
+            //}
 
-            public void ActionOnShiftButtonLatched(int direction, bool isLatched)
-            {
-                shiftButtons[direction].image.color = isLatched ? shiftOnColor : defaultOffColor;
-            }
+            //public void ActionOnShiftButtonLatched(int direction, bool isLatched)
+            //{
+            //    shiftButtons[direction].image.color = isLatched ? shiftOnColor : defaultOffColor;
+            //}
 
-            public void ActionOnLatchStateChanged(bool isOn)
-            {
-                latchButtonImage.color = isOn ? latchOnColor : defaultOffColor;
+            //public void ActionOnLatchStateChanged(bool isOn)
+            //{
+            //    latchButtonImage.color = isOn ? latchOnColor : defaultOffColor;
 
-                foreach (var shiftButton in shiftButtons)
-                {
-                    shiftButton.SetRepeat(!isOn);
+            //    foreach (var shiftButton in shiftButtons)
+            //    {
+            //        shiftButton.SetRepeat(!isOn);
 
-                    if(!isOn)
-                    {
-                        shiftButton.image.color = defaultOffColor;
-                    }
-                }
-            }
+            //        if(!isOn)
+            //        {
+            //            shiftButton.image.color = defaultOffColor;
+            //        }
+            //    }
+            //}
 
-            public void ActionWrapStateChanged(bool isOn)
-            {
-                wrapButtonImage.color = isOn ? wrapOnColor : defaultOffColor;
-            }
+            //public void ActionWrapStateChanged(bool isOn)
+            //{
+            //    wrapButtonImage.color = isOn ? wrapOnColor : defaultOffColor;
+            //}
         }
     }

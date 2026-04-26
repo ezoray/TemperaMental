@@ -22,6 +22,18 @@ namespace TemperaMental.UI.Emitters
 
         [SerializeField] Slider randomSlider;
 
+        [Header("Order: Up, Down, Left, Right")]
+        [SerializeField] List<DimmableRepeatableButton> shiftButtons;
+
+        [SerializeField] Image latchButtonImage;
+        [SerializeField] Image wrapButtonImage;
+
+        Color defaultOffColor;
+        Color latchOnColor;
+        Color wrapOnColor;
+        Color shiftOnColor;
+
+
         Dictionary<EmitterTransformMode, EmitterTransformUIState> transformModeStates;
 
         [SerializeField] UnityEvent<float> onRandomValueChanged;
@@ -31,18 +43,30 @@ namespace TemperaMental.UI.Emitters
             transformModeStates = new Dictionary<EmitterTransformMode, EmitterTransformUIState>
             {
                 { EmitterTransformMode.Random, new EmitterTransformUIState(EmitterTransformLitFlags.Random, EmitterTransformSelectableFlags.Random) },
-                { EmitterTransformMode.Flip, new EmitterTransformUIState(EmitterTransformLitFlags.Flip, EmitterTransformSelectableFlags.Flip) }
+                { EmitterTransformMode.Flip, new EmitterTransformUIState(EmitterTransformLitFlags.Flip, EmitterTransformSelectableFlags.Flip) },
+                { EmitterTransformMode.Rotate, new EmitterTransformUIState(EmitterTransformLitFlags.Rotate, EmitterTransformSelectableFlags.Rotate) },
+                { EmitterTransformMode.Swap, new EmitterTransformUIState(EmitterTransformLitFlags.Swap, EmitterTransformSelectableFlags.Swap) },
+                { EmitterTransformMode.Shift, new EmitterTransformUIState(EmitterTransformLitFlags.Shift, EmitterTransformSelectableFlags.Shift) }
             };
 
             randomSlider.minValue = 0;
             randomSlider.maxValue = ConfigRegistry.Grid.MaxEmitters;
             randomSlider.SetValueWithoutNotify(0);
+
+            defaultOffColor = ConfigRegistry.UI.DefaultColor;
+            latchOnColor = ConfigRegistry.UI.GreenColor;
+            wrapOnColor = ConfigRegistry.UI.PurpleColor;
+            shiftOnColor = ConfigRegistry.UI.CyanColor;
         }
 
-
-        private void OnEnable()
+        private void Start()
         {
-        
+            // set Shift as initial enabled transform
+            if (transformModeStates.TryGetValue(EmitterTransformMode.Shift, out var transformUIState))
+            {
+                SetButtonsLitState(transformUIState.LitFlags);
+                SetSelectablesInteractable(transformUIState.SelectableFlags);
+            }
         }
 
         private void SetSelectablesInteractable(EmitterTransformSelectableFlags selectableFlags)
@@ -65,14 +89,41 @@ namespace TemperaMental.UI.Emitters
             }
         }
 
-        public void ActionOnRandomEmitterCountChanged(int emitterCount)
+        public void ActionOnDirectionLatchStateChanged(int direction, bool isLatched)
         {
-            randomSlider.SetValueWithoutNotify(emitterCount);
+            shiftButtons[direction].image.color = isLatched ? shiftOnColor : defaultOffColor;
         }
+
+        public void ActionOnLatchStateChanged(bool isOn)
+        {
+            latchButtonImage.color = isOn ? latchOnColor : defaultOffColor;
+
+            foreach (var shiftButton in shiftButtons)
+            {
+                shiftButton.SetRepeat(!isOn);
+
+                if (!isOn)
+                {
+                    shiftButton.image.color = defaultOffColor;
+                }
+            }
+        }
+
+        public void ActionWrapStateChanged(bool isOn)
+        {
+            wrapButtonImage.color = isOn ? wrapOnColor : defaultOffColor;
+        }
+
+        //public void ActionOnEmittersTransformed(ulong[] emitterGroup)
+        //{
+        //    int emitterCount = EmitterUtils.GetEmitterCount(emitterGroup);
+
+        //    randomSlider.SetValueWithoutNotify(emitterCount);
+        //}
 
         public void ActionOnRemoveEmitter(Vector2Int position)
         {
-            randomSlider.SetValueWithoutNotify(randomSlider.value--);
+            randomSlider.SetValueWithoutNotify(randomSlider.value -1);
         }
 
         public void ActionOnAddEmitter(EmitterDetail emitterDetail)
@@ -86,7 +137,8 @@ namespace TemperaMental.UI.Emitters
         {
             int emitterCount = EmitterUtils.GetEmitterCount(frameDetail.EmitterGroups);
 
-            randomSlider.value = emitterCount;
+            randomSlider.SetValueWithoutNotify(emitterCount);
+          //  randomSlider.value = emitterCount;
         }
 
         public void ActionOnTransformEmitterChanged(int emitterId, bool isEnabled)

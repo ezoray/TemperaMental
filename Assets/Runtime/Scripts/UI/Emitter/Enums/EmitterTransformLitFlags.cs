@@ -7,6 +7,8 @@ namespace TemperaMental.UI.Emitters
     {
         Random = 1,
         Flip = 2,
-        Rotate = 4
+        Rotate = 4,
+        Swap = 8,
+        Shift = 16
     }
 }

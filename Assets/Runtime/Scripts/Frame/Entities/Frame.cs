@@ -34,7 +34,12 @@ namespace TemperaMental.Frames
             Array.Copy(otherFrame.emitterGroups, emitterGroups, emitterGroups.Length);
         }
 
-        // returns the ulong bitmask array directly so callers can iterate by emitter without conversion
+        public void SetEmitterGroups(ulong[] groups)
+        {
+            Array.Copy(groups, emitterGroups, emitterGroups.Length);
+        }
+
+        // return reference to emitter array for direct access to up-to-date values
         public ulong[] GetEmitterGroups()
         {
             return emitterGroups;
