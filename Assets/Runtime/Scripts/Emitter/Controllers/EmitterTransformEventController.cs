@@ -10,13 +10,13 @@ namespace TemperaMental.Emitters
         [SerializeField] EmitterTransformManager transformManager;
         [SerializeField] FrameManager frameManager;
 
-        public void OnClickDirection(int directionId)
+        public void OnClickDirection(int directionValue)
         {
             ulong[] emitterGroup = frameManager.GetCurrentFrameEmitters();
-            transformManager.DoTransform(emitterGroup, directionId);
+            transformManager.HandleDirectionChange(emitterGroup, directionValue);
         }
 
-        public void OnClickToggleLatch() => transformManager.ToggleLatch();
+        public void OnClickToggleLatch() => transformManager.ToggleTransformLatch();
 
         public void OnClickToggleWrapping() => transformManager.ToggleWrapping();
 

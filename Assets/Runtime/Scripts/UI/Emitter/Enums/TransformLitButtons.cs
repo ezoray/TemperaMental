@@ -3,7 +3,7 @@ using System;
 namespace TemperaMental.UI.Emitters
 {
     [Flags]
-    public enum EmitterTransformLitFlags
+    public enum TransformLitButtons
     {
         Random = 1,
         Flip = 2,

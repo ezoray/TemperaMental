@@ -12,29 +12,24 @@ namespace TemperaMental.Emitters
         [Header("Order: Random, Flip, Rotate, Swap, Shift")]
         [SerializeField] List<TransformBaseService> transformServices;
         [SerializeField] FrameManager frameManager;
-        [SerializeField] RandomTransformService randomTransformService;
-        [SerializeField] ShiftTransformService shiftTransformService;
+
+        RandomTransformService randomTransformService;
+        ShiftTransformService shiftTransformService;
 
         EmitterTransformMode transformMode;
-        TransformEmitterFlags activeEmitters;
-
-        bool isLatched;
-        bool doWrap;
-        TransformDirectionFlags directionFlags;
-
-        ulong[] transformedGroup;
+        TransformEmitters activeEmitters;
 
         int bpm;
         float nextEventTime;
         float repeatRate;
 
-        [SerializeField] UnityEvent<EmitterTransformMode> onTransformModeChanged;
+        [SerializeField] UnityEvent<EmitterTransformMode, EmitterTransformDetail> onTransformModeChanged;
         [SerializeField] UnityEvent<int, bool> onTransformEmitterChanged;
         [SerializeField] UnityEvent<ulong[]> onEmittersTransformed;
 
         [SerializeField] UnityEvent<bool> onLatchStateChanged;
         [SerializeField] UnityEvent<bool> onWrapStateChanged;
-        [SerializeField] UnityEvent<int, bool> onDirectionLatchStateChanged;
+        [SerializeField] UnityEvent<TransformDirections, bool> onDirectionLatchStateChanged;
 
 
         private void Awake()
@@ -46,70 +41,55 @@ namespace TemperaMental.Emitters
 
         private void OnEnable()
         {
+            randomTransformService = (RandomTransformService)transformServices[(int)EmitterTransformMode.Random];
+            shiftTransformService = (ShiftTransformService)transformServices[(int)EmitterTransformMode.Shift];
+
             transformMode = EmitterTransformMode.Shift;
-            activeEmitters = TransformEmitterFlags.All;
+            activeEmitters = TransformEmitters.All;
+
+            foreach (var transformService in transformServices)
+            {
+                transformService.OnDirectionLatchStateChanged += ActionOnServiceDirectionLatchChanged;
+                transformService.OnEmittersTransformed += ActionOnEmittersTransformed;
+            }
         }
 
         void Update()
         {
-            if (!isLatched || directionFlags == TransformDirectionFlags.None) return;
-
             if (Time.time >= nextEventTime)
             {
                 // current frame may change during playback so get current frame emitters each time
                 ulong[] emitterGroup = frameManager.GetCurrentFrameEmitters();
 
-                DoDirectionTransform(emitterGroup, directionFlags);
+                foreach (var transformService in transformServices)
+                {
+                    if(transformService.IsLatched)
+                    {
+                        emitterGroup = transformService.DoTransform(emitterGroup, activeEmitters);
+                    }
+                }
+
+                onEmittersTransformed?.Invoke(emitterGroup);
+
                 nextEventTime = Time.time + repeatRate;
             }
         }
 
-        // transform by direction
-        public void DoTransform(ulong[] emitterGroup, int direction)
+        public void HandleDirectionChange(ulong[] emitterGroup, int directionValue)
         {
-            // use flags to allow two directions at once if applicable
-            TransformDirectionFlags directionFlag = (TransformDirectionFlags)(1 << direction);
-
-            // if not latched do transform immediately
-            if (!isLatched)
-            {
-                DoDirectionTransform(emitterGroup, directionFlag);
-                return;
-            }
-
-            // latched enabled and direction already latched, clear it
-            if (directionFlags.HasFlag(directionFlag))
-            {
-                directionFlags &= ~directionFlag;
-
-                onDirectionLatchStateChanged?.Invoke(direction, false);
-                return;
-            }
-
-            // otherwise direction not already latched, set it and clear opposing direction
-            directionFlags &= ~(TransformDirectionFlags)(1 << (direction ^ 1));
-            onDirectionLatchStateChanged?.Invoke(direction ^ 1, false);
-
-            directionFlags |= directionFlag;
-            onDirectionLatchStateChanged?.Invoke(direction, true);
-
-            nextEventTime = Time.time;
+            transformServices[(int)transformMode].HandleDirectionChange(emitterGroup, activeEmitters, directionValue);
         }
 
         public void ToggleWrapping()
         {
-            doWrap = !doWrap;
+            bool isWrapping = shiftTransformService.ToggleWrap();
 
-            shiftTransformService.Wrap = doWrap;
-
-            onWrapStateChanged?.Invoke(doWrap);
+            onWrapStateChanged?.Invoke(isWrapping);
         }
 
-        public void ToggleLatch()
+        public void ToggleTransformLatch()
         {
-            isLatched = !isLatched;
-
-            if (!isLatched) directionFlags = TransformDirectionFlags.None;
+            bool isLatched = transformServices[(int)transformMode].ToggleLatch();
 
             onLatchStateChanged?.Invoke(isLatched);
         }       
@@ -123,15 +103,15 @@ namespace TemperaMental.Emitters
 
         public void RandomiseEmitters(ulong[] emitterGroup, int targetCount)
         {
-            randomTransformService.DoRandomTransform(emitterGroup, targetCount, activeEmitters);
-            onEmittersTransformed?.Invoke(emitterGroup);
+            ulong[] transformedGroups = randomTransformService.DoRandomTransform(emitterGroup, targetCount, activeEmitters);
+            onEmittersTransformed?.Invoke(transformedGroups);
         }
 
         public void ToggleEmitter(int emitterId)
         {
-            TransformEmitterFlags emitter = (TransformEmitterFlags)(1 << emitterId);
+            TransformEmitters emitter = (TransformEmitters)(1 << emitterId);
 
-            activeEmitters ^= (TransformEmitterFlags)(1 << emitterId);
+            activeEmitters ^= (TransformEmitters)(1 << emitterId);
 
             onTransformEmitterChanged?.Invoke(emitterId, activeEmitters.HasFlag(emitter));
         }
@@ -142,15 +122,29 @@ namespace TemperaMental.Emitters
             {
                 this.transformMode = transformMode;
 
-                onTransformModeChanged?.Invoke(transformMode);
+                EmitterTransformDetail transformDetail = transformServices[(int)transformMode].GetTransformDetail();
+
+                onTransformModeChanged?.Invoke(transformMode, transformDetail);
             }
         }
 
-        private void DoDirectionTransform(ulong[] emitterGroup, TransformDirectionFlags direction)
+        private void ActionOnEmittersTransformed(ulong[] transformedGroups)
         {
-            transformedGroup = transformServices[(int)transformMode].DoTransform(emitterGroup, activeEmitters, direction);
+            onEmittersTransformed?.Invoke(transformedGroups);
+        }
 
-            onEmittersTransformed?.Invoke(transformedGroup);
+        private void ActionOnServiceDirectionLatchChanged(TransformDirections directions, bool state)
+        {
+            onDirectionLatchStateChanged?.Invoke(directions, state);
+        }
+
+        private void OnDisable()
+        {
+            foreach (var transformService in transformServices)
+            {
+                transformService.OnDirectionLatchStateChanged -= ActionOnServiceDirectionLatchChanged;
+                transformService.OnEmittersTransformed -= ActionOnEmittersTransformed;
+            }
         }
     }
 }

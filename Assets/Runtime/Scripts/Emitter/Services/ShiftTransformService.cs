@@ -7,39 +7,31 @@ namespace TemperaMental.Emitters
     public class ShiftTransformService : TransformBaseService
     {
         int gridWidth, gridHeight;
-        bool wrap;
+        bool isWrapping;
 
         private void OnEnable()
         {
             gridWidth = ConfigRegistry.Grid.GridWidth;
             gridHeight = ConfigRegistry.Grid.GridHeight;
+
+            allowedDirections = ConfigRegistry.Emitter.ShiftTransformDirections;
         }
 
-        public override ulong[] DoTransform(ulong[] groups, TransformEmitterFlags activeEmitters, TransformDirectionFlags directions)
+        public bool ToggleWrap()
         {
-            ulong[] transformedGroups = groups;
+            isWrapping = !isWrapping;
 
-            for (int i = 0; i < 4; i++)
-            {
-                TransformDirectionFlags directionFlag = (TransformDirectionFlags)(1 << i);
-
-                if (directions.HasFlag(directionFlag))
-                {
-                    transformedGroups = DoSingleTransform(transformedGroups, activeEmitters, directionFlag);
-                }
-            }
-
-            return transformedGroups;
+            return isWrapping;
         }
 
         // returns a emitter array with all emitter bitmasks shifted in the given direction
-        private ulong[] DoSingleTransform(ulong[] groups, TransformEmitterFlags activeEmitters, TransformDirectionFlags direction)
+        protected override ulong[] DoSingleTransform(ulong[] groups, TransformEmitters activeEmitters, TransformDirections direction)
         {
             // Build a mask of all positions occupied by inactive emitters
             ulong inactiveOccupied = 0;
             for (int i = 0; i < groups.Length; i++)
             {
-                if (!activeEmitters.HasFlag((TransformEmitterFlags)(1 << i)))
+                if (!activeEmitters.HasFlag((TransformEmitters)(1 << i)))
                     inactiveOccupied |= groups[i];
             }
 
@@ -47,7 +39,7 @@ namespace TemperaMental.Emitters
 
             for (int i = 0; i < groups.Length; i++)
             {
-                bool isActive = activeEmitters.HasFlag((TransformEmitterFlags)(1 << i));
+                bool isActive = activeEmitters.HasFlag((TransformEmitters)(1 << i));
 
                 if (!isActive)
                 {
@@ -57,21 +49,21 @@ namespace TemperaMental.Emitters
                 }
 
                 // Shift the active emitter and strip any bits that land on inactive-occupied positions
-                result[i] = ShiftBitmask(groups[i], direction, wrap) & ~inactiveOccupied;
+                result[i] = ShiftBitmask(groups[i], direction, isWrapping) & ~inactiveOccupied;
             }
 
             // Resolve collisions between active emitters — last-writer wins per original logic,
             // but only among active slots. Build allAdds to suppress removes as in FrameMidiPlayer.
             for (int i = 0; i < result.Length; i++)
             {
-                if (!activeEmitters.HasFlag((TransformEmitterFlags)(1 << i))) continue;
+                if (!activeEmitters.HasFlag((TransformEmitters)(1 << i))) continue;
 
                 ulong movedInto = result[i] & ~groups[i];
 
                 for (int j = 0; j < result.Length; j++)
                 {
                     if (i == j) continue;
-                    if (!activeEmitters.HasFlag((TransformEmitterFlags)(1 << j))) continue;
+                    if (!activeEmitters.HasFlag((TransformEmitters)(1 << j))) continue;
 
                     // Strip positions that emitter i has moved into from other active emitters
                     result[j] &= ~movedInto;
@@ -81,20 +73,20 @@ namespace TemperaMental.Emitters
             return result;
         }
 
-        ulong ShiftBitmask(ulong mask, TransformDirectionFlags direction, bool wrap)
+         private ulong ShiftBitmask(ulong mask, TransformDirections direction, bool wrap)
         {
             return direction switch
             {
-                TransformDirectionFlags.Left => ShiftLeft(mask, wrap),
-                TransformDirectionFlags.Right => ShiftRight(mask, wrap),
-                TransformDirectionFlags.Up => ShiftUp(mask, wrap),
-                TransformDirectionFlags.Down => ShiftDown(mask, wrap),
+                TransformDirections.Left => ShiftLeft(mask, wrap),
+                TransformDirections.Right => ShiftRight(mask, wrap),
+                TransformDirections.Up => ShiftUp(mask, wrap),
+                TransformDirections.Down => ShiftDown(mask, wrap),
                 _ => throw new ArgumentOutOfRangeException(nameof(direction))
             };
         }
 
         // move emitters to lower x(subtract one column)
-        ulong ShiftLeft(ulong mask, bool wrap)
+        private ulong ShiftLeft(ulong mask, bool wrap)
         {
             ulong lost = mask & ColumnMask(0);
             ulong shifted = (mask >> gridHeight) & ValidMask();
@@ -106,7 +98,7 @@ namespace TemperaMental.Emitters
         }
 
         // move emitters to higher x(add one column)
-        ulong ShiftRight(ulong mask, bool wrap)
+        private ulong ShiftRight(ulong mask, bool wrap)
         {
             ulong lost = mask & ColumnMask(gridWidth - 1);
             ulong shifted = (mask << gridHeight) & ValidMask();
@@ -118,7 +110,7 @@ namespace TemperaMental.Emitters
         }
 
         // move emitters to higher y(decrease index within each column)
-        ulong ShiftUp(ulong mask, bool wrap)
+        private ulong ShiftUp(ulong mask, bool wrap)
         {
             ulong result = 0;
 
@@ -139,7 +131,7 @@ namespace TemperaMental.Emitters
         }
 
         // move emitters to lower y(increase index within each column)
-        ulong ShiftDown(ulong mask, bool wrap)
+        private ulong ShiftDown(ulong mask, bool wrap)
         {
             ulong result = 0;
             ulong colBits = (1UL << gridHeight) - 1;
@@ -172,6 +164,6 @@ namespace TemperaMental.Emitters
             return colMask << (column * gridHeight);
         }
 
-        public bool Wrap { get => wrap; set => wrap = value; }
+        public bool Wrap { get => isWrapping; set => isWrapping = value; }
     }
 }

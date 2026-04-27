@@ -1,16 +1,16 @@
-using TemperaMental.Frames;
+using TemperaMental.Core;
 
 namespace TemperaMental.UI.Emitters
 {
     public struct EmitterTransformUIState
     {
-        public EmitterTransformLitFlags LitFlags;
-        public  EmitterTransformSelectableFlags SelectableFlags;
+        public TransformLitButtons LitButtons;
+        public TransformDirections Directions;
 
-        public EmitterTransformUIState(EmitterTransformLitFlags litFlags, EmitterTransformSelectableFlags selectableFlags)
+        public EmitterTransformUIState(TransformLitButtons litButtons, TransformDirections directions)
         {
-            this.LitFlags = litFlags;
-            this.SelectableFlags = selectableFlags;
+            LitButtons = litButtons;
+            Directions = directions;
         }
     }
 }

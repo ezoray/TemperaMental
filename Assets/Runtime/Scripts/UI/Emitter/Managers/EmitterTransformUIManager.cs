@@ -17,13 +17,10 @@ namespace TemperaMental.UI.Emitters
         [Header("Order: Random, Flip, Rotate, Switch, Shift")]
         [SerializeField] LightableButton[] modeButtons;
 
-        [Header("Order: Up, Down, Left, Right, Latch, Wrap, Slider")]
-        [SerializeField] Selectable[] selectables;
-
         [SerializeField] Slider randomSlider;
 
         [Header("Order: Up, Down, Left, Right")]
-        [SerializeField] List<DimmableRepeatableButton> shiftButtons;
+        [SerializeField] DimmableRepeatableButton[] directionButtons;
 
         [SerializeField] Image latchButtonImage;
         [SerializeField] Image wrapButtonImage;
@@ -31,8 +28,7 @@ namespace TemperaMental.UI.Emitters
         Color defaultOffColor;
         Color latchOnColor;
         Color wrapOnColor;
-        Color shiftOnColor;
-
+        Color directionOnColor;
 
         Dictionary<EmitterTransformMode, EmitterTransformUIState> transformModeStates;
 
@@ -42,11 +38,11 @@ namespace TemperaMental.UI.Emitters
         {
             transformModeStates = new Dictionary<EmitterTransformMode, EmitterTransformUIState>
             {
-                { EmitterTransformMode.Random, new EmitterTransformUIState(EmitterTransformLitFlags.Random, EmitterTransformSelectableFlags.Random) },
-                { EmitterTransformMode.Flip, new EmitterTransformUIState(EmitterTransformLitFlags.Flip, EmitterTransformSelectableFlags.Flip) },
-                { EmitterTransformMode.Rotate, new EmitterTransformUIState(EmitterTransformLitFlags.Rotate, EmitterTransformSelectableFlags.Rotate) },
-                { EmitterTransformMode.Swap, new EmitterTransformUIState(EmitterTransformLitFlags.Swap, EmitterTransformSelectableFlags.Swap) },
-                { EmitterTransformMode.Shift, new EmitterTransformUIState(EmitterTransformLitFlags.Shift, EmitterTransformSelectableFlags.Shift) }
+                { EmitterTransformMode.Random, new EmitterTransformUIState(TransformLitButtons.Random, TransformDirections.Random) },
+                { EmitterTransformMode.Flip, new EmitterTransformUIState(TransformLitButtons.Flip, TransformDirections.Flip) },
+                { EmitterTransformMode.Rotate, new EmitterTransformUIState(TransformLitButtons.Rotate, TransformDirections.Rotate) },
+                { EmitterTransformMode.Swap, new EmitterTransformUIState(TransformLitButtons.Swap, TransformDirections.Swap) },
+                { EmitterTransformMode.Shift, new EmitterTransformUIState(TransformLitButtons.Shift, TransformDirections.Shift) }
             };
 
             randomSlider.minValue = 0;
@@ -56,7 +52,7 @@ namespace TemperaMental.UI.Emitters
             defaultOffColor = ConfigRegistry.UI.DefaultColor;
             latchOnColor = ConfigRegistry.UI.GreenColor;
             wrapOnColor = ConfigRegistry.UI.PurpleColor;
-            shiftOnColor = ConfigRegistry.UI.CyanColor;
+            directionOnColor = ConfigRegistry.UI.CyanColor;
         }
 
         private void Start()
@@ -64,47 +60,58 @@ namespace TemperaMental.UI.Emitters
             // set Shift as initial enabled transform
             if (transformModeStates.TryGetValue(EmitterTransformMode.Shift, out var transformUIState))
             {
-                SetButtonsLitState(transformUIState.LitFlags);
-                SetSelectablesInteractable(transformUIState.SelectableFlags);
+                SetButtonsLitState(transformUIState.LitButtons);
+                SetDirectionsInteractable(transformUIState.Directions);
             }
         }
 
-        private void SetSelectablesInteractable(EmitterTransformSelectableFlags selectableFlags)
+        private void SetDirectionsInteractable(TransformDirections directions)
         {
-            for (int i = 0; i < selectables.Length; i++)
+            for (int i = 0; i < directionButtons.Length; i++)
             {
-                bool isEnabled = ((int)selectableFlags & (1 << i)) != 0;
+                bool isEnabled = ((int)directions & (1 << i)) != 0;
 
-                selectables[i].interactable = isEnabled;
+                directionButtons[i].interactable = isEnabled;
             }
         }
 
-        private void SetButtonsLitState(EmitterTransformLitFlags litFlags)
+        private void SetButtonsLitState(TransformLitButtons litButtons)
         {
             for (int i = 0; i < modeButtons.Length; i++)
             {
-                bool isLit = ((int)litFlags & (1 << i)) != 0;
+                bool isLit = ((int)litButtons & (1 << i)) != 0;
 
                 modeButtons[i].SetLit(isLit);
             }
         }
 
-        public void ActionOnDirectionLatchStateChanged(int direction, bool isLatched)
+        public void ActionOnDirectionLatchStateChanged(TransformDirections direction, bool isLatched)
         {
-            shiftButtons[direction].image.color = isLatched ? shiftOnColor : defaultOffColor;
+            int directionIndex = 0;
+
+            for (int i = 0; i < directionButtons.Length; i++)
+            {
+                if (direction == (TransformDirections)(1 << i))
+                {
+                    directionIndex = i;
+                    break;
+                }
+            }
+
+            directionButtons[directionIndex].image.color = isLatched ? directionOnColor : defaultOffColor;
         }
 
         public void ActionOnLatchStateChanged(bool isOn)
         {
             latchButtonImage.color = isOn ? latchOnColor : defaultOffColor;
 
-            foreach (var shiftButton in shiftButtons)
+            foreach (var directionButton in directionButtons)
             {
-                shiftButton.SetRepeat(!isOn);
+                directionButton.SetRepeat(!isOn);
 
                 if (!isOn)
                 {
-                    shiftButton.image.color = defaultOffColor;
+                    directionButton.image.color = defaultOffColor;
                 }
             }
         }
@@ -114,16 +121,9 @@ namespace TemperaMental.UI.Emitters
             wrapButtonImage.color = isOn ? wrapOnColor : defaultOffColor;
         }
 
-        //public void ActionOnEmittersTransformed(ulong[] emitterGroup)
-        //{
-        //    int emitterCount = EmitterUtils.GetEmitterCount(emitterGroup);
-
-        //    randomSlider.SetValueWithoutNotify(emitterCount);
-        //}
-
         public void ActionOnRemoveEmitter(Vector2Int position)
         {
-            randomSlider.SetValueWithoutNotify(randomSlider.value -1);
+            randomSlider.SetValueWithoutNotify(randomSlider.value - 1);
         }
 
         public void ActionOnAddEmitter(EmitterDetail emitterDetail)
@@ -138,7 +138,6 @@ namespace TemperaMental.UI.Emitters
             int emitterCount = EmitterUtils.GetEmitterCount(frameDetail.EmitterGroups);
 
             randomSlider.SetValueWithoutNotify(emitterCount);
-          //  randomSlider.value = emitterCount;
         }
 
         public void ActionOnTransformEmitterChanged(int emitterId, bool isEnabled)
@@ -146,12 +145,23 @@ namespace TemperaMental.UI.Emitters
             emitterButtons[emitterId].SetDimmed(!isEnabled);
         }
 
-        public void ActionOnTransformModeChanged(EmitterTransformMode transformMode)
+        public void ActionOnTransformModeChanged(EmitterTransformMode transformMode, EmitterTransformDetail transformDetail)
         {
             if (transformModeStates.TryGetValue(transformMode, out var transformUIState))
             {
-                SetButtonsLitState(transformUIState.LitFlags);
-                SetSelectablesInteractable(transformUIState.SelectableFlags);
+                SetButtonsLitState(transformUIState.LitButtons);
+                SetDirectionsInteractable(transformUIState.Directions);
+            }
+
+            latchButtonImage.color = transformDetail.IsLatched ? latchOnColor : defaultOffColor;
+
+            for (int i = 0; i < directionButtons.Length; i++)
+            {
+                directionButtons[i].SetRepeat(!transformDetail.IsLatched);
+
+                bool isLit = ((int)transformDetail.CurrentDirections & (1 << i)) != 0;
+
+                directionButtons[i].image.color = isLit ? directionOnColor : defaultOffColor;
             }
         }
     }
