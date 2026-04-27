@@ -1192,6 +1192,7 @@ MonoBehaviour:
   - {fileID: 2027373328}
   - {fileID: 2045701840}
   - {fileID: 1522324444}
+  - {fileID: 1969188241}
   - {fileID: 421361514}
   - {fileID: 1885924087}
   - {fileID: 1069332348}
@@ -1336,7 +1337,7 @@ PrefabInstance:
     - target: {fileID: 8355472681341576843, guid: e4f5eb86001634226bd56a387e454231, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 691349918}
+      objectReference: {fileID: 0}
     - target: {fileID: 8355472681341576843, guid: e4f5eb86001634226bd56a387e454231, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2
@@ -3891,50 +3892,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TemperaMental.FrameTransformController
   transformManager: {fileID: 413820966}
   frameManager: {fileID: 1457006301}
---- !u!1 &511942592
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 511942593}
-  - component: {fileID: 511942594}
-  m_Layer: 0
-  m_Name: FrameShiftService
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &511942593
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 511942592}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1457006300}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &511942594
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 511942592}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4c94ebd5ffe79421eaefd22257bbcd5d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TemperaMental.Frames.FrameShiftService
 --- !u!1001 &517203224
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5273,50 +5230,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 342393026}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &691349916
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 691349917}
-  - component: {fileID: 691349918}
-  m_Layer: 0
-  m_Name: FrameShiftController
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &691349917
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 691349916}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 2069221093}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &691349918
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 691349916}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: efd71b6bb020b423daf702b9fb644b71, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::FrameShiftManager
 --- !u!1 &691874079
 GameObject:
   m_ObjectHideFlags: 0
@@ -5678,6 +5591,19 @@ MonoBehaviour:
         m_CallState: 2
       - m_Target: {fileID: 1362657596}
         m_TargetAssemblyTypeName: TemperaMental.Frames.FrameEventController, Assembly-CSharp
+        m_MethodName: ActionOnPlaybackStateChanged
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 507064014}
+        m_TargetAssemblyTypeName: TemperaMental.Emitters.EmitterTransformEventController,
+          Assembly-CSharp
         m_MethodName: ActionOnPlaybackStateChanged
         m_Mode: 0
         m_Arguments:
@@ -6387,7 +6313,7 @@ PrefabInstance:
     - target: {fileID: 8355472681341576843, guid: e4f5eb86001634226bd56a387e454231, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 691349918}
+      objectReference: {fileID: 0}
     - target: {fileID: 8355472681341576843, guid: e4f5eb86001634226bd56a387e454231, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Target
       value: 
@@ -9311,7 +9237,7 @@ PrefabInstance:
     - target: {fileID: 8355472681341576843, guid: e4f5eb86001634226bd56a387e454231, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 691349918}
+      objectReference: {fileID: 0}
     - target: {fileID: 8355472681341576843, guid: e4f5eb86001634226bd56a387e454231, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2
@@ -9957,7 +9883,7 @@ PrefabInstance:
     - target: {fileID: 8355472681341576843, guid: e4f5eb86001634226bd56a387e454231, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 691349918}
+      objectReference: {fileID: 0}
     - target: {fileID: 8355472681341576843, guid: e4f5eb86001634226bd56a387e454231, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2
@@ -10799,7 +10725,6 @@ MonoBehaviour:
   mainCamera: {fileID: 1553216987}
   gridManager: {fileID: 1166318856}
   frameManager: {fileID: 1457006301}
-  frameShiftController: {fileID: 691349918}
 --- !u!4 &1362657597
 Transform:
   m_ObjectHideFlags: 0
@@ -11522,8 +11447,7 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 511942593}
+  m_Children: []
   m_Father: {fileID: 2069221093}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1457006301
@@ -15786,7 +15710,7 @@ GameObject:
   - component: {fileID: 1969188242}
   - component: {fileID: 1969188241}
   m_Layer: 5
-  m_Name: DpadPanel
+  m_Name: DirectionPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -16649,7 +16573,6 @@ Transform:
   m_Children:
   - {fileID: 1362657597}
   - {fileID: 1457006300}
-  - {fileID: 691349917}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2104452299

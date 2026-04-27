@@ -28,6 +28,8 @@ namespace TemperaMental.Emitters
             transformManager.RandomiseEmitters(emitterGroup, Mathf.RoundToInt(randomValue));
         }
 
+        public void ActionOnPlaybackStateChanged(PlaybackState playbackState) => transformManager.SetPlaybackState(playbackState);
+
         public void ActionOnBpmChanged(int newBpm)
         {
             transformManager.ActionOnBpmChanged(newBpm);

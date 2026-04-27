@@ -23,6 +23,8 @@ namespace TemperaMental.Emitters
         float nextEventTime;
         float repeatRate;
 
+        PlaybackState playbackState;
+
         [SerializeField] UnityEvent<EmitterTransformMode, EmitterTransformDetail> onTransformModeChanged;
         [SerializeField] UnityEvent<int, bool> onTransformEmitterChanged;
         [SerializeField] UnityEvent<ulong[]> onEmittersTransformed;
@@ -30,7 +32,6 @@ namespace TemperaMental.Emitters
         [SerializeField] UnityEvent<bool> onLatchStateChanged;
         [SerializeField] UnityEvent<bool> onWrapStateChanged;
         [SerializeField] UnityEvent<TransformDirections, bool> onDirectionLatchStateChanged;
-
 
         private void Awake()
         {
@@ -58,20 +59,23 @@ namespace TemperaMental.Emitters
         {
             if (Time.time >= nextEventTime)
             {
-                // current frame may change during playback so get current frame emitters each time
-                ulong[] emitterGroup = frameManager.GetCurrentFrameEmitters();
-
-                foreach (var transformService in transformServices)
+                if (playbackState == PlaybackState.Stopped || playbackState == PlaybackState.Reset)
                 {
-                    if(transformService.IsLatched)
+                    // current frame may change during playback so get current frame emitters each time
+                    ulong[] emitterGroup = frameManager.GetCurrentFrameEmitters();
+
+                    foreach (var transformService in transformServices)
                     {
-                        emitterGroup = transformService.DoTransform(emitterGroup, activeEmitters);
+                        if (transformService.IsLatched)
+                        {
+                            emitterGroup = transformService.DoTransform(emitterGroup, activeEmitters);
+                        }
                     }
+
+                    onEmittersTransformed?.Invoke(emitterGroup);
+
+                    nextEventTime = Time.time + repeatRate;
                 }
-
-                onEmittersTransformed?.Invoke(emitterGroup);
-
-                nextEventTime = Time.time + repeatRate;
             }
         }
 
@@ -145,6 +149,11 @@ namespace TemperaMental.Emitters
                 transformService.OnDirectionLatchStateChanged -= ActionOnServiceDirectionLatchChanged;
                 transformService.OnEmittersTransformed -= ActionOnEmittersTransformed;
             }
+        }
+
+        public void SetPlaybackState(PlaybackState newPlaybackState)
+        {
+            playbackState = newPlaybackState;
         }
     }
 }

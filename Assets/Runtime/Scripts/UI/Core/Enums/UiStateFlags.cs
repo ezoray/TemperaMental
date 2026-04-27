@@ -11,14 +11,15 @@ namespace TemperaMental.UI.Core
         File = 2,
         Mode = 4,
         Frame = 8,
-        FrameShift = 16,
-        Playback = 32,
-        Creation = 64,
-        Selection = 128,
+        Transform = 16,
+        Direction = 32,
+        Playback = 64,
+        Creation = 128,
+        Selection = 256,
 
         // presets
-        All = Device | File | Mode | Frame | FrameShift | Playback | Creation | Selection,
-        Playing = Playback | Device | Frame | FrameShift | Creation | Selection,
-        Paused = Playback | Device | Frame | FrameShift | Creation | Selection
+        All = Device | File | Mode | Frame | Transform | Direction | Playback | Creation | Selection,
+        Playing = Playback | Device | Frame | Creation | Selection,
+        Paused = Playback | Device | Frame | Creation | Selection
     }
 }
