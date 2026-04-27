@@ -9,7 +9,6 @@ namespace TemperaMental.Frames
         [SerializeField] Camera mainCamera;
         [SerializeField] GridManager gridManager;
         [SerializeField] FrameManager frameManager;
-        [SerializeField] FrameShiftController frameShiftController;
 
         public void OnClickDeleteFrame() => frameManager.DeleteFrame();
 

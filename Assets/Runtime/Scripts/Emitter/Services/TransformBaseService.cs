@@ -1,6 +1,5 @@
 using System;
 using TemperaMental.Core;
-using TemperaMental.Logs;
 using UnityEngine;
 
 namespace TemperaMental.Emitters
