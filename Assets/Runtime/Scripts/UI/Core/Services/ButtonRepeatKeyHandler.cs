@@ -15,9 +15,18 @@ namespace TemperaMental.UI.Core
 
             canvasGroup = GetComponentInParent<CanvasGroup>();
 
+            actionReference.action.performed += PerformedHandler;
             actionReference.action.started += StartedHandler;
             actionReference.action.canceled += CanceledHandler;
             actionReference.action.Enable();
+        }
+
+        private void PerformedHandler(InputAction.CallbackContext context)
+        {
+            if (canvasGroup == null || canvasGroup.interactable)
+            {
+                button.onClick.Invoke();
+            }
         }
 
         private void StartedHandler(InputAction.CallbackContext context)
@@ -35,6 +44,7 @@ namespace TemperaMental.UI.Core
 
         void OnDestroy()
         {
+            actionReference.action.performed -= PerformedHandler;
             actionReference.action.started -= StartedHandler;
             actionReference.action.canceled -= CanceledHandler;
             actionReference.action.Disable();
