@@ -26,6 +26,8 @@ namespace TemperaMental.Input.Mouse
         float nextRightProcessTime;
         Vector2 leftStartPos;
         Vector2 rightStartPos;
+        Vector2 lastLeftDragPos;
+        Vector2 lastRightDragPos;
 
         [SerializeField] UnityEvent<Vector2> onLeftClick;
         [SerializeField] UnityEvent<Vector2> onRightClick;
@@ -68,10 +70,8 @@ namespace TemperaMental.Input.Mouse
 
                 if (isLeftDragging && Time.time >= nextLeftProcessTime)
                 {
-                    // hack quick and dirty method to switch button presses, required as we can't drag delete emitters otherwise on
-                    // Macbook trackpad. 3 finger drag should be enabled under macOS Accessibility options
                     bool isCtrlHeld = Keyboard.current.ctrlKey.isPressed;
-                    HandleDrag(isCtrlHeld ? onRightClick : onLeftClick);
+                    HandleDrag(isCtrlHeld ? onRightClick : onLeftClick, ref lastLeftDragPos);
                     nextLeftProcessTime = Time.time + processRate;
                 }
             }
@@ -89,7 +89,7 @@ namespace TemperaMental.Input.Mouse
 
                 if (isRightDragging && Time.time >= nextRightProcessTime)
                 {
-                    HandleDrag(onRightClick);
+                    HandleDrag(onRightClick, ref lastRightDragPos);
                     nextRightProcessTime = Time.time + processRate;
                 }
             }
@@ -105,7 +105,7 @@ namespace TemperaMental.Input.Mouse
 
         private void OnLeftClickCanceled(InputAction.CallbackContext context)
         {
-            if (!isLeftDragging) HandleDrag(onLeftClick);
+            if (!isLeftDragging) HandleDrag(onLeftClick, ref lastLeftDragPos);
             isLeftPressed = false;
             isLeftDragging = false;
         }
@@ -120,14 +120,17 @@ namespace TemperaMental.Input.Mouse
 
         private void OnRightClickCanceled(InputAction.CallbackContext context)
         {
-            if (!isRightDragging) HandleDrag(onRightClick);
+            if (!isRightDragging) HandleDrag(onRightClick, ref lastRightDragPos);
             isRightPressed = false;
             isRightDragging = false;
         }
 
-        private void HandleDrag(UnityEvent<Vector2> actionEvent)
+        private void HandleDrag(UnityEvent<Vector2> actionEvent, ref Vector2 lastPos)
         {
             Vector2 mousePosition = mouseActions.Position.ReadValue<Vector2>();
+
+            if (mousePosition == lastPos) return;
+            lastPos = mousePosition;
 
             if (IsInterfaceTouch(mousePosition)) return;
 
