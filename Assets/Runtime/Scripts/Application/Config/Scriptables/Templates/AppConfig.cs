@@ -18,9 +18,8 @@ namespace TemperaMental.Applications.Config
         public float DragDistanceThreshold = 10f;
         public float ProcessRate = 0.025f;
 
-
         // repeatable button values
-        public float InitialDelay = 0.3f;
+        public float InitialDelay = 0.6f;
         public float RepeatRate = 0.1f;
     }
 }

@@ -19,5 +19,5 @@ MonoBehaviour:
   DragDelay: 0.15
   DragDistanceThreshold: 10
   ProcessRate: 0.025
-  InitialDelay: 0.1
+  InitialDelay: 0.3
   RepeatRate: 0.1

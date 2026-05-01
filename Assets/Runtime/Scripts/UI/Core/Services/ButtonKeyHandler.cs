@@ -10,10 +10,8 @@ namespace TemperaMental.UI.Core
 
         CanvasGroup canvasGroup;
 
-        protected override void Awake()
+        protected void Awake()
         {
-            base.Awake();
-
             canvasGroup = GetComponentInParent<CanvasGroup>();
 
             actionReference.action.performed += PerformedHandler;

@@ -1,6 +1,4 @@
-using System.Collections;
-using System.Linq;
-using TemperaMental.Applications.Config;
+using TemperaMental.Input;
 using TemperaMental.Logs;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -8,44 +6,47 @@ using UnityEngine.InputSystem;
 
 namespace TemperaMental.UI.Core
 {
-    public class KeyHandlerBase : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+    public class KeyHandlerBase : MonoBehaviour, IPointerClickHandler
     {
         [SerializeField] protected InputActionReference actionReference;
 
-        string shortcutText;
-        string boundKeyName;
-        Coroutine hoverCoroutine;
-        float shortcutMessageDelay;
-
-        protected virtual void Awake()
+        public void OnPointerClick(PointerEventData eventData)
         {
-            shortcutText = ConfigRegistry.UI.ShortcutText;
-            shortcutMessageDelay = ConfigRegistry.UI.ShortcutMessageDelay;
+            if (eventData.button != PointerEventData.InputButton.Right) return;
+            if (actionReference == null) return;
 
-            boundKeyName = string.Join(", ", actionReference.action.bindings
-                .Select(binding => binding.ToDisplayString())
-                .Where(keyName => !string.IsNullOrEmpty(keyName)));
+            LogMan.Log($"Rebinding {actionReference.action.name} " +
+                $"[{GetBoundKeyName(actionReference.action)}] — press a key, or Escape to cancel");
+
+            KeybindManager.Instance.StartRebind(
+                actionReference.action,
+                OnRebindComplete,
+                OnRebindConflict,
+                OnRebindCancelled
+            );
         }
 
-        public void OnPointerEnter(PointerEventData eventData)
+        private void OnRebindComplete(InputAction action)
         {
-            hoverCoroutine = StartCoroutine(DelayedShortcutMessage());
+            LogMan.Log($"{action.name} rebound to [{GetBoundKeyName(actionReference.action)}]");
         }
 
-        public void OnPointerExit(PointerEventData eventData)
+        private void OnRebindConflict(InputAction action, string conflictActionName)
         {
-            if (hoverCoroutine != null)
-            {
-                StopCoroutine(hoverCoroutine);
-                hoverCoroutine = null;
-            }
+            if (conflictActionName == null)
+                LogMan.Log($"{action.name} [{GetBoundKeyName(actionReference.action)}] — this binding cannot be rebound");
+            else
+                LogMan.Log($"{action.name} rebind cancelled — key is already bound to {conflictActionName}");
         }
 
-        private IEnumerator DelayedShortcutMessage()
+        private void OnRebindCancelled()
         {
-            yield return new WaitForSeconds(shortcutMessageDelay);
-            LogMan.LogTemp($"{shortcutText} {boundKeyName}");
+            LogMan.Log("Rebind cancelled");
         }
 
+        protected string GetBoundKeyName(InputAction action)
+        {
+            return KeybindManager.Instance.GetBindingDisplayString(action);
+        }
     }
 }

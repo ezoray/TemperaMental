@@ -1,18 +1,17 @@
+using TemperaMental.Logs;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 namespace TemperaMental.UI.Core
 {
-    public class ButtonRepeatKeyHandler :KeyHandlerBase
+    public class ButtonRepeatKeyHandler : KeyHandlerBase
     {
         [SerializeField] DimmableRepeatableButton button;
 
         CanvasGroup canvasGroup;
 
-        protected override void Awake()
+        protected void Awake()
         {
-            base.Awake();
-
             canvasGroup = GetComponentInParent<CanvasGroup>();
 
             actionReference.action.performed += PerformedHandler;

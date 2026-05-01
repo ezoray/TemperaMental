@@ -31,15 +31,6 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "LeftButtonDown",
-                    "type": "PassThrough",
-                    "id": "2c88a3eb-1c69-4dcf-a258-821d6f7be416",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": "Hold",
-                    "initialStateCheck": false
-                },
-                {
                     "name": "Position",
                     "type": "Value",
                     "id": "97a86160-2ee2-465b-a808-8761bed44e54",
@@ -78,17 +69,6 @@
                     "processors": "",
                     "groups": "",
                     "action": "RightClick",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "b13be618-e253-4127-b4c8-d0e222266932",
-                    "path": "<Mouse>/leftButton",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "LeftButtonDown",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -170,41 +150,7 @@
                     "initialStateCheck": false
                 }
             ],
-            "bindings": [
-                {
-                    "name": "",
-                    "id": "b34b75e8-4275-4340-bcd8-925019b153a6",
-                    "path": "<Keyboard>/i",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Append",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "8d93370b-0820-4c33-a618-85975115234a",
-                    "path": "<Keyboard>/o",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Load",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "ea801fa3-75c9-4c29-b5fa-01034d887942",
-                    "path": "<Keyboard>/p",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Save",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                }
-            ]
+            "bindings": []
         },
         {
             "name": "Playback",
@@ -278,8 +224,8 @@
                 {
                     "name": "",
                     "id": "6d5046fc-94b5-40cc-a7ac-1cc5a18a3339",
-                    "path": "<Keyboard>/z",
-                    "interactions": "",
+                    "path": "<Keyboard>/g",
+                    "interactions": "NoModifier",
                     "processors": "",
                     "groups": "",
                     "action": "Play",
@@ -289,8 +235,8 @@
                 {
                     "name": "",
                     "id": "42bd3ade-76f9-40ae-bb65-22bab4599481",
-                    "path": "<Keyboard>/space",
-                    "interactions": "",
+                    "path": "<Keyboard>/h",
+                    "interactions": "NoModifier",
                     "processors": "",
                     "groups": "",
                     "action": "Pause",
@@ -300,8 +246,8 @@
                 {
                     "name": "",
                     "id": "bd3f2045-4b4c-435c-9ecc-b20570061b24",
-                    "path": "<Keyboard>/x",
-                    "interactions": "",
+                    "path": "<Keyboard>/j",
+                    "interactions": "NoModifier",
                     "processors": "",
                     "groups": "",
                     "action": "Stop",
@@ -312,7 +258,7 @@
                     "name": "",
                     "id": "ce167575-0948-4115-9995-aa073176818f",
                     "path": "<Keyboard>/l",
-                    "interactions": "",
+                    "interactions": "NoModifier",
                     "processors": "",
                     "groups": "",
                     "action": "Loop",
@@ -322,8 +268,8 @@
                 {
                     "name": "",
                     "id": "aed89a94-f63b-4c2d-909c-038b8ff439d5",
-                    "path": "<Keyboard>/period",
-                    "interactions": "",
+                    "path": "<Keyboard>/leftBracket",
+                    "interactions": "NoModifier",
                     "processors": "",
                     "groups": "",
                     "action": "PlusBpm",
@@ -333,11 +279,22 @@
                 {
                     "name": "",
                     "id": "4493ea5b-8969-44c0-9d6a-a2fd85dcc4b6",
-                    "path": "<Keyboard>/comma",
-                    "interactions": "",
+                    "path": "<Keyboard>/rightBracket",
+                    "interactions": "NoModifier",
                     "processors": "",
                     "groups": "",
                     "action": "MinusBpm",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "6f14da67-afe5-4ea9-9e5e-997e85f45cd5",
+                    "path": "<Keyboard>/k",
+                    "interactions": "NoModifier",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Reverse",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
@@ -353,7 +310,7 @@
                     "id": "8a6cdd13-a2cc-492e-a8a5-d588a68a41e1",
                     "expectedControlType": "",
                     "processors": "",
-                    "interactions": "",
+                    "interactions": "NoModifier",
                     "initialStateCheck": false
                 },
                 {
@@ -387,20 +344,9 @@
             "bindings": [
                 {
                     "name": "",
-                    "id": "f40b3fdf-2fd8-4a22-a5f6-964602e16d6c",
-                    "path": "<Keyboard>/1",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Blue",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "7eea0fab-efb9-4264-aae4-8b5c811a4c39",
                     "path": "<Keyboard>/2",
-                    "interactions": "",
+                    "interactions": "NoModifier",
                     "processors": "",
                     "groups": "",
                     "action": "Red",
@@ -411,7 +357,7 @@
                     "name": "",
                     "id": "bf970296-a20a-45a0-b555-29ac6dc9014f",
                     "path": "<Keyboard>/3",
-                    "interactions": "",
+                    "interactions": "NoModifier",
                     "processors": "",
                     "groups": "",
                     "action": "Yellow",
@@ -422,10 +368,21 @@
                     "name": "",
                     "id": "8564c6ba-e337-47a4-a798-4e46cbca4688",
                     "path": "<Keyboard>/4",
-                    "interactions": "",
+                    "interactions": "NoModifier",
                     "processors": "",
                     "groups": "",
                     "action": "Green",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "9854282b-6367-48b7-bc96-228bfdec84a7",
+                    "path": "<Keyboard>/1",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Blue",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
@@ -445,19 +402,7 @@
                     "initialStateCheck": false
                 }
             ],
-            "bindings": [
-                {
-                    "name": "",
-                    "id": "703023f8-cd55-41c3-93f5-90c57537f604",
-                    "path": "<Keyboard>/5",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Emitter",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                }
-            ]
+            "bindings": []
         },
         {
             "name": "Create",
@@ -531,8 +476,8 @@
                 {
                     "name": "",
                     "id": "f47f54fb-919d-42df-b416-cb8fc4f5a82d",
-                    "path": "<Keyboard>/s",
-                    "interactions": "",
+                    "path": "<Keyboard>/q",
+                    "interactions": "NoModifier",
                     "processors": "",
                     "groups": "",
                     "action": "Duplicate",
@@ -540,21 +485,43 @@
                     "isPartOfComposite": false
                 },
                 {
-                    "name": "",
-                    "id": "55d37203-fdce-4be6-a927-c013a707bb28",
-                    "path": "<Keyboard>/q",
+                    "name": "One Modifier",
+                    "id": "59fc603d-252b-48f5-a8fc-c64429f3e307",
+                    "path": "OneModifier",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Copy",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "modifier",
+                    "id": "d791131d-86f2-48b1-940b-6f28cf5c1d0e",
+                    "path": "<Keyboard>/ctrl",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
                     "action": "Copy",
                     "isComposite": false,
-                    "isPartOfComposite": false
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "binding",
+                    "id": "90f4a299-69b9-4fdd-82b3-404611fabdbc",
+                    "path": "<Keyboard>/c",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Copy",
+                    "isComposite": false,
+                    "isPartOfComposite": true
                 },
                 {
                     "name": "",
                     "id": "529c536c-e7db-4577-935b-e4d59566d929",
                     "path": "<Keyboard>/w",
-                    "interactions": "",
+                    "interactions": "NoModifier",
                     "processors": "",
                     "groups": "",
                     "action": "New",
@@ -562,21 +529,43 @@
                     "isPartOfComposite": false
                 },
                 {
-                    "name": "",
-                    "id": "5e6f40ef-ace3-44f5-a1e0-5a780d8e7889",
-                    "path": "<Keyboard>/e",
+                    "name": "One Modifier",
+                    "id": "4736ce82-948a-44d7-8bfa-d3f5d8253e78",
+                    "path": "OneModifier",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Paste",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "modifier",
+                    "id": "e996bce3-7aaa-4f8b-93f1-28d6e054e9cb",
+                    "path": "<Keyboard>/ctrl",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
                     "action": "Paste",
                     "isComposite": false,
-                    "isPartOfComposite": false
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "binding",
+                    "id": "4c42c37c-32ef-47ba-992e-848264d4b324",
+                    "path": "<Keyboard>/v",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Paste",
+                    "isComposite": false,
+                    "isPartOfComposite": true
                 },
                 {
                     "name": "",
                     "id": "50eb4ffd-bec7-4b6d-921e-b06098e97aa2",
-                    "path": "<Keyboard>/t",
-                    "interactions": "",
+                    "path": "<Keyboard>/e",
+                    "interactions": "NoModifier",
                     "processors": "",
                     "groups": "",
                     "action": "Clear",
@@ -586,8 +575,8 @@
                 {
                     "name": "",
                     "id": "6db96cbb-dfe8-4912-aaf3-1c1727a5ef24",
-                    "path": "<Keyboard>/g",
-                    "interactions": "",
+                    "path": "<Keyboard>/backspace",
+                    "interactions": "NoModifier",
                     "processors": "",
                     "groups": "",
                     "action": "Delete",
@@ -595,15 +584,37 @@
                     "isPartOfComposite": false
                 },
                 {
-                    "name": "",
-                    "id": "24c019f7-4768-4b38-87fb-2a995f3a74ea",
-                    "path": "<Keyboard>/b",
+                    "name": "One Modifier",
+                    "id": "547cee53-9f2f-43b8-ba13-303e5d471ad6",
+                    "path": "OneModifier",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "DeleteAll",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "modifier",
+                    "id": "eab28813-7360-46ba-b713-9832af8317a9",
+                    "path": "<Keyboard>/ctrl",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
                     "action": "DeleteAll",
                     "isComposite": false,
-                    "isPartOfComposite": false
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "binding",
+                    "id": "20f8ddf8-fa34-41cd-aa99-91088e110a0d",
+                    "path": "<Keyboard>/backspace",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "DeleteAll",
+                    "isComposite": false,
+                    "isPartOfComposite": true
                 }
             ]
         },
@@ -652,8 +663,8 @@
                 {
                     "name": "",
                     "id": "afa537dc-b87f-4227-940f-531d7e4dd597",
-                    "path": "<Keyboard>/backquote",
-                    "interactions": "",
+                    "path": "<Keyboard>/a",
+                    "interactions": "NoModifier",
                     "processors": "",
                     "groups": "",
                     "action": "Start",
@@ -664,7 +675,7 @@
                     "name": "",
                     "id": "9aab069e-0f86-4f19-83ae-e9c031ad5c95",
                     "path": "<Keyboard>/d",
-                    "interactions": "",
+                    "interactions": "NoModifier",
                     "processors": "",
                     "groups": "",
                     "action": "Next",
@@ -674,8 +685,8 @@
                 {
                     "name": "",
                     "id": "8c567153-14f5-4477-9e8b-0cac638b0dfd",
-                    "path": "<Keyboard>/c",
-                    "interactions": "",
+                    "path": "<Keyboard>/f",
+                    "interactions": "NoModifier",
                     "processors": "",
                     "groups": "",
                     "action": "End",
@@ -685,8 +696,8 @@
                 {
                     "name": "",
                     "id": "331afc9e-51b3-442b-95bc-42833288c301",
-                    "path": "<Keyboard>/a",
-                    "interactions": "",
+                    "path": "<Keyboard>/s",
+                    "interactions": "NoModifier",
                     "processors": "",
                     "groups": "",
                     "action": "Previous",
@@ -724,7 +735,331 @@
             ]
         },
         {
-            "name": "FrameShift",
+            "name": "TransformEmitter",
+            "id": "578ffc5a-7a4d-44b8-a673-20cf9423b861",
+            "actions": [
+                {
+                    "name": "Blue",
+                    "type": "Button",
+                    "id": "1b086676-f815-4b22-b346-941ba3733b1e",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Red",
+                    "type": "Button",
+                    "id": "3f832471-47d7-45cc-9b29-74b7062e1745",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Yellow",
+                    "type": "Button",
+                    "id": "78d70d68-ab06-4495-b0c5-3ff6eb579f15",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Green",
+                    "type": "Button",
+                    "id": "447f115c-9b07-4df8-8a0e-d4818b6b7023",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "One Modifier",
+                    "id": "03dd7761-74cb-440d-a126-e248e114f030",
+                    "path": "OneModifier",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Green",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "modifier",
+                    "id": "6d8dee7e-83f9-4f64-b3e5-4a294b1631a8",
+                    "path": "<Keyboard>/ctrl",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Green",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "binding",
+                    "id": "2b26d628-5a74-481b-b5ff-c690bb41025c",
+                    "path": "<Keyboard>/4",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Green",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "One Modifier",
+                    "id": "d8754d55-174f-4bd2-97e0-32fbb8476e5c",
+                    "path": "OneModifier",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Yellow",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "modifier",
+                    "id": "a744d6c0-dc92-48a4-9db0-dd5181d6fbd0",
+                    "path": "<Keyboard>/ctrl",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Yellow",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "binding",
+                    "id": "ba84e6ff-2069-489f-b82c-0aef52348639",
+                    "path": "<Keyboard>/3",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Yellow",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "One Modifier",
+                    "id": "8e97b5ac-df4a-4ff7-900d-c787df50f49e",
+                    "path": "OneModifier",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Blue",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "modifier",
+                    "id": "e00751ec-b3aa-4626-92d0-8d317c43fe50",
+                    "path": "<Keyboard>/ctrl",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Blue",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "binding",
+                    "id": "7aa1f3e3-da85-4814-a04a-7fe1f9b5762e",
+                    "path": "<Keyboard>/1",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Blue",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "One Modifier",
+                    "id": "d3f7a49b-fd2f-4598-8454-ad2c517a0fa4",
+                    "path": "OneModifier",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Red",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "modifier",
+                    "id": "b8f5f767-4f7a-4ef9-b99d-3af3fe3a75fc",
+                    "path": "<Keyboard>/ctrl",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Red",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "binding",
+                    "id": "cb78c332-0d2c-48af-aed8-caec53a95c20",
+                    "path": "<Keyboard>/2",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Red",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                }
+            ]
+        },
+        {
+            "name": "Transform",
+            "id": "22b43ec7-56aa-4f29-a8b9-187be462af9e",
+            "actions": [
+                {
+                    "name": "Random",
+                    "type": "Button",
+                    "id": "1c7b4e83-de04-415e-b15f-bc3ed1274072",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Flip",
+                    "type": "Button",
+                    "id": "b90a849e-dd6d-460a-a8a6-450bc5ed6449",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Rotate",
+                    "type": "Button",
+                    "id": "057e93d5-1e33-444d-9c02-5b5ac5431d55",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Swap",
+                    "type": "Button",
+                    "id": "56ccb06b-efa6-42c7-848c-d13e6dac362a",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Shift",
+                    "type": "Button",
+                    "id": "a564ef14-8dff-48bb-a73d-1e19f7dc543c",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Latch",
+                    "type": "Button",
+                    "id": "16b62ea9-28e9-44a0-8522-f37330125349",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Wrap",
+                    "type": "Button",
+                    "id": "baf6ad83-f732-474f-abeb-f88dbafc8f20",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "e2b891ed-fff2-40d5-beac-0bef7b6de50e",
+                    "path": "<Keyboard>/backquote",
+                    "interactions": "NoModifier",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Random",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "4eee25b5-c097-4d47-9b5a-97f01e1e5c83",
+                    "path": "<Keyboard>/z",
+                    "interactions": "NoModifier",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Flip",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2dba437b-dd8f-4c72-af30-6874abcfd5e4",
+                    "path": "<Keyboard>/x",
+                    "interactions": "NoModifier",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Rotate",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5df494e7-36f1-42b3-a121-3c5be3754765",
+                    "path": "<Keyboard>/c",
+                    "interactions": "NoModifier",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Swap",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "caff2019-c072-43e2-9bb1-4798e44ff04e",
+                    "path": "<Keyboard>/v",
+                    "interactions": "NoModifier",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Shift",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3c1e5cee-bb56-4daa-98ec-ac69d5dfb149",
+                    "path": "<Keyboard>/n",
+                    "interactions": "NoModifier",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Latch",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "6775694c-d176-4b90-ba3c-7d59b799fc38",
+                    "path": "<Keyboard>/b",
+                    "interactions": "NoModifier",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Wrap",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "Direction",
             "id": "8cfc6de0-fa50-43f8-bb88-aae6a71d1366",
             "actions": [
                 {
@@ -762,24 +1097,6 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
-                },
-                {
-                    "name": "Wrap",
-                    "type": "Button",
-                    "id": "30cb6ae7-0136-48b1-800f-3c2cb1a051a5",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "Latch",
-                    "type": "Button",
-                    "id": "89071647-e050-4e40-ac96-f2b11d5f5feb",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -787,7 +1104,7 @@
                     "name": "",
                     "id": "a7b33fc2-12a6-42ae-a258-846583aca494",
                     "path": "<Keyboard>/upArrow",
-                    "interactions": "",
+                    "interactions": "NoModifier",
                     "processors": "",
                     "groups": "",
                     "action": "Up",
@@ -798,7 +1115,7 @@
                     "name": "",
                     "id": "544f6beb-3660-40b7-9f0f-3671a4cf5c5f",
                     "path": "<Keyboard>/downArrow",
-                    "interactions": "",
+                    "interactions": "NoModifier",
                     "processors": "",
                     "groups": "",
                     "action": "Down",
@@ -809,7 +1126,7 @@
                     "name": "",
                     "id": "5030a97b-34bd-4e25-8f22-ff9b64fa8f35",
                     "path": "<Keyboard>/leftArrow",
-                    "interactions": "",
+                    "interactions": "NoModifier",
                     "processors": "",
                     "groups": "",
                     "action": "Left",
@@ -820,140 +1137,10 @@
                     "name": "",
                     "id": "bbc25992-758e-40e7-beac-4651bd8469e2",
                     "path": "<Keyboard>/rightArrow",
-                    "interactions": "",
+                    "interactions": "NoModifier",
                     "processors": "",
                     "groups": "",
                     "action": "Right",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "b4f112f8-e723-42dc-941a-93801795afc0",
-                    "path": "<Keyboard>/slash",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Wrap",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "e3e33903-aa2e-4892-91e3-5922bdf0ddfd",
-                    "path": "<Keyboard>/k",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Latch",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                }
-            ]
-        },
-        {
-            "name": "Transform",
-            "id": "22b43ec7-56aa-4f29-a8b9-187be462af9e",
-            "actions": [
-                {
-                    "name": "Random",
-                    "type": "Button",
-                    "id": "1c7b4e83-de04-415e-b15f-bc3ed1274072",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "Flip",
-                    "type": "Button",
-                    "id": "b90a849e-dd6d-460a-a8a6-450bc5ed6449",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "Rotate",
-                    "type": "Button",
-                    "id": "057e93d5-1e33-444d-9c02-5b5ac5431d55",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "Switch",
-                    "type": "Button",
-                    "id": "56ccb06b-efa6-42c7-848c-d13e6dac362a",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "Shift",
-                    "type": "Button",
-                    "id": "a564ef14-8dff-48bb-a73d-1e19f7dc543c",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                }
-            ],
-            "bindings": [
-                {
-                    "name": "",
-                    "id": "e2b891ed-fff2-40d5-beac-0bef7b6de50e",
-                    "path": "",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Random",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "4eee25b5-c097-4d47-9b5a-97f01e1e5c83",
-                    "path": "",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Flip",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "2dba437b-dd8f-4c72-af30-6874abcfd5e4",
-                    "path": "",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Rotate",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "5df494e7-36f1-42b3-a121-3c5be3754765",
-                    "path": "",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Switch",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "caff2019-c072-43e2-9bb1-4798e44ff04e",
-                    "path": "",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Shift",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

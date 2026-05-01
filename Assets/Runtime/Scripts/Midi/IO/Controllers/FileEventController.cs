@@ -5,9 +5,13 @@ using TemperaMental.Frames;
 using TemperaMental.Logs;
 using TemperaMental.Midi.Core;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace TemperaMental.Midi.IO
 {
+    // key isPressed check is required as the file system dialog box steals focus from the app without it knowing which
+    // can lead to held keys having their state inverted
+    // due to this there are no keyboard shortcuts for loading and saving
     public class FileEventController : MonoBehaviour
     {
         [SerializeField] MidiManager midiManager;
@@ -16,6 +20,8 @@ namespace TemperaMental.Midi.IO
 
         public void OnClickAppendMidiFileAsFrames()
         {
+            if (Keyboard.current.anyKey.isPressed) return;
+
             try
             {
                 if (midiFileService.TryOpenMidiFile(out MidiFile midiFile, true))
@@ -34,6 +40,8 @@ namespace TemperaMental.Midi.IO
 
         public void OnClickLoadMidiFileAsFrames()
         {
+            if (Keyboard.current.anyKey.isPressed) return;
+
             try
             {
                 if (midiFileService.TryOpenMidiFile(out MidiFile midiFile))
@@ -52,6 +60,8 @@ namespace TemperaMental.Midi.IO
 
         public void OnClickSaveFramesAsMidiFile()
         {
+            if (Keyboard.current.anyKey.isPressed) return;
+
             try
             {
                 MidiFile midiFile = midiManager.FromFramesToMidiFile(frameManager.GetFrames());
