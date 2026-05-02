@@ -60,7 +60,7 @@ namespace TemperaMental.UI.Emitters
             // set Shift as initial enabled transform
             if (transformModeStates.TryGetValue(EmitterTransformMode.Shift, out var transformUIState))
             {
-                SetButtonsLitState(transformUIState.LitButtons);
+                SetModeLitState(transformUIState.LitButtons);
                 SetDirectionsInteractable(transformUIState.Directions);
             }
         }
@@ -75,13 +75,23 @@ namespace TemperaMental.UI.Emitters
             }
         }
 
-        private void SetButtonsLitState(TransformLitButtons litButtons)
+        private void SetModeLitState(TransformLitButtons litButtons)
         {
             for (int i = 0; i < modeButtons.Length; i++)
             {
                 bool isLit = ((int)litButtons & (1 << i)) != 0;
 
                 modeButtons[i].SetLit(isLit);
+            }
+        }
+
+        private void SetActiveEmitters(TransformEmitters activeEmitters)
+        {
+            for (int i = 0; i < emitterButtons.Length; i++)
+            {
+                bool isActive = ((int)activeEmitters & (1 << i)) != 0;
+
+                emitterButtons[i].SetDimmed(!isActive);
             }
         }
 
@@ -140,17 +150,19 @@ namespace TemperaMental.UI.Emitters
             randomSlider.SetValueWithoutNotify(emitterCount);
         }
 
-        public void ActionOnTransformEmitterChanged(int emitterId, bool isEnabled)
+        public void ActionOnTransformEmitterChanged(int emitterId, bool isActive)
         {
-            emitterButtons[emitterId].SetDimmed(!isEnabled);
+            emitterButtons[emitterId].SetDimmed(!isActive);
         }
 
         public void ActionOnTransformModeChanged(EmitterTransformMode transformMode, EmitterTransformDetail transformDetail)
         {
+            SetActiveEmitters(transformDetail.ActiveEmitters);
+
             if (transformModeStates.TryGetValue(transformMode, out var transformUIState))
             {
-                SetButtonsLitState(transformUIState.LitButtons);
-                SetDirectionsInteractable(transformUIState.Directions);
+                SetModeLitState(transformUIState.LitButtons);
+                SetDirectionsInteractable(transformUIState.Directions);                
             }
 
             latchButtonImage.color = transformDetail.IsLatched ? latchOnColor : defaultOffColor;

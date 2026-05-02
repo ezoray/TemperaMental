@@ -9,13 +9,20 @@ namespace TemperaMental.Emitters
         protected TransformDirections allowedDirections;
         protected TransformDirections currentDirections;
         protected bool isLatched;
+        protected TransformEmitters activeEmitters;
 
         public event Action<TransformDirections, bool> OnDirectionLatchStateChanged;
         public event Action<ulong[]> OnEmittersTransformed;
 
-        protected abstract ulong[] DoSingleTransform(ulong[] groups, TransformEmitters activeEmitters, TransformDirections direction);
+        protected abstract ulong[] DoSingleTransform(ulong[] groups, TransformDirections direction);
 
-        public ulong[] DoTransform(ulong[] groups, TransformEmitters activeEmitters)
+
+        protected virtual void OnEnable()
+        {
+            activeEmitters = TransformEmitters.All;    
+        }
+
+        public ulong[] DoTransform(ulong[] groups)
         {
             ulong[] transformedGroups = groups;
 
@@ -25,7 +32,7 @@ namespace TemperaMental.Emitters
 
                 if (currentDirections.HasFlag(direction))
                 {
-                    transformedGroups = DoSingleTransform(transformedGroups, activeEmitters, direction);
+                    transformedGroups = DoSingleTransform(transformedGroups, direction);
                 }
             }
 
@@ -34,10 +41,10 @@ namespace TemperaMental.Emitters
 
         public EmitterTransformDetail GetTransformDetail()
         {
-            return new EmitterTransformDetail(isLatched, currentDirections);
+            return new EmitterTransformDetail(activeEmitters, isLatched, currentDirections);
         }
 
-        public void HandleDirectionChange(ulong[] emitterGroup, TransformEmitters activeEmitters, int directionValue)
+        public void HandleDirectionChange(ulong[] emitterGroup, int directionValue)
         {
             TransformDirections direction = (TransformDirections)(1 << directionValue);
 
@@ -45,7 +52,7 @@ namespace TemperaMental.Emitters
 
             if (!isLatched)
             {
-                ulong[] transformedGroups = DoSingleTransform(emitterGroup, activeEmitters, direction);
+                ulong[] transformedGroups = DoSingleTransform(emitterGroup, direction);
                 OnEmittersTransformed?.Invoke(transformedGroups);
                 return;
             }
@@ -63,6 +70,15 @@ namespace TemperaMental.Emitters
 
             currentDirections |= direction;
             OnDirectionLatchStateChanged?.Invoke(direction, true);
+        }
+
+        public bool ToggleEmitter(int emitterId)
+        {
+            TransformEmitters emitter = (TransformEmitters)(1 << emitterId);
+
+            activeEmitters ^= emitter;
+
+            return activeEmitters.HasFlag(emitter);
         }
 
         public bool ToggleLatch()

@@ -11,28 +11,30 @@ namespace TemperaMental.Emitters
         int gridWidth, gridHeight;
         int maxEmitters;
 
-        private void OnEnable()
+        protected override void OnEnable()
         {
+            base.OnEnable();
+
             gridWidth = ConfigRegistry.Grid.GridWidth;
             gridHeight = ConfigRegistry.Grid.GridHeight;
             maxEmitters = ConfigRegistry.Grid.MaxEmitters;
             allowedDirections = ConfigRegistry.Emitter.RandomTransformDirections;
         }
 
-        protected override ulong[] DoSingleTransform(ulong[] groups, TransformEmitters activeEmitters, TransformDirections direction)
+        protected override ulong[] DoSingleTransform(ulong[] groups, TransformDirections direction)
         {
             int targetCount = EmitterUtils.GetEmitterCount(groups);
             targetCount = direction.HasFlag(TransformDirections.Right) ? targetCount + 1 : targetCount - 1;
 
             if (targetCount >= 0 && targetCount <= maxEmitters)
             {
-                return DoRandomTransform(groups, targetCount, activeEmitters);
+                return DoRandomTransform(groups, targetCount);
             }
 
             return groups;
         }
 
-        public ulong[] DoRandomTransform(ulong[] groups, int targetCount, TransformEmitters activeEmitters)
+        public ulong[] DoRandomTransform(ulong[] groups, int targetCount)
         {
             ulong[] transformedGroups = new ulong[groups.Length];
             System.Array.Copy(groups, transformedGroups, groups.Length);

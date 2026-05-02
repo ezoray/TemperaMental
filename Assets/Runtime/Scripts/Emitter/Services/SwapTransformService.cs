@@ -8,12 +8,14 @@ namespace TemperaMental.Emitters
     public class SwapTransformService : TransformBaseService
     {
 
-        private void OnEnable()
+        protected override void OnEnable()
         {
+            base.OnEnable();
+
             allowedDirections = ConfigRegistry.Emitter.SwapTransformDirections;
         }
 
-        protected override ulong[] DoSingleTransform(ulong[] groups, TransformEmitters activeEmitters, TransformDirections direction)
+        protected override ulong[] DoSingleTransform(ulong[] groups, TransformDirections direction)
         {
             ulong[] transformedGroups = new ulong[groups.Length];
             Array.Copy(groups, transformedGroups, groups.Length);

@@ -126,15 +126,6 @@ namespace TemperaMental.Input
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""Pan"",
-                    ""type"": ""Value"",
-                    ""id"": ""56aa4d1c-2459-4dd6-a528-7603ef21219c"",
-                    ""expectedControlType"": ""Vector2"",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -170,39 +161,6 @@ namespace TemperaMental.Input
                     ""action"": ""Position"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": ""One Modifier"",
-                    ""id"": ""31367381-d073-475c-9267-bef048aef4e3"",
-                    ""path"": ""OneModifier"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Pan"",
-                    ""isComposite"": true,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": ""modifier"",
-                    ""id"": ""c76cb763-3cb8-40f2-ab16-06c30d39564d"",
-                    ""path"": ""<Keyboard>/leftCtrl"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Pan"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": true
-                },
-                {
-                    ""name"": ""binding"",
-                    ""id"": ""86b07221-8d5a-4e98-9213-dc1b6e98d9ab"",
-                    ""path"": ""<Mouse>/delta"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Pan"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": true
                 }
             ]
         },
@@ -1244,7 +1202,6 @@ namespace TemperaMental.Input
             m_Mouse_LeftClick = m_Mouse.FindAction("LeftClick", throwIfNotFound: true);
             m_Mouse_RightClick = m_Mouse.FindAction("RightClick", throwIfNotFound: true);
             m_Mouse_Position = m_Mouse.FindAction("Position", throwIfNotFound: true);
-            m_Mouse_Pan = m_Mouse.FindAction("Pan", throwIfNotFound: true);
             // File
             m_File = asset.FindActionMap("File", throwIfNotFound: true);
             m_File_Append = m_File.FindAction("Append", throwIfNotFound: true);
@@ -1486,7 +1443,6 @@ namespace TemperaMental.Input
         private readonly InputAction m_Mouse_LeftClick;
         private readonly InputAction m_Mouse_RightClick;
         private readonly InputAction m_Mouse_Position;
-        private readonly InputAction m_Mouse_Pan;
         /// <summary>
         /// Provides access to input actions defined in input action map "Mouse".
         /// </summary>
@@ -1510,10 +1466,6 @@ namespace TemperaMental.Input
             /// Provides access to the underlying input action "Mouse/Position".
             /// </summary>
             public InputAction @Position => m_Wrapper.m_Mouse_Position;
-            /// <summary>
-            /// Provides access to the underlying input action "Mouse/Pan".
-            /// </summary>
-            public InputAction @Pan => m_Wrapper.m_Mouse_Pan;
             /// <summary>
             /// Provides access to the underlying input action map instance.
             /// </summary>
@@ -1549,9 +1501,6 @@ namespace TemperaMental.Input
                 @Position.started += instance.OnPosition;
                 @Position.performed += instance.OnPosition;
                 @Position.canceled += instance.OnPosition;
-                @Pan.started += instance.OnPan;
-                @Pan.performed += instance.OnPan;
-                @Pan.canceled += instance.OnPan;
             }
 
             /// <summary>
@@ -1572,9 +1521,6 @@ namespace TemperaMental.Input
                 @Position.started -= instance.OnPosition;
                 @Position.performed -= instance.OnPosition;
                 @Position.canceled -= instance.OnPosition;
-                @Pan.started -= instance.OnPan;
-                @Pan.performed -= instance.OnPan;
-                @Pan.canceled -= instance.OnPan;
             }
 
             /// <summary>
@@ -2956,13 +2902,6 @@ namespace TemperaMental.Input
             /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
             /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
             void OnPosition(InputAction.CallbackContext context);
-            /// <summary>
-            /// Method invoked when associated input action "Pan" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
-            /// </summary>
-            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
-            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
-            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-            void OnPan(InputAction.CallbackContext context);
         }
         /// <summary>
         /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "File" which allows adding and removing callbacks.

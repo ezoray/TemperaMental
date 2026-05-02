@@ -9,8 +9,10 @@ namespace TemperaMental.Emitters
         int gridWidth, gridHeight;
         bool isWrapping;
 
-        private void OnEnable()
+        protected override void OnEnable()
         {
+            base.OnEnable();
+
             gridWidth = ConfigRegistry.Grid.GridWidth;
             gridHeight = ConfigRegistry.Grid.GridHeight;
 
@@ -25,7 +27,7 @@ namespace TemperaMental.Emitters
         }
 
         // returns a emitter array with all emitter bitmasks shifted in the given direction
-        protected override ulong[] DoSingleTransform(ulong[] groups, TransformEmitters activeEmitters, TransformDirections direction)
+        protected override ulong[] DoSingleTransform(ulong[] groups, TransformDirections direction)
         {
             // Build a mask of all positions occupied by inactive emitters
             ulong inactiveOccupied = 0;

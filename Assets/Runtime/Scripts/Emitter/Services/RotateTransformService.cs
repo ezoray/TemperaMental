@@ -1,6 +1,5 @@
 using TemperaMental.Applications.Config;
 using TemperaMental.Core;
-using TemperaMental.Logs;
 
 namespace TemperaMental.Emitters
 {
@@ -8,14 +7,16 @@ namespace TemperaMental.Emitters
     {
         int gridWidth, gridHeight;
 
-        private void OnEnable()
+        protected override void OnEnable()
         {
+            base.OnEnable();
+
             gridWidth = ConfigRegistry.Grid.GridWidth;
             gridHeight = ConfigRegistry.Grid.GridHeight;
             allowedDirections = ConfigRegistry.Emitter.RotateTransformDirections;
         }
 
-        protected override ulong[] DoSingleTransform(ulong[] groups, TransformEmitters activeEmitters, TransformDirections direction)
+        protected override ulong[] DoSingleTransform(ulong[] groups, TransformDirections direction)
         {
             ulong[] transformedGroups = new ulong[groups.Length];
             bool clockwise = direction.HasFlag(TransformDirections.Right);

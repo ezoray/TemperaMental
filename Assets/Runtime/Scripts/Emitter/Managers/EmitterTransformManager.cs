@@ -17,7 +17,6 @@ namespace TemperaMental.Emitters
         ShiftTransformService shiftTransformService;
 
         EmitterTransformMode transformMode;
-        TransformEmitters activeEmitters;
 
         int bpm;
         float nextEventTime;
@@ -46,7 +45,6 @@ namespace TemperaMental.Emitters
             shiftTransformService = (ShiftTransformService)transformServices[(int)EmitterTransformMode.Shift];
 
             transformMode = EmitterTransformMode.Shift;
-            activeEmitters = TransformEmitters.All;
 
             foreach (var transformService in transformServices)
             {
@@ -68,7 +66,7 @@ namespace TemperaMental.Emitters
                     {
                         if (transformService.IsLatched)
                         {
-                            emitterGroup = transformService.DoTransform(emitterGroup, activeEmitters);
+                            emitterGroup = transformService.DoTransform(emitterGroup);
                         }
                     }
 
@@ -81,7 +79,7 @@ namespace TemperaMental.Emitters
 
         public void HandleDirectionChange(ulong[] emitterGroup, int directionValue)
         {
-            transformServices[(int)transformMode].HandleDirectionChange(emitterGroup, activeEmitters, directionValue);
+            transformServices[(int)transformMode].HandleDirectionChange(emitterGroup, directionValue);
         }
 
         public void ToggleWrapping()
@@ -107,17 +105,15 @@ namespace TemperaMental.Emitters
 
         public void RandomiseEmitters(ulong[] emitterGroup, int targetCount)
         {
-            ulong[] transformedGroups = randomTransformService.DoRandomTransform(emitterGroup, targetCount, activeEmitters);
+            ulong[] transformedGroups = randomTransformService.DoRandomTransform(emitterGroup, targetCount);
             onEmittersTransformed?.Invoke(transformedGroups);
         }
 
         public void ToggleEmitter(int emitterId)
         {
-            TransformEmitters emitter = (TransformEmitters)(1 << emitterId);
+            bool isActive = transformServices[(int)transformMode].ToggleEmitter(emitterId);
 
-            activeEmitters ^= (TransformEmitters)(1 << emitterId);
-
-            onTransformEmitterChanged?.Invoke(emitterId, activeEmitters.HasFlag(emitter));
+            onTransformEmitterChanged?.Invoke(emitterId, isActive);
         }
 
         public void SetTransformMode(EmitterTransformMode transformMode)

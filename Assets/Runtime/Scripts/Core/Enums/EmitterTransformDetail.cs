@@ -4,11 +4,13 @@ namespace TemperaMental.Core
 {
     public struct EmitterTransformDetail
     {
+        public readonly TransformEmitters ActiveEmitters;
         public readonly bool IsLatched;
-        public TransformDirections CurrentDirections;
+        public readonly TransformDirections CurrentDirections;
 
-        public EmitterTransformDetail(bool isLatched, TransformDirections currentDirections)
+        public EmitterTransformDetail(TransformEmitters activeEmitters, bool isLatched, TransformDirections currentDirections)
         {
+            ActiveEmitters = activeEmitters;
             IsLatched = isLatched;
             CurrentDirections = currentDirections;
         }

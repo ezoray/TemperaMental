@@ -7,15 +7,17 @@ namespace TemperaMental.Emitters
     {
         int gridWidth, gridHeight;
 
-        private void OnEnable()
+        protected override void OnEnable()
         {
+            base.OnEnable();
+
             gridWidth = ConfigRegistry.Grid.GridWidth;
             gridHeight = ConfigRegistry.Grid.GridHeight;
 
             allowedDirections = ConfigRegistry.Emitter.FlipTransformDirections;
         }
 
-        protected override ulong[] DoSingleTransform(ulong[] groups, TransformEmitters activeEmitters, TransformDirections direction)
+        protected override ulong[] DoSingleTransform(ulong[] groups, TransformDirections direction)
         {        
             ulong[] transformedGroup = new ulong[groups.Length];
 

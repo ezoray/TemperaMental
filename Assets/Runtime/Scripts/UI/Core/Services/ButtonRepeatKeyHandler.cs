@@ -10,7 +10,7 @@ namespace TemperaMental.UI.Core
 
         CanvasGroup canvasGroup;
 
-        protected void Awake()
+        private void Awake()
         {
             canvasGroup = GetComponentInParent<CanvasGroup>();
 
