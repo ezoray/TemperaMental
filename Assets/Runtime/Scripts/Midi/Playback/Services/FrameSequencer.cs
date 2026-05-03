@@ -133,6 +133,14 @@ namespace TemperaMental.Midi.Playbacks
                     SetPlaybackState(PlaybackState.Reset);
                     break;
 
+                case PlaybackState.Reset:
+                    if (playFrame != anchorFrame)
+                    {
+                        SetPlayFrame(anchorFrame);
+                        SetPlaybackState(PlaybackState.Reset);
+                    }
+                    break;
+
                 default:
                     // no-op
                     break;

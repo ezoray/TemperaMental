@@ -115,18 +115,9 @@
             "id": "a029ab64-d92c-4901-88c8-f913a951a42c",
             "actions": [
                 {
-                    "name": "Play",
+                    "name": "PlayPause",
                     "type": "Button",
                     "id": "5be2a0bc-520d-4d0c-baac-addfb7d4973c",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "Pause",
-                    "type": "Button",
-                    "id": "88a9c818-277f-4ff9-bd9e-57406b8a9edc",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -182,22 +173,11 @@
                 {
                     "name": "",
                     "id": "6d5046fc-94b5-40cc-a7ac-1cc5a18a3339",
-                    "path": "<Keyboard>/g",
+                    "path": "<Keyboard>/space",
                     "interactions": "NoModifier",
                     "processors": "",
                     "groups": "",
-                    "action": "Play",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "42bd3ade-76f9-40ae-bb65-22bab4599481",
-                    "path": "<Keyboard>/h",
-                    "interactions": "NoModifier",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Pause",
+                    "action": "PlayPause",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

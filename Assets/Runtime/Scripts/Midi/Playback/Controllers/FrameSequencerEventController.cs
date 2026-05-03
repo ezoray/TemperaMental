@@ -23,16 +23,10 @@ namespace TemperaMental.Midi.Playbacks
 
         public void OnClickStop() => frameSequencer.Stop();
 
-        public void OnClickPause()
+        public void OnClickTogglePlayPause()
         {
             int initialFrame = frameManager.GetCurrentFrameNumber();
             frameSequencer.TogglePlayPause(initialFrame);
-        }
-
-        public void OnClickPlay()
-        {
-            int initialFrame = frameManager.GetCurrentFrameNumber();
-            frameSequencer.Play(initialFrame);
         }
     }
 }

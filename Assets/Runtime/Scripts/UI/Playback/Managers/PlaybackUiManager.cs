@@ -1,5 +1,6 @@
 using TemperaMental.Applications.Config;
 using TemperaMental.Core;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,6 +12,10 @@ namespace TemperaMental.UI.Playbacks
         [SerializeField] Image loopButtonImage;
         [SerializeField] Image reverseButtonImage;
 
+        const string Play = "Play";
+        const string Pause = "Pause";
+        const int PlayPauseIndex = 0;
+
         Color defaultOffColor;
         Color loopOnColor;
         Color reverseOnColor;
@@ -20,6 +25,7 @@ namespace TemperaMental.UI.Playbacks
 
         [Header("Order: Play, Pause, Stop")]
         [SerializeField] Button[] controlButtons;
+        [SerializeField] TextMeshProUGUI playText;
 
         [SerializeField] Slider bpmSlider;
 
@@ -80,18 +86,22 @@ namespace TemperaMental.UI.Playbacks
             switch (playbackState)
             {
                 case PlaybackState.Reset:
+                    playText.text = Play;
                     ApplyState(PlaybackUIFlags.Idle);
                     break;
 
-                case PlaybackState.Playing: 
+                case PlaybackState.Playing:
+                    playText.text = Pause;
                     ApplyState(PlaybackUIFlags.Playing);
                     break;
 
                 case PlaybackState.Paused:
+                    playText.text = Play;
                     ApplyState(PlaybackUIFlags.Paused);
                     break;
 
                 case PlaybackState.Stopped:
+                    playText.text = Play;
                     ApplyState(PlaybackUIFlags.Stopped);
                     break;
             }

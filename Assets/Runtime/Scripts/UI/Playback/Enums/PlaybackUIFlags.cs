@@ -6,14 +6,13 @@ namespace TemperaMental.UI.Playbacks
     public enum PlaybackUIFlags
     {
         // button interactable flags
-        Play = 1,
-        Pause = 2,
+        PlayPause = 1,
         Stop = 4,
 
         // state presets
-        Idle = Play,
-        Playing = Play | Pause | Stop,
-        Paused =  Play | Stop,
-        Stopped = Play | Stop
+        Idle = PlayPause | Stop,
+        Playing = PlayPause | Stop,
+        Paused = PlayPause | Stop,
+        Stopped = PlayPause | Stop
     }
 }

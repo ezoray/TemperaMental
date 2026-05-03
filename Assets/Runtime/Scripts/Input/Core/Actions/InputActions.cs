@@ -203,18 +203,9 @@ namespace TemperaMental.Input
             ""id"": ""a029ab64-d92c-4901-88c8-f913a951a42c"",
             ""actions"": [
                 {
-                    ""name"": ""Play"",
+                    ""name"": ""PlayPause"",
                     ""type"": ""Button"",
                     ""id"": ""5be2a0bc-520d-4d0c-baac-addfb7d4973c"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
-                    ""name"": ""Pause"",
-                    ""type"": ""Button"",
-                    ""id"": ""88a9c818-277f-4ff9-bd9e-57406b8a9edc"",
                     ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
@@ -270,22 +261,11 @@ namespace TemperaMental.Input
                 {
                     ""name"": """",
                     ""id"": ""6d5046fc-94b5-40cc-a7ac-1cc5a18a3339"",
-                    ""path"": ""<Keyboard>/g"",
+                    ""path"": ""<Keyboard>/space"",
                     ""interactions"": ""NoModifier"",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""Play"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""42bd3ade-76f9-40ae-bb65-22bab4599481"",
-                    ""path"": ""<Keyboard>/h"",
-                    ""interactions"": ""NoModifier"",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Pause"",
+                    ""action"": ""PlayPause"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -1209,8 +1189,7 @@ namespace TemperaMental.Input
             m_File_Save = m_File.FindAction("Save", throwIfNotFound: true);
             // Playback
             m_Playback = asset.FindActionMap("Playback", throwIfNotFound: true);
-            m_Playback_Play = m_Playback.FindAction("Play", throwIfNotFound: true);
-            m_Playback_Pause = m_Playback.FindAction("Pause", throwIfNotFound: true);
+            m_Playback_PlayPause = m_Playback.FindAction("PlayPause", throwIfNotFound: true);
             m_Playback_Stop = m_Playback.FindAction("Stop", throwIfNotFound: true);
             m_Playback_Loop = m_Playback.FindAction("Loop", throwIfNotFound: true);
             m_Playback_Reverse = m_Playback.FindAction("Reverse", throwIfNotFound: true);
@@ -1676,8 +1655,7 @@ namespace TemperaMental.Input
         // Playback
         private readonly InputActionMap m_Playback;
         private List<IPlaybackActions> m_PlaybackActionsCallbackInterfaces = new List<IPlaybackActions>();
-        private readonly InputAction m_Playback_Play;
-        private readonly InputAction m_Playback_Pause;
+        private readonly InputAction m_Playback_PlayPause;
         private readonly InputAction m_Playback_Stop;
         private readonly InputAction m_Playback_Loop;
         private readonly InputAction m_Playback_Reverse;
@@ -1695,13 +1673,9 @@ namespace TemperaMental.Input
             /// </summary>
             public PlaybackActions(@TemperaMentalInputActions wrapper) { m_Wrapper = wrapper; }
             /// <summary>
-            /// Provides access to the underlying input action "Playback/Play".
+            /// Provides access to the underlying input action "Playback/PlayPause".
             /// </summary>
-            public InputAction @Play => m_Wrapper.m_Playback_Play;
-            /// <summary>
-            /// Provides access to the underlying input action "Playback/Pause".
-            /// </summary>
-            public InputAction @Pause => m_Wrapper.m_Playback_Pause;
+            public InputAction @PlayPause => m_Wrapper.m_Playback_PlayPause;
             /// <summary>
             /// Provides access to the underlying input action "Playback/Stop".
             /// </summary>
@@ -1748,12 +1722,9 @@ namespace TemperaMental.Input
             {
                 if (instance == null || m_Wrapper.m_PlaybackActionsCallbackInterfaces.Contains(instance)) return;
                 m_Wrapper.m_PlaybackActionsCallbackInterfaces.Add(instance);
-                @Play.started += instance.OnPlay;
-                @Play.performed += instance.OnPlay;
-                @Play.canceled += instance.OnPlay;
-                @Pause.started += instance.OnPause;
-                @Pause.performed += instance.OnPause;
-                @Pause.canceled += instance.OnPause;
+                @PlayPause.started += instance.OnPlayPause;
+                @PlayPause.performed += instance.OnPlayPause;
+                @PlayPause.canceled += instance.OnPlayPause;
                 @Stop.started += instance.OnStop;
                 @Stop.performed += instance.OnStop;
                 @Stop.canceled += instance.OnStop;
@@ -1780,12 +1751,9 @@ namespace TemperaMental.Input
             /// <seealso cref="PlaybackActions" />
             private void UnregisterCallbacks(IPlaybackActions instance)
             {
-                @Play.started -= instance.OnPlay;
-                @Play.performed -= instance.OnPlay;
-                @Play.canceled -= instance.OnPlay;
-                @Pause.started -= instance.OnPause;
-                @Pause.performed -= instance.OnPause;
-                @Pause.canceled -= instance.OnPause;
+                @PlayPause.started -= instance.OnPlayPause;
+                @PlayPause.performed -= instance.OnPlayPause;
+                @PlayPause.canceled -= instance.OnPlayPause;
                 @Stop.started -= instance.OnStop;
                 @Stop.performed -= instance.OnStop;
                 @Stop.canceled -= instance.OnStop;
@@ -2940,19 +2908,12 @@ namespace TemperaMental.Input
         public interface IPlaybackActions
         {
             /// <summary>
-            /// Method invoked when associated input action "Play" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// Method invoked when associated input action "PlayPause" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
             /// </summary>
             /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
             /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
             /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-            void OnPlay(InputAction.CallbackContext context);
-            /// <summary>
-            /// Method invoked when associated input action "Pause" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
-            /// </summary>
-            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
-            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
-            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-            void OnPause(InputAction.CallbackContext context);
+            void OnPlayPause(InputAction.CallbackContext context);
             /// <summary>
             /// Method invoked when associated input action "Stop" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
             /// </summary>
