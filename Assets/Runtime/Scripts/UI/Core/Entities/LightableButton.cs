@@ -1,4 +1,5 @@
 using TemperaMental.Applications.Config;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,9 +11,13 @@ namespace TemperaMental.UI.Core
         [SerializeField] UIConfig uiConfig;
         [SerializeField] ButtonColorOption buttonColorOption;
         [SerializeField] Image buttonImage;
+        [SerializeField] TextMeshProUGUI buttonText;
 
         Color litColor;
         Color unlitColor;
+
+
+        float alphaValue;
 
         protected override void Awake()
         {
@@ -27,11 +32,28 @@ namespace TemperaMental.UI.Core
                 ButtonColorOption.Cyan => uiConfig.CyanColor,
                 _ => uiConfig.DefaultColor
             };
+
+            alphaValue = uiConfig.DimAlphaValue;
         }
 
         public void SetLit(bool isLit)
         {
             buttonImage.color = isLit ? litColor : unlitColor;
         }
+
+        protected override void DoStateTransition(SelectionState state, bool instant)
+        {
+            base.DoStateTransition(state, instant);
+
+            if (state == SelectionState.Normal || state == SelectionState.Disabled)
+            {
+                float targetAlpha = (state == SelectionState.Disabled) ? alphaValue : 1f;
+
+                Color color = buttonText.color;
+                color.a = targetAlpha;
+                buttonText.color = color;
+            }
+        }
+
     }
 }

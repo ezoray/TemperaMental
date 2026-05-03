@@ -9,7 +9,19 @@ namespace TemperaMental.Midi.Core
         [SerializeField] FrameMidiPlayer midiPlayer;
 
         PlaybackState playbackState;
+        ulong[] pendingGroups;
+        bool hasPending;
 
+
+        private void Update()
+        {
+            if (hasPending && !midiPlayer.IsFramePlaybackActive)
+            {
+                hasPending = false;
+                midiPlayer.PlayFrame(pendingGroups);
+                pendingGroups = null;
+            }
+        }
 
         public void AddEmitter(EmitterDetail emitterDetail)
         {
@@ -39,7 +51,15 @@ namespace TemperaMental.Midi.Core
         {
             if (playbackState == PlaybackState.Playing) return;
 
-            midiPlayer.PlayFrame(emitterGroups);
+            if (!midiPlayer.PlayFrame(emitterGroups))
+            {
+                pendingGroups = emitterGroups;
+                hasPending = true;
+            }
+            else
+            {
+                hasPending = false;
+            }
         }
     }
 }

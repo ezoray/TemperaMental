@@ -101,6 +101,7 @@ MonoBehaviour:
   uiConfig: {fileID: 11400000, guid: e59a02da33e8f484596c9908f49e0736, type: 2}
   buttonColorOption: 2
   buttonImage: {fileID: 8756554232735807289}
+  buttonText: {fileID: 3649716732437688853}
 --- !u!222 &2692364397623238500
 CanvasRenderer:
   m_ObjectHideFlags: 0

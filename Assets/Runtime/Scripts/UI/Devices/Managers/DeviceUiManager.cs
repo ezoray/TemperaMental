@@ -42,7 +42,6 @@ namespace TemperaMental.UI.Devices
                 deviceDropdown.RefreshShownValue();
             }
 
-            LogMan.Log($"User selected: {device}");
             onDeviceChanged?.Invoke(device);
         }
 

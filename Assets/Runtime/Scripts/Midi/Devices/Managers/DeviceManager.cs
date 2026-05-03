@@ -125,8 +125,6 @@ namespace TemperaMental.Midi.Devices
 
             string target = connectedDevices.Contains(primaryDevice) ? primaryDevice : connectedDevices[0];
 
-            ActionOnDeviceSelected(target);
-
             onAutoSelectDevice?.Invoke(target);
         }
 

@@ -7,6 +7,7 @@ using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Multimedia;
 using TemperaMental.Applications.Config;
 using TemperaMental.Core;
+using TemperaMental.Logs;
 using TemperaMental.Utils;
 using UnityEngine;
 using UnityEngine.Events;
@@ -20,6 +21,7 @@ namespace TemperaMental.Midi.Playbacks
         int activateCC;
         int placeCC;
         int removeCC;
+        byte clearEmittersValue;
         int emitterCount;
         int gridSize;
 
@@ -48,6 +50,7 @@ namespace TemperaMental.Midi.Playbacks
             activateCC = ConfigRegistry.Midi.ActivateCC;
             placeCC = ConfigRegistry.Midi.PlaceCC;
             removeCC = ConfigRegistry.Midi.RemoveCC;
+            clearEmittersValue = ConfigRegistry.Midi.ClearEmittersValue;
             emitterCount = ConfigRegistry.Grid.EmitterCount;
             gridSize = ConfigRegistry.Grid.GridWidth * ConfigRegistry.Grid.GridHeight;
 
@@ -69,9 +72,22 @@ namespace TemperaMental.Midi.Playbacks
             playbackThread.Start();
         }
 
-        public void PlayFrame(ulong[] emitterGroups, long frameDurationTicks = 0, bool fireCallback = false)
+        private void ClearAllEmitters()
         {
-            if (isFramePlaybackActive) return;
+            for (byte i = 0; i < emitterCount; i++)
+            {
+                outputDevice?.SendEvent(CreateCC(activateCC, i));
+                outputDevice?.SendEvent(CreateCC(removeCC, clearEmittersValue));
+            }
+
+            // reset previousGroups to match
+            for (int i = 0; i < emitterCount; i++)
+                previousGroups[i] = 0;
+        }
+
+        public bool PlayFrame(ulong[] emitterGroups, long frameDurationTicks = 0, bool fireCallback = false)
+        {
+            if (isFramePlaybackActive) return true;
 
             this.frameDurationTicks = frameDurationTicks;
             this.fireCallback = fireCallback;
@@ -91,6 +107,8 @@ namespace TemperaMental.Midi.Playbacks
             isFramePlaybackActive = true;
             cancelSignal.Reset();
             workReady.Set();
+
+            return true;
         }
 
         public void CancelFrame()
@@ -101,6 +119,7 @@ namespace TemperaMental.Midi.Playbacks
         public void SetOutputDevice(OutputDevice device)
         {
             outputDevice = device;
+            ClearAllEmitters();
 
             onOutputDeviceChanged?.Invoke(true);
         }

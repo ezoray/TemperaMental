@@ -201,7 +201,12 @@ namespace TemperaMental.Midi.Playbacks
 
         private void PlayFrame()
         {
-            midiPlayer.PlayFrame(frames[playFrame -1].GetEmitterGroups(), frameDurationTicks, true);
+            bool isSent = midiPlayer.PlayFrame(frames[playFrame -1].GetEmitterGroups(), frameDurationTicks, true);
+
+            if (!isSent)
+            {
+                LogMan.LogWarning($"PlayFrame dropped — frame {playFrame} could not send, device busy");
+            }
         }
 
         private void SetPlayFrame(int frame)
