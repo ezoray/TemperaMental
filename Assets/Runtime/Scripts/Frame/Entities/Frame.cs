@@ -34,6 +34,14 @@ namespace TemperaMental.Frames
             Array.Copy(otherFrame.emitterGroups, emitterGroups, emitterGroups.Length);
         }
 
+        public Frame(int width, int height, ulong[] emitterGroups)
+        {
+            this.width = width;
+            this.height = height;
+
+            this.emitterGroups = emitterGroups;
+        }
+
         public void SetEmitterGroups(ulong[] groups)
         {
             Array.Copy(groups, emitterGroups, emitterGroups.Length);

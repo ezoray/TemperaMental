@@ -59,22 +59,36 @@ namespace TemperaMental.Emitters
             {
                 if (playbackState == PlaybackState.Stopped || playbackState == PlaybackState.Reset)
                 {
-                    // current frame may change during playback so get current frame emitters each time
-                    ulong[] emitterGroup = frameManager.GetCurrentFrameEmitters();
-
+                    bool anyLatched = false;
                     foreach (var transformService in transformServices)
-                    {
-                        if (transformService.IsLatched)
-                        {
-                            emitterGroup = transformService.DoTransform(emitterGroup);
-                        }
-                    }
+                        if (transformService.IsLatched) { anyLatched = true; break; }
 
-                    onEmittersTransformed?.Invoke(emitterGroup);
+                    if (anyLatched)
+                    {
+                        ulong[] original = frameManager.GetCurrentFrameEmitters();
+                        ulong[] transformed = frameManager.GetCurrentFrameEmitters();
+
+                        foreach (var transformService in transformServices)
+                        {
+                            if (transformService.IsLatched)
+                                transformed = transformService.DoTransform(transformed);
+                        }
+
+                        if (!GroupsEqual(original, transformed))
+                            onEmittersTransformed?.Invoke(transformed);
+                    }
 
                     nextEventTime = Time.time + repeatRate;
                 }
             }
+        }
+
+        private bool GroupsEqual(ulong[] a, ulong[] b)
+        {
+            if (a == null || b == null || a.Length != b.Length) return false;
+            for (int i = 0; i < a.Length; i++)
+                if (a[i] != b[i]) return false;
+            return true;
         }
 
         public void HandleDirectionChange(ulong[] emitterGroup, int directionValue)
@@ -150,6 +164,16 @@ namespace TemperaMental.Emitters
         public void SetPlaybackState(PlaybackState newPlaybackState)
         {
             playbackState = newPlaybackState;
+
+            if (playbackState == PlaybackState.Playing)
+            {
+                foreach (var transformService in transformServices)
+                {
+                    transformService.IsLatched = false;
+                }
+
+                onLatchStateChanged?.Invoke(false);
+            }
         }
     }
 }

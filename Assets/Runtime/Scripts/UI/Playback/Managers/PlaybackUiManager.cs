@@ -14,16 +14,16 @@ namespace TemperaMental.UI.Playbacks
 
         const string Play = "Play";
         const string Pause = "Pause";
-        const int PlayPauseIndex = 0;
 
         Color defaultOffColor;
+        Color playOnColor;
         Color loopOnColor;
         Color reverseOnColor;
 
         int minBpm;
         int maxBpm;
 
-        [Header("Order: Play, Pause, Stop")]
+        [Header("Order: Play, Stop")]
         [SerializeField] Button[] controlButtons;
         [SerializeField] TextMeshProUGUI playText;
 
@@ -34,6 +34,7 @@ namespace TemperaMental.UI.Playbacks
             transportCanvasGroup.interactable = false;
 
             defaultOffColor = ConfigRegistry.UI.DefaultColor;
+            playOnColor = ConfigRegistry.UI.GreenColor;
             loopOnColor = ConfigRegistry.UI.GreenColor;
             reverseOnColor = ConfigRegistry.UI.PurpleColor;
 
@@ -41,7 +42,7 @@ namespace TemperaMental.UI.Playbacks
             maxBpm = ConfigRegistry.Midi.MaxBpm;
 
             bpmSlider.minValue = minBpm;
-            bpmSlider.maxValue = maxBpm;
+            bpmSlider.maxValue = maxBpm;            
         }
 
         public void OnClickIncrementBpm()
@@ -87,22 +88,22 @@ namespace TemperaMental.UI.Playbacks
             {
                 case PlaybackState.Reset:
                     playText.text = Play;
-                    ApplyState(PlaybackUIFlags.Idle);
+                    ApplyTransportState(PlaybackUIStates.Reset);
                     break;
 
                 case PlaybackState.Playing:
                     playText.text = Pause;
-                    ApplyState(PlaybackUIFlags.Playing);
+                    ApplyTransportState(PlaybackUIStates.Playing);
                     break;
 
                 case PlaybackState.Paused:
                     playText.text = Play;
-                    ApplyState(PlaybackUIFlags.Paused);
+                    ApplyTransportState(PlaybackUIStates.Paused);
                     break;
 
                 case PlaybackState.Stopped:
                     playText.text = Play;
-                    ApplyState(PlaybackUIFlags.Stopped);
+                    ApplyTransportState(PlaybackUIStates.Stopped);
                     break;
             }
         }
@@ -112,7 +113,7 @@ namespace TemperaMental.UI.Playbacks
             transportCanvasGroup.interactable = isSet;
         }
 
-        private void ApplyState(PlaybackUIFlags playbackFlags)
+        private void ApplyTransportState(PlaybackUIStates playbackFlags)
         {
             for (int i = 0; i < controlButtons.Length; i++)
             {

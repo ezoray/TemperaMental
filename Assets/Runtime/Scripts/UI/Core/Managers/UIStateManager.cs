@@ -4,12 +4,12 @@ using UnityEngine;
 
 namespace TemperaMental.UI.Core
 {
-    public class UIManager : MonoBehaviour
+    public class UIStateManager : MonoBehaviour
     {
-        [Header("Order: Device, File, Mode, Frame, Transform, Direction, Playback, Create, Select")]
+        [Header("Order: Device, File, Mode, Frame, Transform, Direction, Record, Playback, Create, Select")]
         [SerializeField] List<CanvasGroup> panels;
 
-        private void ApplyState(UIStateFlags uiState)
+        private void ApplyState(UIStates uiState)
         {
             for (int i = 0; i < panels.Count; i++)
             {
@@ -24,19 +24,19 @@ namespace TemperaMental.UI.Core
             switch (playbackState)
             {
                 case PlaybackState.Reset:
-                    ApplyState(UIStateFlags.All);
+                    ApplyState(UIStates.All);
                     break;
 
                 case PlaybackState.Playing:
-                    ApplyState(UIStateFlags.Playing);
+                    ApplyState(UIStates.Playing);
                     break;
 
                 case PlaybackState.Paused:
-                    ApplyState(UIStateFlags.Paused);
+                    ApplyState(UIStates.Paused);
                     break;
 
                 case PlaybackState.Stopped:
-                    ApplyState(UIStateFlags.All);
+                    ApplyState(UIStates.All);
                     break;
             }
         }

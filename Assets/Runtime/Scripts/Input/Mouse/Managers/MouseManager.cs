@@ -105,7 +105,12 @@ namespace TemperaMental.Input.Mouse
 
         private void OnLeftClickCanceled(InputAction.CallbackContext context)
         {
-            if (!isLeftDragging) HandleDrag(onLeftClick, ref lastLeftDragPos);
+            if (!isLeftDragging)
+            {
+                Vector2 mousePosition = mouseActions.Position.ReadValue<Vector2>();
+                if (!IsInterfaceTouch(mousePosition))
+                    onLeftClick?.Invoke(mousePosition);
+            }
             isLeftPressed = false;
             isLeftDragging = false;
         }
@@ -120,7 +125,12 @@ namespace TemperaMental.Input.Mouse
 
         private void OnRightClickCanceled(InputAction.CallbackContext context)
         {
-            if (!isRightDragging) HandleDrag(onRightClick, ref lastRightDragPos);
+            if (!isRightDragging)
+            {
+                Vector2 mousePosition = mouseActions.Position.ReadValue<Vector2>();
+                if (!IsInterfaceTouch(mousePosition))
+                    onRightClick?.Invoke(mousePosition);
+            }
             isRightPressed = false;
             isRightDragging = false;
         }

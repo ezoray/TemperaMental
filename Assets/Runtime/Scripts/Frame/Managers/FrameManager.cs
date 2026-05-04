@@ -18,12 +18,19 @@ namespace TemperaMental.Frames
         int currentEmitterId;
         Frame copiedFrame;
 
+        bool isRecording;
+
         PlaybackState playbackState;
+
+        public string onText;
+        public string offText;
 
         [SerializeField] UnityEvent<int> onEmitterTypeChanged;
         [SerializeField] UnityEvent<EmitterDetail> onAddEmitter;
         [SerializeField] UnityEvent<Vector2Int> onRemoveEmitter;
         [SerializeField] UnityEvent<FrameDetail> onFrameChanged;
+        [SerializeField] UnityEvent<bool> onRecordingStateChanged;
+
 
         private void Awake()
         {
@@ -32,19 +39,31 @@ namespace TemperaMental.Frames
 
             currentEmitterId = ConfigRegistry.Grid.DefaultEmitterId;
 
+            onText = ConfigRegistry.UI.OnText;
+            offText = ConfigRegistry.UI.OffText;
+
             AddFrame();
         }
 
-        private void Start()
+        public void RecordFrame(ulong[] emitterGroups)
         {
+            if (playbackState == PlaybackState.Playing) return;
 
+            InsertFrameAt(currentFrameIndex + 1, new Frame(gridWidth, gridHeight, emitterGroups));
+        }
+
+        public void ToggleRecording()
+        {
+            isRecording = !isRecording;
+
+            LogMan.Log("Recording " + (isRecording ? onText : offText));
+
+            onRecordingStateChanged?.Invoke(isRecording);
         }
 
         public void UpdateCurrentFrame(ulong[] emitterGroups)
         {  
             currentFrame.SetEmitterGroups(emitterGroups);
-
-          //  if (playbackState == PlaybackState.Playing) return;
 
             NotifyFrameChanged();
         }
@@ -57,6 +76,12 @@ namespace TemperaMental.Frames
         public void SetPlaybackState(PlaybackState newPlaybackState)
         {
             playbackState = newPlaybackState;
+
+            if(playbackState == PlaybackState.Playing)
+            {
+                isRecording = false;
+                onRecordingStateChanged?.Invoke(isRecording);
+            }
         }
 
         public void DeleteFrame()
@@ -250,5 +275,7 @@ namespace TemperaMental.Frames
         {
             onFrameChanged?.Invoke(GetFrameDetail(currentFrame));
         }
+
+        public bool IsRecording { get => isRecording; set => isRecording = value; }
     }
 }

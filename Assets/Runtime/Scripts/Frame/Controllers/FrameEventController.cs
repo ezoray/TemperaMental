@@ -26,7 +26,17 @@ namespace TemperaMental.Frames
 
         public void OnClickNewFrame() => frameManager.InsertFrame();
 
-        public void ActionOnEmittersTransformed(ulong[] emitterGroup) => frameManager.UpdateCurrentFrame(emitterGroup);
+        public void ActionOnEmittersTransformed(ulong[] emitterGroups)
+        { 
+            if (frameManager.IsRecording)
+            {
+                frameManager.RecordFrame(emitterGroups);
+            }
+            else
+            {
+                frameManager.UpdateCurrentFrame(emitterGroups);
+            }
+        }
 
         // frame slider
         public void ActionOnSelectedFrameChanged(float selectedFrame) => frameManager.GoToSelectedFrame(Mathf.RoundToInt(selectedFrame));

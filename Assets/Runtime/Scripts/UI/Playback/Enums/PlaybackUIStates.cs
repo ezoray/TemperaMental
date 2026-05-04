@@ -3,14 +3,14 @@ using System;
 namespace TemperaMental.UI.Playbacks
 {
     [Flags]
-    public enum PlaybackUIFlags
+    public enum PlaybackUIStates
     {
         // button interactable flags
         PlayPause = 1,
-        Stop = 4,
+        Stop = 2,
 
         // state presets
-        Idle = PlayPause | Stop,
+        Reset = PlayPause | Stop,
         Playing = PlayPause | Stop,
         Paused = PlayPause | Stop,
         Stopped = PlayPause | Stop

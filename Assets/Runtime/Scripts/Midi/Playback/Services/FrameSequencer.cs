@@ -178,10 +178,7 @@ namespace TemperaMental.Midi.Playbacks
         {
             isReversed = !isReversed;
 
-            if (playbackState != PlaybackState.Reset)
-            {
-                anchorFrame = playFrame;
-            }
+            anchorFrame = playFrame;
 
             onReverseStateChanged?.Invoke(isReversed);
         }
