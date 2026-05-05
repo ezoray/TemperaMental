@@ -10,7 +10,7 @@ namespace TemperaMental.Midi.Core
 
         public void ActionOnPlaybackStateChanged(PlaybackState playbackState) => immediateService.SetPlaybackState(playbackState);
 
-        public void ActionOnRemoveEmitter(Vector2Int position) => immediateService.RemoveEmitter(position);
+        public void ActionOnRemoveEmitter(Vector2Int position, int emitterCount) => immediateService.RemoveEmitter(position);
 
         public void ActionOnAddEmitter(EmitterDetail emitterDetail) => immediateService.AddEmitter(emitterDetail);
 

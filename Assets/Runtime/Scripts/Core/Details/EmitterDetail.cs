@@ -1,18 +1,29 @@
+using TemperaMental.Utils;
 using UnityEngine;
 
 namespace TemperaMental.Core
 {
     public struct EmitterDetail
     {
-        public Vector2Int Position { get; }
-        public int EmitterId { get; }
-        public ulong[] EmitterGroups { get; }
+        public readonly Vector2Int Position;
+        public readonly int EmitterId;
+        public readonly ulong[] EmitterGroups;
+        public readonly int EmitterCount;
 
-        public EmitterDetail(Vector2Int position, int emitterId, ulong[] emitterGroups = default)
+        public EmitterDetail(Vector2Int position, int emitterId, ulong[] emitterGroups)
         {
             Position = position;
             EmitterId = emitterId;
             EmitterGroups = emitterGroups;
+            EmitterCount = EmitterUtils.GetEmitterCount(emitterGroups);
+        }
+
+        public EmitterDetail(Vector2Int position, int emitterId)
+        {
+            Position = position;
+            EmitterId = emitterId;
+            EmitterGroups = default;
+            EmitterCount = default;
         }
     }
 }

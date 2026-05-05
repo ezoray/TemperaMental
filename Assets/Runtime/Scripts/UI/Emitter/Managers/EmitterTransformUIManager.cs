@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using TemperaMental.Applications.Config;
 using TemperaMental.Core;
 using TemperaMental.UI.Core;
-using TemperaMental.Utils;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -131,23 +130,19 @@ namespace TemperaMental.UI.Emitters
             wrapButtonImage.color = isOn ? wrapOnColor : defaultOffColor;
         }
 
-        public void ActionOnRemoveEmitter(Vector2Int position)
+        public void ActionOnRemoveEmitter(Vector2Int position, int emitterCount)
         {
-            randomSlider.SetValueWithoutNotify(randomSlider.value - 1);
+            randomSlider.SetValueWithoutNotify(emitterCount);
         }
 
         public void ActionOnAddEmitter(EmitterDetail emitterDetail)
         {
-            int emitterCount = EmitterUtils.GetEmitterCount(emitterDetail.EmitterGroups);
-
-            randomSlider.SetValueWithoutNotify(emitterCount);
+            randomSlider.SetValueWithoutNotify(emitterDetail.EmitterCount);
         }
 
         public void ActionOnFrameChanged(FrameDetail frameDetail)
         {
-            int emitterCount = EmitterUtils.GetEmitterCount(frameDetail.EmitterGroups);
-
-            randomSlider.SetValueWithoutNotify(emitterCount);
+            randomSlider.SetValueWithoutNotify(frameDetail.EmitterCount);
         }
 
         public void ActionOnTransformEmitterChanged(int emitterId, bool isActive)

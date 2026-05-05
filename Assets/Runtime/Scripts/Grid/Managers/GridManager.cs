@@ -34,7 +34,7 @@ namespace TemperaMental.Grid
             emitterTilemapManager.AddTiles(frameDetail.EmitterGroups);
         }
 
-        public void ActionOnRemoveEmitter(Vector2Int position)
+        public void ActionOnRemoveEmitter(Vector2Int position, int emitterCount)
         {
             emitterTilemapManager.RemoveTile(position);
         }

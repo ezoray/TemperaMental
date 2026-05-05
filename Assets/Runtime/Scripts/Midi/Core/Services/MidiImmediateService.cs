@@ -22,17 +22,14 @@ namespace TemperaMental.Midi.Core
                 pendingGroups = null;
             }
         }
-
+         
         public void AddEmitter(EmitterDetail emitterDetail)
         {
-    //        if (playbackState == PlaybackState.Playing) return;
             midiPlayer.AddEmitter(emitterDetail);
         }
 
         public void RemoveEmitter(Vector2Int position)
         {
-   //         if (playbackState == PlaybackState.Playing) return;
-
             midiPlayer.RemoveEmitter(position);
         }
 

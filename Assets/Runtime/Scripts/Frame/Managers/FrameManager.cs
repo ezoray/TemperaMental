@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using TemperaMental.Applications.Config;
 using TemperaMental.Core;
 using TemperaMental.Logs;
+using TemperaMental.Utils;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -27,7 +28,7 @@ namespace TemperaMental.Frames
 
         [SerializeField] UnityEvent<int> onEmitterTypeChanged;
         [SerializeField] UnityEvent<EmitterDetail> onAddEmitter;
-        [SerializeField] UnityEvent<Vector2Int> onRemoveEmitter;
+        [SerializeField] UnityEvent<Vector2Int, int> onRemoveEmitter;
         [SerializeField] UnityEvent<FrameDetail> onFrameChanged;
         [SerializeField] UnityEvent<bool> onRecordingStateChanged;
 
@@ -200,7 +201,9 @@ namespace TemperaMental.Frames
         {
             if (currentFrame.TryRemoveEmitter(position))
             {
-                onRemoveEmitter?.Invoke(position);
+                int emitterCount = EmitterUtils.GetEmitterCount(currentFrame.GetEmitterGroups());
+
+                onRemoveEmitter?.Invoke(position, emitterCount);
             }
         }
 

@@ -4,6 +4,7 @@ using TemperaMental.Core;
 using TemperaMental.Applications.Config;
 using System.Collections;
 
+
 namespace TemperaMental.UI.Display
 {
     public class DisplayUIManager : MonoBehaviour
@@ -13,8 +14,7 @@ namespace TemperaMental.UI.Display
 
         [SerializeField] TextMeshProUGUI bpmText;
         [SerializeField] TextMeshProUGUI frameText;
-        [SerializeField] TextMeshProUGUI reverseText;
-        [SerializeField] TextMeshProUGUI loopText;
+        [SerializeField] TextMeshProUGUI emittersText;
         [SerializeField] TextMeshProUGUI logText;
 
         float tempMessageDuration;
@@ -33,6 +33,15 @@ namespace TemperaMental.UI.Display
         private Coroutine tempMessageCoroutine;
         private string lastLogMessage;
 
+        public void ActionOnRemoveEmitter(Vector2Int position, int emitterCount)
+        {
+            emittersText.text = $"{emitterCount}";
+        }
+
+        public void ActionOnAddEmitter(EmitterDetail emitterDetail)
+        {
+            emittersText.text = $"{emitterDetail.EmitterCount}";
+        }
 
         public void ActionOnTempMessage(string message)
         {
@@ -79,19 +88,11 @@ namespace TemperaMental.UI.Display
             logText.color = color;
         }
 
-        public void ActionOnReverseStateChanged(bool isReversed)
-        {
-            reverseText.text = isReversed ? onText : offText;
-        }
-
-        public void ActionOnLoopStateChanged(bool isLooping)
-        {
-            loopText.text = isLooping ? onText : offText;
-        }
-
         public void ActionOnFrameChanged(FrameDetail frameDetail)
         {
             frameText.text = $"{frameDetail.FrameNumber} / {frameDetail.FrameTotal}";
+
+            emittersText.text = $"{frameDetail.EmitterCount}";
         }
 
         public void ActionOnBpmChanged(int bpm)
