@@ -5,7 +5,7 @@ namespace TemperaMental.Midi.Core
 {
     public class MidiImmediateEventController : MonoBehaviour
     {
-        [SerializeField] MidiManager midiManager;
+        [SerializeField] MidiTempoManager midiManager;
         [SerializeField] MidiImmediateService immediateService;
 
         public void ActionOnPlaybackStateChanged(PlaybackState playbackState) => immediateService.SetPlaybackState(playbackState);

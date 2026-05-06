@@ -211,9 +211,9 @@ namespace TemperaMental.Frames
         {
             if (!currentFrame.CheckSameEmitterAtPosition(cellPosition, currentEmitterId))
             {
-                EmitterDetail emitterDetail = new EmitterDetail(cellPosition, currentEmitterId, currentFrame.GetEmitterGroups());
+                currentFrame.AddEmitter(cellPosition, currentEmitterId);
 
-                currentFrame.AddEmitter(emitterDetail);
+                EmitterDetail emitterDetail = new EmitterDetail(cellPosition, currentEmitterId, currentFrame.GetEmitterGroups());
 
                 onAddEmitter?.Invoke(emitterDetail);
             }

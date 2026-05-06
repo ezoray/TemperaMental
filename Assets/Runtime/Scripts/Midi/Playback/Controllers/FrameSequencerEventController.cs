@@ -9,7 +9,7 @@ namespace TemperaMental.Midi.Playbacks
     {
         [SerializeField] DeviceManager deviceManager;
         [SerializeField] FrameSequencer frameSequencer;
-        [SerializeField] MidiManager midiManager;
+        [SerializeField] MidiTempoManager midiManager;
         [SerializeField] FrameManager frameManager;
 
         // frame slider

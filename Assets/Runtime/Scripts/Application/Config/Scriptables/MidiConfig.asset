@@ -18,11 +18,11 @@ MonoBehaviour:
   AppendTitle: Append Midi File
   LoadTitle: Open Midi File
   SaveTitle: Save Midi File
-  DefaultBpm: 400
+  DefaultBpm: 128
   MinBpm: 10
-  MaxBpm: 2000
+  MaxBpm: 1000
   TicksPerFrame: 120
-  EventIntervalMS: 0.0001
+  EventIntervalMS: 0.0005
   ActivateCC: 10
   PlaceCC: 11
   RemoveCC: 12

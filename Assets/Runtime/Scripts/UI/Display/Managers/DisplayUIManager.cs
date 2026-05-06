@@ -3,7 +3,7 @@ using TMPro;
 using TemperaMental.Core;
 using TemperaMental.Applications.Config;
 using System.Collections;
-
+using TemperaMental.Logs;
 
 namespace TemperaMental.UI.Display
 {
@@ -39,7 +39,7 @@ namespace TemperaMental.UI.Display
         }
 
         public void ActionOnAddEmitter(EmitterDetail emitterDetail)
-        {
+        {           
             emittersText.text = $"{emitterDetail.EmitterCount}";
         }
 

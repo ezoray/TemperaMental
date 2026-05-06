@@ -14,13 +14,13 @@ namespace TemperaMental.Applications.Config
         public string LoadTitle = "Open Midi File";
         public string SaveTitle = "Save Midi File";
 
-        public int DefaultBpm = 400;
+        public int DefaultBpm = 128;
         public int MinBpm = 10;
-        public int MaxBpm = 2000;
+        public int MaxBpm = 1000;
 
         // tick resolution and interval between ticks
-        public short TicksPerFrame = 960;
-        public float EventIntervalMS = 0.0001f;
+        public short TicksPerFrame = 120;
+        public float EventIntervalMS = 0.0005f;
 
         // cc numbers for emitters
         public int ActivateCC = 10;

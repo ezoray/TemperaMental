@@ -4,6 +4,8 @@ using Melanchall.DryWetMidi.Core;
 using TemperaMental.Frames;
 using TemperaMental.Logs;
 using TemperaMental.Midi.Core;
+using TemperaMental.Midi.Transforms;
+using TemperaMental.Utils;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -14,7 +16,8 @@ namespace TemperaMental.Midi.IO
     // due to this there are no keyboard shortcuts for loading and saving
     public class FileEventController : MonoBehaviour
     {
-        [SerializeField] MidiManager midiManager;
+        [SerializeField] MidiTempoManager midiManager;
+        [SerializeField] MidiTransformService midiTransformService;
         [SerializeField] MidiFileService midiFileService;
         [SerializeField] FrameManager frameManager;
 
@@ -26,7 +29,10 @@ namespace TemperaMental.Midi.IO
             {
                 if (midiFileService.TryOpenMidiFile(out MidiFile midiFile, true))
                 {
-                    List<Frame> frames = midiManager.FromMidiFileToFrames(midiFile);
+                    int bpm = MidiUtils.GetBpmFromMidiFile(midiFile);
+                    midiManager.SetBpm(bpm);
+
+                    List<Frame> frames = midiTransformService.FromMidiFileToFrames(midiFile);
                     frameManager.AppendFrames(frames);
 
                     LogMan.Log("File appended");
@@ -46,7 +52,10 @@ namespace TemperaMental.Midi.IO
             {
                 if (midiFileService.TryOpenMidiFile(out MidiFile midiFile))
                 {
-                    List<Frame> frames = midiManager.FromMidiFileToFrames(midiFile);
+                    int bpm = MidiUtils.GetBpmFromMidiFile(midiFile);
+                    midiManager.SetBpm(bpm);
+
+                    List<Frame> frames = midiTransformService.FromMidiFileToFrames(midiFile);
                     frameManager.SetFrames(frames);
 
                     LogMan.Log("File loaded");
@@ -64,7 +73,9 @@ namespace TemperaMental.Midi.IO
 
             try
             {
-                MidiFile midiFile = midiManager.FromFramesToMidiFile(frameManager.GetFrames());
+                int bpm = midiManager.GetBpm();
+
+                MidiFile midiFile = midiTransformService.FromFramesToMidiFile(frameManager.GetFrames(), bpm);
 
                 if (midiFileService.TrySaveMidiFile(midiFile))
                 {

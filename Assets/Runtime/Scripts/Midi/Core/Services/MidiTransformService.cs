@@ -3,7 +3,6 @@ using Melanchall.DryWetMidi.Common;
 using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Interaction;
 using TemperaMental.Applications.Config;
-using TemperaMental.Core;
 using TemperaMental.Frames;
 using TemperaMental.Utils;
 using UnityEngine;
@@ -47,33 +46,14 @@ namespace TemperaMental.Midi.Transforms
             gridSize = gridWidth * gridHeight;
         }
 
-        public MidiFile FromFramesToMidiFileReversed(IReadOnlyList<Frame> sourceFrames, int bpm)
-        {
-            List<Frame> reversedFrames = GetReversedList<Frame>(sourceFrames);
-
-            return FromFramesToMidiFile(reversedFrames, bpm, true);
-        }
-
-        private List<T> GetReversedList<T>(IReadOnlyList<T> original)
-        {
-            List<T> reversed = new List<T>(original.Count);
-
-            for (int i = original.Count - 1; i >= 0; i--)
-            {
-                reversed.Add(original[i]);
-            }
-
-            return reversed;
-        }
-
-        public MidiFile FromFramesToMidiFile(IReadOnlyList<Frame> sourceFrames, int bpm, bool isReversed)
+        public MidiFile FromFramesToMidiFile(IReadOnlyList<Frame> sourceFrames, int bpm)
         {
             MidiFile midiFile = BuildMidiFile();
             TrackChunk trackChunk = BuildTrackChunk(bpm);
 
             using (var manager = trackChunk.ManageTimedEvents())
             {
-                WriteFrames(manager, sourceFrames, isReversed);
+                WriteFrames(manager, sourceFrames);
             }
 
             midiFile.Chunks.Add(trackChunk);
@@ -98,13 +78,13 @@ namespace TemperaMental.Midi.Transforms
             return trackChunk;
         }
 
-        private void WriteFrames(TimedObjectsManager<TimedEvent> manager, IReadOnlyList<Frame> sourceFrames, bool isReversed)
+        private void WriteFrames(TimedObjectsManager<TimedEvent> manager, IReadOnlyList<Frame> sourceFrames)
         {
             for (int i = 0; i < sourceFrames.Count; i++)
             {
                 long frameTick = i * ticksPerFrame;
 
-                int frameNumber = isReversed ? sourceFrames.Count - i : i + 1;
+                int frameNumber = i + 1;
 
                 frameTick = WriteFrameStart(manager, frameTick, frameNumber);
 
@@ -190,6 +170,9 @@ namespace TemperaMental.Midi.Transforms
             // add events to frame based on the calculation of what events belong in each frame
             foreach (var timedEvent in timedEvents)
             {
+                // skip non-CC events entirely — markers should not trigger frame boundaries
+                if (timedEvent.Event is not ControlChangeEvent cc) continue;
+
                 long frameTick = (timedEvent.Time / ticksPerFrame) * ticksPerFrame;
 
                 if (frameTick != currentFrameTick)
@@ -199,14 +182,10 @@ namespace TemperaMental.Midi.Transforms
                         frames.Add(currentFrame);
                     }
 
-                    // each frame is now absolute so start fresh rather than copying previous
                     currentFrame = new Frame(gridWidth, gridHeight);
-
                     currentFrameTick = frameTick;
                     currentEmitterId = 0;
                 }
-
-                if (timedEvent.Event is not ControlChangeEvent cc) continue;
 
                 int controlNumber = (int)cc.ControlNumber;
 
@@ -216,11 +195,7 @@ namespace TemperaMental.Midi.Transforms
                 }
                 else if (controlNumber == placeCC)
                 {
-                    currentFrame.AddEmitter(new EmitterDetail(EmitterUtils.IndexToPosition((byte)cc.ControlValue), currentEmitterId));
-                }
-                else if (controlNumber == removeCC)
-                {
-                    // clear messages can be ignored on load as each frame starts fresh
+                    currentFrame.AddEmitter(EmitterUtils.IndexToPosition((byte)cc.ControlValue), currentEmitterId);
                 }
             }
 

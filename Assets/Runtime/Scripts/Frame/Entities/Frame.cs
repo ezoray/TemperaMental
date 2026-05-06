@@ -1,6 +1,5 @@
 using System;
 using TemperaMental.Applications.Config;
-using TemperaMental.Core;
 using TemperaMental.Utils;
 using UnityEngine;
 
@@ -53,18 +52,18 @@ namespace TemperaMental.Frames
             return emitterGroups;
         }
 
-        public void AddEmitter(EmitterDetail emitterDetail)
+        public void AddEmitter(Vector2Int position, int emitterId)
         {
-            int pos = EmitterUtils.PositionToIndex(emitterDetail.Position);
+            int pos = EmitterUtils.PositionToIndex(position);
 
             // evict any other emitter at this position
             for (int i = 0; i < emitterCount; i++)
             {
-                if (i == emitterDetail.EmitterId) continue;
+                if (i == emitterId) continue;
                 emitterGroups[i] &= ~(1UL << pos);
             }
 
-            emitterGroups[emitterDetail.EmitterId] |= 1UL << pos;
+            emitterGroups[emitterId] |= 1UL << pos;
         }
 
         public bool TryRemoveEmitter(Vector2Int position)
