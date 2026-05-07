@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Melanchall.DryWetMidi.Multimedia;
@@ -34,8 +35,12 @@ namespace TemperaMental.Midi.Devices
 
         private void Start()
         {
+#if UNITY_STANDALONE_WIN
+            StartCoroutine(PollDevices());
+#else
             DevicesWatcher.Instance.DeviceAdded += OnDeviceChange;
             DevicesWatcher.Instance.DeviceRemoved += OnDeviceChange;
+#endif
             SyncDeviceList();
         }
 
@@ -76,7 +81,7 @@ namespace TemperaMental.Midi.Devices
                 }
             }
 
-            foreach (var name in added)
+            foreach (string name in added)
             {
                 LogMan.Log($"Device connected: {name}");
             }
@@ -128,11 +133,6 @@ namespace TemperaMental.Midi.Devices
             onAutoSelectDevice?.Invoke(target);
         }
 
-        private void OnDeviceChange(object sender, DeviceAddedRemovedEventArgs eventArgs)
-        {
-            isDeviceChange = true;
-        }
-
         public void ActionOnDeviceSelected(string deviceName)
         {
             try
@@ -157,13 +157,39 @@ namespace TemperaMental.Midi.Devices
             }
         }
 
+#if UNITY_STANDALONE_WIN
+        private IEnumerator PollDevices()
+        {
+            var wait = new WaitForSeconds(1.5f);
+            List<string> previousDevices = new List<string>();
+
+            while (true)
+            {
+                yield return wait;
+                List<string> current = GetHardwareDeviceNames();
+                if (!current.SequenceEqual(previousDevices))
+                {
+                    previousDevices = current;
+                    isDeviceChange = true;
+                }
+            }
+        }
+#else
+        private void OnDeviceChange(object sender, DeviceAddedRemovedEventArgs eventArgs)
+        {
+            isDeviceChange = true;
+        }
+#endif
+
         private void OnDisable()
         {
+#if !UNITY_STANDALONE_WIN
             if (DevicesWatcher.Instance != null)
             {
                 DevicesWatcher.Instance.DeviceAdded -= OnDeviceChange;
                 DevicesWatcher.Instance.DeviceRemoved -= OnDeviceChange;
             }
+#endif
         }
     }
 }
