@@ -9,6 +9,7 @@ namespace TemperaMental.UI.Playbacks
     public class PlaybackUIManager : MonoBehaviour
     {
         [SerializeField] CanvasGroup transportCanvasGroup;
+        [SerializeField] Image playPauseButtonImage;
         [SerializeField] Image loopButtonImage;
         [SerializeField] Image reverseButtonImage;
 
@@ -17,6 +18,7 @@ namespace TemperaMental.UI.Playbacks
 
         Color defaultOffColor;
         Color playOnColor;
+        Color pauseOnColor;
         Color loopOnColor;
         Color reverseOnColor;
 
@@ -35,7 +37,8 @@ namespace TemperaMental.UI.Playbacks
 
             defaultOffColor = ConfigRegistry.UI.DefaultColor;
             playOnColor = ConfigRegistry.UI.GreenColor;
-            loopOnColor = ConfigRegistry.UI.GreenColor;
+            pauseOnColor = ConfigRegistry.UI.OrangeColor;
+            loopOnColor = ConfigRegistry.UI.CyanColor;
             reverseOnColor = ConfigRegistry.UI.PurpleColor;
 
             minBpm = ConfigRegistry.Midi.MinBpm;
@@ -88,21 +91,25 @@ namespace TemperaMental.UI.Playbacks
             {
                 case PlaybackState.Reset:
                     playText.text = Play;
+                    playPauseButtonImage.color = defaultOffColor;
                     ApplyTransportState(PlaybackUIStates.Reset);
                     break;
 
                 case PlaybackState.Playing:
                     playText.text = Pause;
+                    playPauseButtonImage.color = playOnColor;
                     ApplyTransportState(PlaybackUIStates.Playing);
                     break;
 
                 case PlaybackState.Paused:
                     playText.text = Play;
+                    playPauseButtonImage.color = pauseOnColor;
                     ApplyTransportState(PlaybackUIStates.Paused);
                     break;
 
                 case PlaybackState.Stopped:
                     playText.text = Play;
+                    playPauseButtonImage.color = defaultOffColor;
                     ApplyTransportState(PlaybackUIStates.Stopped);
                     break;
             }

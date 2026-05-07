@@ -7,9 +7,11 @@ namespace TemperaMental.Applications.Config
     {
         // button colours
         public Color DefaultColor = new Color(0.55f, 0.55f, 0.55f);
+        public Color YellowColor = new Color(0.8f, 0.8f, 0f);
         public Color GreenColor = new Color(0.4f, 0.8f, 0.4f);
         public Color PurpleColor = new Color(1f, 0.5f, 1f);
         public Color CyanColor = new Color(0.5f, 0.8f, 1f);
+        public Color OrangeColor = new Color(1f, 0.5f, 0.4f);
         public Color RedColor = new Color(1f, 0.2f, 0f);
 
         // dimmable button text alpha value

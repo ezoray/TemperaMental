@@ -1710,7 +1710,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1410924834910122274, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_Name
-      value: Play
+      value: PlayPause
       objectReference: {fileID: 0}
     - target: {fileID: 5331573247357082670, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_Pivot.x
@@ -6674,7 +6674,7 @@ MonoBehaviour:
   - {fileID: 599143014}
   - {fileID: 1880858656}
   - {fileID: 1886725798}
-  modeButtons:
+  transformButtons:
   - {fileID: 1950119889}
   - {fileID: 1428952673}
   - {fileID: 2025912337}
@@ -9399,6 +9399,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Tempera.Mental.Ui.Playbacks.PlaybackUiManager
   transportCanvasGroup: {fileID: 313372013}
+  playPauseButtonImage: {fileID: 1593440929}
   loopButtonImage: {fileID: 758800339}
   reverseButtonImage: {fileID: 1170093368}
   controlButtons:
@@ -9435,7 +9436,7 @@ PrefabInstance:
       objectReference: {fileID: 8365872900819910787, guid: 868e564be3c22417f8244fc888ba1e30, type: 3}
     - target: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_Interactable
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
@@ -9479,7 +9480,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1175797879279421861, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_fontColor.a
-      value: 1
+      value: 0.3
       objectReference: {fileID: 0}
     - target: {fileID: 1175797879279421861, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_fontColor.b
@@ -9499,7 +9500,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1175797879279421861, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_fontColor32.rgba
-      value: 4293519849
+      value: 1290398185
       objectReference: {fileID: 0}
     - target: {fileID: 1410924834910122274, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_Name
@@ -12320,6 +12321,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 645e4b2724ce340edbe6c0109b4073d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Tempera.Mental.UI.DimmableTextButton
+--- !u!114 &1593440929 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8711836282921573231, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
+  m_PrefabInstance: {fileID: 140874791}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
 --- !u!1 &1599832656
 GameObject:
   m_ObjectHideFlags: 0
@@ -15395,6 +15407,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1522324440}
     m_Modifications:
+    - target: {fileID: 809130223728603375, guid: cdf7151bfea7c4db287b1a49f3aacd43, type: 3}
+      propertyPath: buttonColorOption
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 809130223728603375, guid: cdf7151bfea7c4db287b1a49f3aacd43, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 

@@ -10,7 +10,7 @@ namespace TemperaMental.UI.Playbacks
         Stop = 2,
 
         // state presets
-        Reset = PlayPause | Stop,
+        Reset = PlayPause,
         Playing = PlayPause | Stop,
         Paused = PlayPause | Stop,
         Stopped = PlayPause | Stop

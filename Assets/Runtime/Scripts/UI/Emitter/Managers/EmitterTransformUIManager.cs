@@ -14,7 +14,7 @@ namespace TemperaMental.UI.Emitters
         [SerializeField] DimmableButton[] emitterButtons;
 
         [Header("Order: Random, Flip, Rotate, Switch, Shift")]
-        [SerializeField] LightableButton[] modeButtons;
+        [SerializeField] LightableButton[] transformButtons;
 
         [SerializeField] Slider randomSlider;
 
@@ -50,7 +50,7 @@ namespace TemperaMental.UI.Emitters
 
             defaultOffColor = ConfigRegistry.UI.DefaultColor;
             latchOnColor = ConfigRegistry.UI.GreenColor;
-            wrapOnColor = ConfigRegistry.UI.PurpleColor;
+            wrapOnColor = ConfigRegistry.UI.OrangeColor;
             directionOnColor = ConfigRegistry.UI.CyanColor;
         }
 
@@ -76,11 +76,11 @@ namespace TemperaMental.UI.Emitters
 
         private void SetModeLitState(TransformLitButtons litButtons)
         {
-            for (int i = 0; i < modeButtons.Length; i++)
+            for (int i = 0; i < transformButtons.Length; i++)
             {
                 bool isLit = ((int)litButtons & (1 << i)) != 0;
 
-                modeButtons[i].SetLit(isLit);
+                transformButtons[i].SetLit(isLit);
             }
         }
 

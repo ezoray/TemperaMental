@@ -13,9 +13,11 @@ MonoBehaviour:
   m_Name: UIConfig
   m_EditorClassIdentifier: Assembly-CSharp::TemperaMental.Applications.Config.UIConfig
   DefaultColor: {r: 0.55, g: 0.55, b: 0.55, a: 1}
+  YellowColor: {r: 1, g: 1, b: 0, a: 1}
   GreenColor: {r: 0.4, g: 0.8, b: 0.4, a: 1}
   PurpleColor: {r: 1, g: 0.5, b: 1, a: 1}
   CyanColor: {r: 0.5, g: 0.8, b: 1, a: 1}
+  OrangeColor: {r: 1, g: 0.5, b: 0.4, a: 1}
   RedColor: {r: 1, g: 0.25, b: 0, a: 1}
   DimAlphaValue: 0.3
   ColorDimFactor: 0.6

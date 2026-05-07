@@ -16,7 +16,6 @@ namespace TemperaMental.UI.Core
         Color litColor;
         Color unlitColor;
 
-
         float alphaValue;
 
         protected override void Awake()
