@@ -26,10 +26,20 @@ namespace TemperaMental.Emitters
             return isWrapping;
         }
 
-        // returns a emitter array with all emitter bitmasks shifted in the given direction
+        public override ulong[] DoTransform(ulong[] groups)
+        {
+            if (currentDirections == TransformDirections.None) return groups;
+            return DoSingleTransform(groups, currentDirections);
+        }
+
         protected override ulong[] DoSingleTransform(ulong[] groups, TransformDirections direction)
         {
-            // Build a mask of all positions occupied by inactive emitters
+            bool hasHorizontal = direction.HasFlag(TransformDirections.Left) || direction.HasFlag(TransformDirections.Right);
+            bool hasVertical = direction.HasFlag(TransformDirections.Up) || direction.HasFlag(TransformDirections.Down);
+
+            TransformDirections horizontalDirection = direction & (TransformDirections.Left | TransformDirections.Right);
+            TransformDirections verticalDirection = direction & (TransformDirections.Up | TransformDirections.Down);
+
             ulong inactiveOccupied = 0;
             for (int i = 0; i < groups.Length; i++)
             {
@@ -37,45 +47,45 @@ namespace TemperaMental.Emitters
                     inactiveOccupied |= groups[i];
             }
 
-            ulong[] result = new ulong[groups.Length];
+            ulong[] transformedGroups = new ulong[groups.Length];
 
             for (int i = 0; i < groups.Length; i++)
             {
-                bool isActive = activeEmitters.HasFlag((TransformEmitters)(1 << i));
-
-                if (!isActive)
+                if (!activeEmitters.HasFlag((TransformEmitters)(1 << i)))
                 {
-                    // Inactive emitters are copied unchanged
-                    result[i] = groups[i];
+                    transformedGroups[i] = groups[i];
                     continue;
                 }
 
-                // Shift the active emitter and strip any bits that land on inactive-occupied positions
-                result[i] = ShiftBitmask(groups[i], direction, isWrapping) & ~inactiveOccupied;
+                ulong mask = groups[i];
+
+                if (hasHorizontal)
+                    mask = ShiftBitmask(mask, horizontalDirection, isWrapping);
+                if (hasVertical)
+                    mask = ShiftBitmask(mask, verticalDirection, isWrapping);
+
+                transformedGroups[i] = mask & ~inactiveOccupied;
             }
 
-            // Resolve collisions between active emitters — last-writer wins per original logic,
-            // but only among active slots. Build allAdds to suppress removes as in PlaybackManager
-            for (int i = 0; i < result.Length; i++)
+            // last-writer-wins collision resolution between active emitters
+            for (int i = 0; i < transformedGroups.Length; i++)
             {
                 if (!activeEmitters.HasFlag((TransformEmitters)(1 << i))) continue;
 
-                ulong movedInto = result[i] & ~groups[i];
+                ulong movedInto = transformedGroups[i] & ~groups[i];
 
-                for (int j = 0; j < result.Length; j++)
+                for (int j = 0; j < transformedGroups.Length; j++)
                 {
                     if (i == j) continue;
                     if (!activeEmitters.HasFlag((TransformEmitters)(1 << j))) continue;
-
-                    // Strip positions that emitter i has moved into from other active emitters
-                    result[j] &= ~movedInto;
+                    transformedGroups[j] &= ~movedInto;
                 }
             }
 
-            return result;
+            return transformedGroups;
         }
 
-         private ulong ShiftBitmask(ulong mask, TransformDirections direction, bool wrap)
+        private ulong ShiftBitmask(ulong mask, TransformDirections direction, bool wrap)
         {
             return direction switch
             {

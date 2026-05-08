@@ -22,7 +22,7 @@ namespace TemperaMental.Emitters
             activeEmitters = TransformEmitters.All;    
         }
 
-        public ulong[] DoTransform(ulong[] groups)
+        public virtual ulong[] DoTransform(ulong[] groups)
         {
             ulong[] transformedGroups = groups;
 
