@@ -51,8 +51,6 @@ namespace TemperaMental.Midi.Playbacks
         private void Start()
         {
             frames = frameManager.GetFrames();
-
-            LogMan.Log($"Start: frames {frames.Count} duration {frameDurationTicks}");
         }
 
         private void Update()
@@ -73,7 +71,7 @@ namespace TemperaMental.Midi.Playbacks
             if (isPlaybackFinished)
             {
                 isPlaybackFinished = false;
-                LogMan.Log("Playback finished");
+                LogMan.Log("Playback Finished");
             }
         }
 
@@ -202,7 +200,7 @@ namespace TemperaMental.Midi.Playbacks
 
             if (!isSent)
             {
-                LogMan.LogWarning($"PlayFrame dropped — frame {playFrame} could not send, device busy");
+                LogMan.LogWarning($"PlayFrame dropped — frame {playFrame} could not be sent, device busy");
             }
         }
 
