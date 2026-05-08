@@ -55,7 +55,7 @@ namespace TemperaMental.Emitters
             }
 
             // Resolve collisions between active emitters — last-writer wins per original logic,
-            // but only among active slots. Build allAdds to suppress removes as in FrameMidiPlayer.
+            // but only among active slots. Build allAdds to suppress removes as in PlaybackManager
             for (int i = 0; i < result.Length; i++)
             {
                 if (!activeEmitters.HasFlag((TransformEmitters)(1 << i))) continue;

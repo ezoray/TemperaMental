@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Melanchall.DryWetMidi.Multimedia;
@@ -21,10 +20,10 @@ namespace TemperaMental.Midi.Devices
         bool isInitialSync;
         volatile bool isDeviceChange;
 
-        [SerializeField] UnityEvent<string> onAutoSelectDevice;
+        [SerializeField] UnityEvent<string> onInitialDeviceFound;
+        [SerializeField] UnityEvent<List<string>> onDevicesUpdated;
         [SerializeField] UnityEvent<OutputDevice> onDeviceSelected;
         [SerializeField] UnityEvent onCurrentDeviceRemoved;
-        [SerializeField] UnityEvent<List<string>> onDevicesUpdated;
 
         private void OnEnable()
         {
@@ -128,9 +127,9 @@ namespace TemperaMental.Midi.Devices
                 return;
             }
 
-            string target = connectedDevices.Contains(primaryDevice) ? primaryDevice : connectedDevices[0];
+            string targetDevice = connectedDevices.Contains(primaryDevice) ? primaryDevice : connectedDevices[0];
 
-            onAutoSelectDevice?.Invoke(target);
+            onInitialDeviceFound?.Invoke(targetDevice);
         }
 
         public void ActionOnDeviceSelected(string deviceName)

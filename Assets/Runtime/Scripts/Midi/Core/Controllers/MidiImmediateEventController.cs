@@ -1,11 +1,13 @@
 using TemperaMental.Core;
+using TemperaMental.Frames;
 using UnityEngine;
 
 namespace TemperaMental.Midi.Core
 {
     public class MidiImmediateEventController : MonoBehaviour
     {
-        [SerializeField] MidiTempoManager midiManager;
+        [SerializeField] FrameManager frameManager;
+        [SerializeField] MidiTempoManager midiTempoManager;
         [SerializeField] MidiImmediateService immediateService;
 
         public void ActionOnPlaybackStateChanged(PlaybackState playbackState) => immediateService.SetPlaybackState(playbackState);
@@ -18,6 +20,15 @@ namespace TemperaMental.Midi.Core
 
         public void ActionOnFrameChanged(FrameDetail frameDetail) => immediateService.SendFrame(frameDetail.EmitterGroups);
 
-        public void ActionOnBpmValueChanged(float bpm) => midiManager.SetBpm(Mathf.RoundToInt(bpm));
+        public void ActionOnBpmValueChanged(float bpm) => midiTempoManager.SetBpm(Mathf.RoundToInt(bpm));
+
+        public void ActionOnPlaybackReadyStateChanged(bool isReady)
+        {
+            if (isReady)
+            {
+                ulong[] emitterGroups = frameManager.GetCurrentFrameEmitters();
+                immediateService.SendFrame(emitterGroups);
+            }
+        }
     }
 }

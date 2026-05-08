@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using TemperaMental.Applications.Config;
-using TemperaMental.Logs;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
@@ -45,7 +44,7 @@ namespace TemperaMental.UI.Devices
             onDeviceChanged?.Invoke(device);
         }
 
-        public void ActionOnAutoSelectDevice(string deviceName)
+        public void ActionOnInitialDeviceFound(string deviceName)
         {
             int index = deviceDropdown.options.FindIndex(option => option.text == deviceName);
 

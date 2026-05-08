@@ -7,14 +7,13 @@ using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Multimedia;
 using TemperaMental.Applications.Config;
 using TemperaMental.Core;
-using TemperaMental.Logs;
 using TemperaMental.Utils;
 using UnityEngine;
 using UnityEngine.Events;
 
 namespace TemperaMental.Midi.Playbacks
 {
-    public class FrameMidiPlayer : MonoBehaviour
+    public class PlaybackManager : MonoBehaviour
     {
         OutputDevice outputDevice;
 
@@ -42,7 +41,7 @@ namespace TemperaMental.Midi.Playbacks
 
         public event Action OnFramePlaybackCompleted;
 
-        [SerializeField] UnityEvent<bool> onOutputDeviceChanged;
+        [SerializeField] UnityEvent<bool> onPlaybackReadyStateChanged;
 
 
         private void OnEnable()
@@ -72,7 +71,7 @@ namespace TemperaMental.Midi.Playbacks
             playbackThread.Start();
         }
 
-        private void ClearAllEmitters()
+        private void SendClearAllEmitters()
         {
             for (byte i = 0; i < emitterCount; i++)
             {
@@ -119,15 +118,17 @@ namespace TemperaMental.Midi.Playbacks
         public void SetOutputDevice(OutputDevice device)
         {
             outputDevice = device;
-            ClearAllEmitters();
+            SendClearAllEmitters();
 
-            onOutputDeviceChanged?.Invoke(true);
+            onPlaybackReadyStateChanged?.Invoke(true);
         }
 
         public void ClearOutputDevice()
         {
             CancelFrame();
             outputDevice = null;
+
+            onPlaybackReadyStateChanged?.Invoke(false);
         }
 
         public void AddEmitter(EmitterDetail emitterDetail)

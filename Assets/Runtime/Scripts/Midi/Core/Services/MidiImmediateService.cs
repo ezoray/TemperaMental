@@ -6,7 +6,7 @@ namespace TemperaMental.Midi.Core
 {
     public class MidiImmediateService : MonoBehaviour
     {
-        [SerializeField] FrameMidiPlayer midiPlayer;
+        [SerializeField] PlaybackManager playbackManager;
 
         PlaybackState playbackState;
         ulong[] pendingGroups;
@@ -15,27 +15,27 @@ namespace TemperaMental.Midi.Core
 
         private void Update()
         {
-            if (hasPending && !midiPlayer.IsFramePlaybackActive)
+            if (hasPending && !playbackManager.IsFramePlaybackActive)
             {
                 hasPending = false;
-                midiPlayer.PlayFrame(pendingGroups);
+                playbackManager.PlayFrame(pendingGroups);
                 pendingGroups = null;
             }
         }
          
         public void AddEmitter(EmitterDetail emitterDetail)
         {
-            midiPlayer.AddEmitter(emitterDetail);
+            playbackManager.AddEmitter(emitterDetail);
         }
 
         public void RemoveEmitter(Vector2Int position)
         {
-            midiPlayer.RemoveEmitter(position);
+            playbackManager.RemoveEmitter(position);
         }
 
         public void SetEmitterType(int emitterId)
         {
-            midiPlayer.SetEmitterType(emitterId);
+            playbackManager.SetEmitterType(emitterId);
         }
 
 
@@ -48,7 +48,7 @@ namespace TemperaMental.Midi.Core
         {
             if (playbackState == PlaybackState.Playing) return;
 
-            if (!midiPlayer.PlayFrame(emitterGroups))
+            if (!playbackManager.PlayFrame(emitterGroups))
             {
                 pendingGroups = emitterGroups;
                 hasPending = true;

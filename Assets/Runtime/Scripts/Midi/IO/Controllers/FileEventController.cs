@@ -16,7 +16,7 @@ namespace TemperaMental.Midi.IO
     // due to this there are no keyboard shortcuts for loading and saving
     public class FileEventController : MonoBehaviour
     {
-        [SerializeField] MidiTempoManager midiManager;
+        [SerializeField] MidiTempoManager midiTempoManager;
         [SerializeField] MidiTransformService midiTransformService;
         [SerializeField] MidiFileService midiFileService;
         [SerializeField] FrameManager frameManager;
@@ -30,7 +30,7 @@ namespace TemperaMental.Midi.IO
                 if (midiFileService.TryOpenMidiFile(out MidiFile midiFile, true))
                 {
                     int bpm = MidiUtils.GetBpmFromMidiFile(midiFile);
-                    midiManager.SetBpm(bpm);
+                    midiTempoManager.SetBpm(bpm);
 
                     List<Frame> frames = midiTransformService.FromMidiFileToFrames(midiFile);
                     frameManager.AppendFrames(frames);
@@ -53,7 +53,7 @@ namespace TemperaMental.Midi.IO
                 if (midiFileService.TryOpenMidiFile(out MidiFile midiFile))
                 {
                     int bpm = MidiUtils.GetBpmFromMidiFile(midiFile);
-                    midiManager.SetBpm(bpm);
+                    midiTempoManager.SetBpm(bpm);
 
                     List<Frame> frames = midiTransformService.FromMidiFileToFrames(midiFile);
                     frameManager.SetFrames(frames);
@@ -73,7 +73,7 @@ namespace TemperaMental.Midi.IO
 
             try
             {
-                int bpm = midiManager.GetBpm();
+                int bpm = midiTempoManager.GetBpm();
 
                 MidiFile midiFile = midiTransformService.FromFramesToMidiFile(frameManager.GetFrames(), bpm);
 

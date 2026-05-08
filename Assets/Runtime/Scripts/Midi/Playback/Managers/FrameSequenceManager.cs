@@ -9,10 +9,10 @@ using UnityEngine.Events;
 
 namespace TemperaMental.Midi.Playbacks
 {
-    public class FrameSequencer : MonoBehaviour
+    public class FrameSequenceManager : MonoBehaviour
     {
         [SerializeField] FrameManager frameManager;
-        [SerializeField] FrameMidiPlayer midiPlayer;
+        [SerializeField] PlaybackManager playbackManager;
 
         IReadOnlyList<Frame> frames;
        volatile bool isNewPlayFrame;
@@ -45,7 +45,7 @@ namespace TemperaMental.Midi.Playbacks
             bpm = ConfigRegistry.Midi.DefaultBpm;
             frameDurationTicks = (long)(60.0 / bpm * Stopwatch.Frequency);
 
-            midiPlayer.OnFramePlaybackCompleted += ActionOnFramePlaybackCompleted;
+            playbackManager.OnFramePlaybackCompleted += ActionOnFramePlaybackCompleted;
         }
 
         private void Start()
@@ -120,7 +120,7 @@ namespace TemperaMental.Midi.Playbacks
             {
                 case PlaybackState.Playing:
                     SetPlaybackState(PlaybackState.Stopping);
-                    midiPlayer.CancelFrame();
+                    playbackManager.CancelFrame();
                     break;
 
                 case PlaybackState.Paused:
@@ -156,7 +156,7 @@ namespace TemperaMental.Midi.Playbacks
                 case PlaybackState.Playing:
                     pendingSeekFrame = clampedFrame;
                     SetPlaybackState(PlaybackState.Seeking);
-                    midiPlayer.CancelFrame();
+                    playbackManager.CancelFrame();
                     break;
 
                 case PlaybackState.Pausing:
@@ -198,7 +198,7 @@ namespace TemperaMental.Midi.Playbacks
 
         private void PlayFrame()
         {
-            bool isSent = midiPlayer.PlayFrame(frames[playFrame -1].GetEmitterGroups(), frameDurationTicks, true);
+            bool isSent = playbackManager.PlayFrame(frames[playFrame -1].GetEmitterGroups(), frameDurationTicks, true);
 
             if (!isSent)
             {
@@ -217,7 +217,7 @@ namespace TemperaMental.Midi.Playbacks
             if (playbackState != PlaybackState.Playing) return;
 
             SetPlaybackState(PlaybackState.Pausing);
-            midiPlayer.CancelFrame();
+            playbackManager.CancelFrame();
         }
 
         private void ResumePlayback()
@@ -291,7 +291,7 @@ namespace TemperaMental.Midi.Playbacks
 
         private void OnDisable()
         {
-            midiPlayer.OnFramePlaybackCompleted -= ActionOnFramePlaybackCompleted;
+            playbackManager.OnFramePlaybackCompleted -= ActionOnFramePlaybackCompleted;
         }
     }
 }

@@ -33,6 +33,8 @@ namespace TemperaMental.UI.Playbacks
 
         private void Awake()
         {
+            transportCanvasGroup.interactable = false;
+
             defaultOffColor = ConfigRegistry.UI.DefaultColor;
             playOnColor = ConfigRegistry.UI.GreenColor;
             pauseOnColor = ConfigRegistry.UI.OrangeColor;
@@ -113,9 +115,9 @@ namespace TemperaMental.UI.Playbacks
             }
         }
 
-        public void ActionOnOutputDeviceChanged(bool isSet)
+        public void ActionOnPlaybackReadyStateChanged(bool isReady)
         {
-            transportCanvasGroup.interactable = isSet;
+            transportCanvasGroup.interactable = isReady;
         }
 
         private void ApplyTransportState(PlaybackUIStates playbackFlags)

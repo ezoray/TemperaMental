@@ -1,15 +1,11 @@
 using TemperaMental.Frames;
-using TemperaMental.Midi.Core;
-using TemperaMental.Midi.Devices;
 using UnityEngine;
 
 namespace TemperaMental.Midi.Playbacks
 {
-    public class FrameSequencerEventController : MonoBehaviour
+    public class FrameSequenceEventController : MonoBehaviour
     {
-        [SerializeField] DeviceManager deviceManager;
-        [SerializeField] FrameSequencer frameSequencer;
-        [SerializeField] MidiTempoManager midiManager;
+        [SerializeField] FrameSequenceManager frameSequencer;
         [SerializeField] FrameManager frameManager;
 
         // frame slider
