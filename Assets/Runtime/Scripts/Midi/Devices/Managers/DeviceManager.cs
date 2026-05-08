@@ -19,6 +19,7 @@ namespace TemperaMental.Midi.Devices
 
         bool isInitialSync;
         volatile bool isDeviceChange;
+        float pollingInterval; // poll for device changes in Windows only, use callbacks in macOS
 
         [SerializeField] UnityEvent<string> onInitialDeviceFound;
         [SerializeField] UnityEvent<List<string>> onDevicesUpdated;
@@ -30,6 +31,8 @@ namespace TemperaMental.Midi.Devices
             connectedDevices = new List<string>();
             isInitialSync = true;
             primaryDevice = ConfigRegistry.Midi.PrimaryDevice;
+
+            pollingInterval = ConfigRegistry.Midi.PollingInterval;
         }
 
         private void Start()
@@ -159,7 +162,7 @@ namespace TemperaMental.Midi.Devices
 #if UNITY_STANDALONE_WIN
         private IEnumerator PollDevices()
         {
-            var wait = new WaitForSeconds(1.5f);
+            var wait = new WaitForSeconds(pollingInterval);
             List<string> previousDevices = new List<string>();
 
             while (true)

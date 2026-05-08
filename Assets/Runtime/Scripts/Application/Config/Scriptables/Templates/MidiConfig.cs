@@ -7,6 +7,9 @@ namespace TemperaMental.Applications.Config
     {
         public string PrimaryDevice = "Tempera";
 
+        // time between checking for device connection changes under Windows;
+        public float PollingInterval = 0.5f;
+
         // midi file io
         public string FilterName = "Midi";
         public string FilterType = "mid";

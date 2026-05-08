@@ -8,6 +8,14 @@ namespace TemperaMental.Midi.Playbacks
         [SerializeField] FrameSequenceManager frameSequencer;
         [SerializeField] FrameManager frameManager;
 
+        public void ActionOnPlaybackReadyStateChanged(bool isReady)
+        {
+            if (!isReady)
+            {
+                frameSequencer.Stop();
+            }
+        }
+
         // frame slider
         public void ActionOnSelectedFrameChanged(float selectedFrame) => frameSequencer.SeekToFrame(Mathf.RoundToInt(selectedFrame));
 
