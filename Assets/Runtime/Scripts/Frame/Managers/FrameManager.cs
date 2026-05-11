@@ -46,27 +46,39 @@ namespace TemperaMental.Frames
             AddFrame();
         }
 
-        public void RecordFrame(ulong[] emitterGroups)
+        public void ReceiveEmitterGroups(ulong[] emitterGroups)
         {
-            if (playbackState == PlaybackState.Playing) return;
-
-            InsertFrameAt(currentFrameIndex + 1, new Frame(gridWidth, gridHeight, emitterGroups));
+            if (isRecording)
+            {
+                RecordFrame(emitterGroups);
+            }
+            else
+            {
+                UpdateCurrentFrame(emitterGroups);
+            }
         }
 
         public void ToggleRecording()
         {
-            isRecording = !isRecording;
-
-            LogMan.Log("Recording " + (isRecording ? onText : offText));
-
-            onRecordingStateChanged?.Invoke(isRecording);
+            SetRecording(!isRecording);
         }
 
-        public void UpdateCurrentFrame(ulong[] emitterGroups)
+        private void UpdateCurrentFrame(ulong[] emitterGroups)
         {  
             currentFrame.SetEmitterGroups(emitterGroups);
 
             NotifyFrameChanged();
+        }
+
+        private void SetRecording(bool recordingValue)
+        {
+            if (isRecording == recordingValue) return;
+
+            isRecording = recordingValue;
+
+            LogMan.Log("Recording " + (isRecording ? onText : offText));
+
+            onRecordingStateChanged?.Invoke(isRecording);
         }
 
         public ulong[] GetCurrentFrameEmitters()
@@ -80,8 +92,7 @@ namespace TemperaMental.Frames
 
             if(playbackState == PlaybackState.Playing)
             {
-                isRecording = false;
-                onRecordingStateChanged?.Invoke(isRecording);
+                SetRecording(false);
             }
         }
 
@@ -245,6 +256,13 @@ namespace TemperaMental.Frames
             return new FrameDetail(currentFrameIndex + 1, frames.Count, frame.GetEmitterGroups());
         }
 
+        private void RecordFrame(ulong[] emitterGroups)
+        {
+            if (playbackState == PlaybackState.Playing) return;
+
+            InsertFrameAt(currentFrameIndex + 1, new Frame(gridWidth, gridHeight, emitterGroups));
+        }
+
         private void SetCurrentFrame(int index)
         {
             int newIndex = Mathf.Clamp(index, 0, frames.Count - 1);
@@ -278,7 +296,5 @@ namespace TemperaMental.Frames
         {
             onFrameChanged?.Invoke(GetFrameDetail(currentFrame));
         }
-
-        public bool IsRecording { get => isRecording; set => isRecording = value; }
     }
 }

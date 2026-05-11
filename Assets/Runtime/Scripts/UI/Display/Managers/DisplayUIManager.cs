@@ -9,9 +9,6 @@ namespace TemperaMental.UI.Display
 {
     public class DisplayUIManager : MonoBehaviour
     {
-        public string onText;
-        public string offText;
-
         [SerializeField] TextMeshProUGUI bpmText;
         [SerializeField] TextMeshProUGUI frameText;
         [SerializeField] TextMeshProUGUI emittersText;
@@ -20,18 +17,19 @@ namespace TemperaMental.UI.Display
         float tempMessageDuration;
         float tempMessageFadeDuration;
 
+        private Coroutine tempMessageCoroutine;
+        private string lastLogMessage;
+
         private void Awake()
         {
-            onText = ConfigRegistry.UI.OnText;
-            offText = ConfigRegistry.UI.OffText;
-
-            bpmText.text = ConfigRegistry.Midi.DefaultBpm.ToString();
             tempMessageDuration = ConfigRegistry.UI.TempMessageDuration;
             tempMessageFadeDuration = ConfigRegistry.UI.TempMessageFadeDuration;
         }
 
-        private Coroutine tempMessageCoroutine;
-        private string lastLogMessage;
+        private void Start()
+        {
+            bpmText.text = ConfigRegistry.Midi.DefaultBpm.ToString();
+        }
 
         public void ActionOnRemoveEmitter(Vector2Int position, int emitterCount)
         {
@@ -100,5 +98,13 @@ namespace TemperaMental.UI.Display
             bpmText.text = bpm.ToString();
         }
 
+        private void OnDisable()
+        {
+            if (tempMessageCoroutine != null)
+            {
+                StopCoroutine(tempMessageCoroutine);
+                tempMessageCoroutine = null;
+            }
+        }
     }
 }

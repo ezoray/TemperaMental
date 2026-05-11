@@ -17,7 +17,7 @@ namespace TemperaMental.Emitters
         protected abstract ulong[] DoSingleTransform(ulong[] groups, TransformDirections direction);
 
 
-        protected virtual void OnEnable()
+        protected virtual void Awake()
         {
             activeEmitters = TransformEmitters.All;    
         }

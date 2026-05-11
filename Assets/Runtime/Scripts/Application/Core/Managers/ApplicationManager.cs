@@ -16,7 +16,10 @@ namespace TemperaMental.Applications.Core
 
         private void Awake()
         {
+            Application.targetFrameRate = ConfigRegistry.App.FrameRate;
+
             inputActions = new TemperaMentalInputActions();
+            mouseManager.SetMouseActions(inputActions.Mouse);
 
             EmitterUtils.Initialise();
         }
@@ -24,20 +27,9 @@ namespace TemperaMental.Applications.Core
         private void Start()
         {
             QualitySettings.vSyncCount = 0;
-            Application.targetFrameRate = ConfigRegistry.App.FrameRate;
+
 
             versionText.text = "v" + Application.version;
-
-            mouseManager.InitActions(inputActions);
-        }
-
-        public void OnClickQuit()
-        {
-#if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false;
-#else
-    Application.Quit();
-#endif
         }
 
         private void OnDestroy()

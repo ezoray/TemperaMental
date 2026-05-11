@@ -8,9 +8,9 @@ namespace TemperaMental.Emitters
     public class SwapTransformService : TransformBaseService
     {
 
-        protected override void OnEnable()
+        protected override void Awake()
         {
-            base.OnEnable();
+            base.Awake();
 
             allowedDirections = ConfigRegistry.Emitter.SwapTransformDirections;
         }

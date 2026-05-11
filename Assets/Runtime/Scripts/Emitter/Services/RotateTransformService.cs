@@ -7,9 +7,9 @@ namespace TemperaMental.Emitters
     {
         int gridWidth, gridHeight;
 
-        protected override void OnEnable()
+        protected override void Awake()
         {
-            base.OnEnable();
+            base.Awake();
 
             gridWidth = ConfigRegistry.Grid.GridWidth;
             gridHeight = ConfigRegistry.Grid.GridHeight;

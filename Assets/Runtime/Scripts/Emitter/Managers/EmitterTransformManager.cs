@@ -32,20 +32,27 @@ namespace TemperaMental.Emitters
         [SerializeField] UnityEvent<bool> onWrapStateChanged;
         [SerializeField] UnityEvent<TransformDirections, bool> onDirectionLatchStateChanged;
 
+
         private void Awake()
         {
             bpm = ConfigRegistry.Midi.DefaultBpm;
             repeatRate = 60f / bpm;
             nextEventTime = Time.time + repeatRate;
+
+            randomTransformService = (RandomTransformService)transformServices[(int)EmitterTransformMode.Random];
+            shiftTransformService = (ShiftTransformService)transformServices[(int)EmitterTransformMode.Shift];
+            transformMode = EmitterTransformMode.Shift;
+        }
+
+        private void Start()
+        {
+            // fire initial state to subscribers (UI)
+            EmitterTransformDetail detail = transformServices[(int)transformMode].GetTransformDetail();
+            onTransformModeChanged?.Invoke(transformMode, detail);
         }
 
         private void OnEnable()
         {
-            randomTransformService = (RandomTransformService)transformServices[(int)EmitterTransformMode.Random];
-            shiftTransformService = (ShiftTransformService)transformServices[(int)EmitterTransformMode.Shift];
-
-            transformMode = EmitterTransformMode.Shift;
-
             foreach (var transformService in transformServices)
             {
                 transformService.OnDirectionLatchStateChanged += ActionOnServiceDirectionLatchChanged;
@@ -142,6 +149,21 @@ namespace TemperaMental.Emitters
             }
         }
 
+        public void SetPlaybackState(PlaybackState newPlaybackState)
+        {
+            playbackState = newPlaybackState;
+
+            if (playbackState == PlaybackState.Playing)
+            {
+                foreach (var transformService in transformServices)
+                {
+                    transformService.IsLatched = false;
+                }
+
+                onLatchStateChanged?.Invoke(false);
+            }
+        }
+
         private void ActionOnEmittersTransformed(ulong[] transformedGroups)
         {
             onEmittersTransformed?.Invoke(transformedGroups);
@@ -158,21 +180,6 @@ namespace TemperaMental.Emitters
             {
                 transformService.OnDirectionLatchStateChanged -= ActionOnServiceDirectionLatchChanged;
                 transformService.OnEmittersTransformed -= ActionOnEmittersTransformed;
-            }
-        }
-
-        public void SetPlaybackState(PlaybackState newPlaybackState)
-        {
-            playbackState = newPlaybackState;
-
-            if (playbackState == PlaybackState.Playing)
-            {
-                foreach (var transformService in transformServices)
-                {
-                    transformService.IsLatched = false;
-                }
-
-                onLatchStateChanged?.Invoke(false);
             }
         }
     }

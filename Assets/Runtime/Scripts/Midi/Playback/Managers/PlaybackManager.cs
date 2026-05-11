@@ -13,6 +13,7 @@ using UnityEngine.Events;
 
 namespace TemperaMental.Midi.Playbacks
 {
+    // todo tempo handling needs to be moved into its own class
     public class PlaybackManager : MonoBehaviour
     {
         OutputDevice outputDevice;
@@ -43,8 +44,7 @@ namespace TemperaMental.Midi.Playbacks
 
         [SerializeField] UnityEvent<bool> onPlaybackReadyStateChanged;
 
-
-        private void OnEnable()
+        private void Awake()
         {
             activateCC = ConfigRegistry.Midi.ActivateCC;
             placeCC = ConfigRegistry.Midi.PlaceCC;
@@ -52,16 +52,13 @@ namespace TemperaMental.Midi.Playbacks
             clearEmittersValue = ConfigRegistry.Midi.ClearEmittersValue;
             emitterCount = ConfigRegistry.Grid.EmitterCount;
             gridSize = ConfigRegistry.Grid.GridWidth * ConfigRegistry.Grid.GridHeight;
-
             intervalTicks = (long)(Stopwatch.Frequency * ConfigRegistry.Midi.EventIntervalMS);
 
             previousGroups = new ulong[emitterCount];
+        }
 
-            for (int i = 0; i < previousGroups.Length; i++)
-            {
-                previousGroups[i] = ulong.MaxValue;
-            }
-
+        private void OnEnable()
+        {
             isRunning = true;
             workReady = new ManualResetEventSlim(false);
             cancelSignal = new ManualResetEventSlim(false);
@@ -258,6 +255,8 @@ namespace TemperaMental.Midi.Playbacks
             isRunning = false;
             cancelSignal.Set();
             workReady.Set();
+            playbackThread?.Join();
+            playbackThread = null;
         }
     }
 }

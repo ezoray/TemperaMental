@@ -54,16 +54,6 @@ namespace TemperaMental.UI.Emitters
             directionOnColor = ConfigRegistry.UI.CyanColor;
         }
 
-        private void Start()
-        {
-            // set Shift as initial enabled transform
-            if (transformModeStates.TryGetValue(EmitterTransformMode.Shift, out var transformUIState))
-            {
-                SetModeLitState(transformUIState.LitButtons);
-                SetDirectionsInteractable(transformUIState.Directions);
-            }
-        }
-
         private void SetDirectionsInteractable(TransformDirections directions)
         {
             for (int i = 0; i < directionButtons.Length; i++)

@@ -7,6 +7,7 @@ namespace TemperaMental.Midi.Core
     public class MidiTempoManager : MonoBehaviour
     { 
         int bpm;
+
         [SerializeField] UnityEvent<int> onBpmChanged;
 
 

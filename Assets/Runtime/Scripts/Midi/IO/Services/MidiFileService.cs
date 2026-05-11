@@ -16,7 +16,7 @@ namespace TemperaMental.Midi.IO
         ExtensionFilter[] fileExtensions;
 
 
-        private void OnEnable()
+        private void Awake()
         {
             appendTitle = ConfigRegistry.Midi.AppendTitle;
             loadTitle = ConfigRegistry.Midi.LoadTitle;

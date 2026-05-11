@@ -13,6 +13,8 @@ namespace TemperaMental.UI.Core
         {
             for (int i = 0; i < panels.Count; i++)
             {
+                if (panels[i] == null) continue;
+
                 bool isEnabled = ((int)uiState & (1 << i)) != 0;
 
                 panels[i].interactable = isEnabled;
@@ -39,11 +41,6 @@ namespace TemperaMental.UI.Core
                     ApplyState(UIStates.All);
                     break;
             }
-        }
-
-        private void OnDestroy()
-        {
-            panels.Clear();
         }
     }
 }

@@ -34,22 +34,25 @@ namespace TemperaMental.Midi.Playbacks
         [SerializeField] UnityEvent<bool> onLoopStateChanged;
         [SerializeField] UnityEvent<bool> onReverseStateChanged;
 
-        private void OnEnable()
+
+        private void Awake()
         {
             playbackState = PlaybackState.Reset;
-
-            isPlaybackFinished = false;
-            isLooped = false;
-            isReversed = false;
-
             bpm = ConfigRegistry.Midi.DefaultBpm;
             frameDurationTicks = (long)(60.0 / bpm * Stopwatch.Frequency);
+        }
 
+
+        private void OnEnable()
+        {
             playbackManager.OnFramePlaybackCompleted += ActionOnFramePlaybackCompleted;
         }
 
         private void Start()
         {
+            onLoopStateChanged?.Invoke(isLooped);
+            onReverseStateChanged?.Invoke(isReversed);
+            onPlaybackStateChanged?.Invoke(playbackState);
             frames = frameManager.GetFrames();
         }
 
@@ -232,7 +235,7 @@ namespace TemperaMental.Midi.Playbacks
             isPlaybackStateChanged = true;
         }
 
-        public void ActionOnFramePlaybackCompleted()
+        private void ActionOnFramePlaybackCompleted()
         {
             switch (playbackState)
             {

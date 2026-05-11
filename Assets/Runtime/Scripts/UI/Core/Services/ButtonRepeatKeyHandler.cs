@@ -13,7 +13,10 @@ namespace TemperaMental.UI.Core
         private void Awake()
         {
             canvasGroup = GetComponentInParent<CanvasGroup>();
+        }
 
+        private void OnEnable()
+        {
             actionReference.action.performed += PerformedHandler;
             actionReference.action.started += StartedHandler;
             actionReference.action.canceled += CanceledHandler;
@@ -41,7 +44,7 @@ namespace TemperaMental.UI.Core
             button.OnRelease();
         }
 
-        void OnDestroy()
+        private void OnDisable()
         {
             actionReference.action.performed -= PerformedHandler;
             actionReference.action.started -= StartedHandler;

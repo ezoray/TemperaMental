@@ -11,9 +11,8 @@ namespace TemperaMental.UI.Devices
         [SerializeField] TMP_Dropdown deviceDropdown;
         [SerializeField] UnityEvent<string> onDeviceChanged;
 
-        // option placeholders
-        string noDevicesText = "No Devices";
-        string selectDeviceText = "Select Device";
+        string noDevicesText;
+        string selectDeviceText;
 
         private void Awake()
         {

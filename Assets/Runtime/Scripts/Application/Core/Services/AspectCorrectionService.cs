@@ -3,7 +3,7 @@ namespace TemperaMental.Applications.Core
     using TemperaMental.Applications.Config;
     using UnityEngine;
 
-    public class AspectCorrector : MonoBehaviour
+    public class AspectCorrectionService : MonoBehaviour
     {
         float targetRatio = 3f / 4f;
 
@@ -18,14 +18,11 @@ namespace TemperaMental.Applications.Core
         float resizeDelay = 0.75f;
         float resizeTimer = 0f;
 
-        void Start()
+        private void Awake()
         {
             lastWidth = Screen.width;
             lastHeight = Screen.height;
-        }
 
-        private void Awake()
-        {
             targetRatio = ConfigRegistry.App.TargetRatio;
             minWidth = ConfigRegistry.App.MinWidth;
             minHeight = ConfigRegistry.App.MinHeight;

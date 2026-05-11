@@ -13,7 +13,10 @@ namespace TemperaMental.UI.Core
         private void Awake()
         {
             canvasGroup = GetComponentInParent<CanvasGroup>();
+        }
 
+        private void OnEnable()
+        {
             actionReference.action.performed += PerformedHandler;
             actionReference.action.Enable();
         }
@@ -26,10 +29,10 @@ namespace TemperaMental.UI.Core
             }
         }
 
-        private void OnDestroy()
+        private void OnDisable()
         {
             actionReference.action.performed -= PerformedHandler;
             actionReference.action.Disable();
-        } 
+        }
     }
 }

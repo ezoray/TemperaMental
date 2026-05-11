@@ -11,7 +11,7 @@ namespace TemperaMental.Grid
 
         BoundsInt gridBounds;
 
-        private void OnEnable()
+        private void Awake()
         {
              gridBounds = new BoundsInt(0, 0, 0, ConfigRegistry.Grid.GridWidth, ConfigRegistry.Grid.GridHeight, 1);
         }

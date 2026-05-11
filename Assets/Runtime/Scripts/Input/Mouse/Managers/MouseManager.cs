@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using TemperaMental.Applications.Config;
 using UnityEngine;
@@ -14,6 +15,7 @@ namespace TemperaMental.Input.Mouse
         [SerializeField] float processRate;
 
         TemperaMentalInputActions.MouseActions mouseActions;
+        bool isInitialised;
 
         bool isLeftPressed;
         bool isRightPressed;
@@ -41,16 +43,22 @@ namespace TemperaMental.Input.Mouse
             processRate = ConfigRegistry.App.ProcessRate;
         }
 
-        public void InitActions(TemperaMentalInputActions inputActions)
+        public void SetMouseActions(TemperaMentalInputActions.MouseActions mouseActions)
         {
-            mouseActions = inputActions.Mouse;
+            this.mouseActions = mouseActions;
 
-            mouseActions.LeftClick.started += OnLeftClickStarted;
-            mouseActions.LeftClick.canceled += OnLeftClickCanceled;
-            mouseActions.RightClick.started += OnRightClickStarted;
-            mouseActions.RightClick.canceled += OnRightClickCanceled;
+            isInitialised = true;
 
-            mouseActions.Enable();
+            if (isActiveAndEnabled)
+            {
+                Subscribe();
+            }
+        }
+
+        private void OnEnable()
+        {
+            if (!isInitialised) return;
+            Subscribe();
         }
 
         private void Update()
@@ -162,14 +170,28 @@ namespace TemperaMental.Input.Mouse
             return false;
         }
 
-        private void OnDisable()
+        private void Subscribe()
+        {
+            mouseActions.LeftClick.started += OnLeftClickStarted;
+            mouseActions.LeftClick.canceled += OnLeftClickCanceled;
+            mouseActions.RightClick.started += OnRightClickStarted;
+            mouseActions.RightClick.canceled += OnRightClickCanceled;
+            mouseActions.Enable();
+        }
+
+        private void Unsubscribe()
         {
             mouseActions.LeftClick.started -= OnLeftClickStarted;
             mouseActions.LeftClick.canceled -= OnLeftClickCanceled;
             mouseActions.RightClick.started -= OnRightClickStarted;
             mouseActions.RightClick.canceled -= OnRightClickCanceled;
-
             mouseActions.Disable();
+        }
+
+        private void OnDisable()
+        {
+            if (!isInitialised) return;
+            Unsubscribe();
         }
     }
 }

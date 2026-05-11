@@ -9,6 +9,7 @@ using UnityEngine.Events;
 
 namespace TemperaMental.Midi.Devices
 {
+    // poll for midi device changes in Windows only, use callbacks in macOS
     public class DeviceManager : MonoBehaviour
     {
         string primaryDevice;
@@ -17,31 +18,49 @@ namespace TemperaMental.Midi.Devices
         List<string> connectedDevices;
         OutputDevice currentDevice;
 
-        bool isInitialSync;
+        bool isInitialSync = true;
         volatile bool isDeviceChange;
-        float pollingInterval; // poll for device changes in Windows only, use callbacks in macOS
+        float pollingInterval; 
+
+        bool isWatcherSubscribed;
 
         [SerializeField] UnityEvent<string> onInitialDeviceFound;
         [SerializeField] UnityEvent<List<string>> onDevicesUpdated;
         [SerializeField] UnityEvent<OutputDevice> onDeviceSelected;
         [SerializeField] UnityEvent onCurrentDeviceRemoved;
 
-        private void OnEnable()
+        private void Awake()
         {
             connectedDevices = new List<string>();
-            isInitialSync = true;
-            primaryDevice = ConfigRegistry.Midi.PrimaryDevice;
 
+            primaryDevice = ConfigRegistry.Midi.PrimaryDevice;
             pollingInterval = ConfigRegistry.Midi.PollingInterval;
+        }
+
+
+        private void OnEnable()
+        {
+#if !UNITY_STANDALONE_WIN
+            if (DevicesWatcher.Instance != null && !isWatcherSubscribed)
+            {
+                DevicesWatcher.Instance.DeviceAdded += OnDeviceChange;
+                DevicesWatcher.Instance.DeviceRemoved += OnDeviceChange;
+                isWatcherSubscribed = true;
+            }
+#endif
         }
 
         private void Start()
         {
 #if UNITY_STANDALONE_WIN
-            StartCoroutine(PollDevices());
+    StartCoroutine(PollDevices());
 #else
-            DevicesWatcher.Instance.DeviceAdded += OnDeviceChange;
-            DevicesWatcher.Instance.DeviceRemoved += OnDeviceChange;
+            if (DevicesWatcher.Instance != null && !isWatcherSubscribed)
+            {
+                DevicesWatcher.Instance.DeviceAdded += OnDeviceChange;
+                DevicesWatcher.Instance.DeviceRemoved += OnDeviceChange;
+                isWatcherSubscribed = true;
+            }
 #endif
             SyncDeviceList();
         }
@@ -183,15 +202,40 @@ namespace TemperaMental.Midi.Devices
         }
 #endif
 
+        private void DisposeCurrentDevice()
+        {
+            if (currentDevice == null) return;
+            try
+            {
+                currentDevice.Dispose();
+            }
+            catch (Exception ex)
+            {
+                LogMan.LogWarning($"Error disposing device: {ex.Message}");
+            }
+            finally
+            {
+                currentDevice = null;
+                currentDeviceName = null;
+            }
+        }
+
         private void OnDisable()
         {
 #if !UNITY_STANDALONE_WIN
-            if (DevicesWatcher.Instance != null)
+            if (DevicesWatcher.Instance != null && isWatcherSubscribed)
             {
                 DevicesWatcher.Instance.DeviceAdded -= OnDeviceChange;
                 DevicesWatcher.Instance.DeviceRemoved -= OnDeviceChange;
+                isWatcherSubscribed = false;
             }
 #endif
+            DisposeCurrentDevice();
+        }
+
+        private void OnDestroy()
+        {
+            DisposeCurrentDevice();
         }
     }
 }

@@ -47,10 +47,7 @@ namespace TemperaMental.Input
             }
 
             Instance = this;
-#if UNITY_EDITOR
-            PlayerPrefs.DeleteKey(PlayerPrefsKey);
-            PlayerPrefs.Save();
-#endif
+
             LoadBindings();
         }
 
