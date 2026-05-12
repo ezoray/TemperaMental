@@ -32,7 +32,7 @@ namespace TemperaMental.Transforms
 
         public void ActionOnBpmChanged(int newBpm)
         {
-            transformManager.ActionOnBpmChanged(newBpm);
+            transformManager.SetBpm(newBpm);
         }
 
         public void OnClickToggleEmitter(int emitterId)

@@ -26,11 +26,6 @@ namespace TemperaMental.UI.Display
             tempMessageFadeDuration = ConfigRegistry.UI.TempMessageFadeDuration;
         }
 
-        private void Start()
-        {
-            bpmText.text = ConfigRegistry.Midi.DefaultBpm.ToString();
-        }
-
         public void ActionOnRemoveEmitter(Vector2Int position, int emitterCount)
         {
             emittersText.text = $"{emitterCount}";

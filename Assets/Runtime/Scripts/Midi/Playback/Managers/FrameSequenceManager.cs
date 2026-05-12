@@ -38,8 +38,6 @@ namespace TemperaMental.Midi.Playbacks
         private void Awake()
         {
             playbackState = PlaybackState.Reset;
-            bpm = ConfigRegistry.Midi.DefaultBpm;
-            frameDurationTicks = (long)(60.0 / bpm * Stopwatch.Frequency);
         }
 
 

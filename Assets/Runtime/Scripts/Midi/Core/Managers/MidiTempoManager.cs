@@ -11,9 +11,9 @@ namespace TemperaMental.Midi.Core
         [SerializeField] UnityEvent<int> onBpmChanged;
 
 
-        private void Awake()
+        private void Start()
         {
-            bpm = ConfigRegistry.Midi.DefaultBpm;
+            SetBpm(ConfigRegistry.Midi.DefaultBpm);
         }
  
         public void SetBpm(int newBpm)

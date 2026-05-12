@@ -122,7 +122,19 @@ namespace TemperaMental.Midi.Devices
         {
             var names = new List<string>();
 
-            foreach (var device in OutputDevice.GetAll())
+            IEnumerable<OutputDevice> devices;
+
+            try
+            {
+                devices = OutputDevice.GetAll();
+            }
+            catch (Exception ex)
+            {
+                LogMan.LogWarning($"Failed to enumerate MIDI devices: {ex.Message}");
+                return names;
+            }
+
+            foreach (var device in devices)
             {
                 try
                 {

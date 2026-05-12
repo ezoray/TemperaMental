@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using TemperaMental.Applications.Config;
 using TemperaMental.Core;
 
 namespace TemperaMental.Transforms
@@ -48,18 +47,13 @@ namespace TemperaMental.Transforms
             }
             else
             {
-                (int, int)[] upPairs = { (0, 1), (2, 3) };
-                (int, int)[] downPairs = { (0, 2), (1, 3) };
-                (int, int)[] pairs = direction.HasFlag(TransformDirections.Up) ? upPairs : downPairs;
-
-                foreach (var (a, b) in pairs)
-                {
-                    bool aActive = activeEmitters.HasFlag((TransformEmitters)(1 << a));
-                    bool bActive = activeEmitters.HasFlag((TransformEmitters)(1 << b));
-                    if (!aActive || !bActive) continue;
-
+                (int, int) pair = direction.HasFlag(TransformDirections.Up) ? (0, 3) : (1, 2);
+                int a = pair.Item1;
+                int b = pair.Item2;
+                bool aActive = activeEmitters.HasFlag((TransformEmitters)(1 << a));
+                bool bActive = activeEmitters.HasFlag((TransformEmitters)(1 << b));
+                if (aActive && bActive)
                     (transformedGroups[a], transformedGroups[b]) = (transformedGroups[b], transformedGroups[a]);
-                }
             }
 
             return transformedGroups;

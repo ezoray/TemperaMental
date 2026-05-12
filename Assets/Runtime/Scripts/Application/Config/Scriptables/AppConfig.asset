@@ -18,6 +18,6 @@ MonoBehaviour:
   MinHeight: 720
   DragDelay: 0.15
   DragDistanceThreshold: 10
-  ProcessRate: 0.025
+  ProcessRate: 0.01
   InitialDelay: 0.3
   RepeatRate: 0.1

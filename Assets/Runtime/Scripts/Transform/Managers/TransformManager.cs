@@ -36,10 +36,6 @@ namespace TemperaMental.Transforms
 
         private void Awake()
         {
-            bpm = ConfigRegistry.Midi.DefaultBpm;
-            repeatRate = 60f / bpm;
-            nextEventTime = Time.time + repeatRate;
-
             randomTransformService = (RandomTransformService)transformServices[(int)TransformMode.Random];
             shiftTransformService = (ShiftTransformService)transformServices[(int)TransformMode.Shift];
             transformMode = TransformMode.Shift;
@@ -118,7 +114,7 @@ namespace TemperaMental.Transforms
             onLatchStateChanged?.Invoke(isLatched);
         }       
 
-        public void ActionOnBpmChanged(int newBpm)
+        public void SetBpm(int newBpm)
         {
             bpm = newBpm;
             repeatRate = 60f / bpm;
