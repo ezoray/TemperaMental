@@ -3,11 +3,11 @@ using TemperaMental.Core;
 using TemperaMental.Frames;
 using UnityEngine;
 
-namespace TemperaMental.Emitters
+namespace TemperaMental.Transforms
 {
-    public class EmitterTransformEventController : MonoBehaviour
+    public class TransformEventController : MonoBehaviour
     {
-        [SerializeField] EmitterTransformManager transformManager;
+        [SerializeField] TransformManager transformManager;
         [SerializeField] FrameManager frameManager;
 
         public void OnClickDirection(int directionValue)
@@ -42,9 +42,9 @@ namespace TemperaMental.Emitters
 
         public void OnClickSetTransformMode(int transformMode)
         {
-            if (Enum.IsDefined(typeof(EmitterTransformMode), transformMode))
+            if (Enum.IsDefined(typeof(TransformMode), transformMode))
             {
-                transformManager.SetTransformMode((EmitterTransformMode)transformMode);
+                transformManager.SetTransformMode((TransformMode)transformMode);
             }
         }
     }

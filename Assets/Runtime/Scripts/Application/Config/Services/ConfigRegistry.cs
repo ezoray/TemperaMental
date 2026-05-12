@@ -9,14 +9,12 @@ namespace TemperaMental.Applications.Config
 
         [SerializeField] LoggingConfig logging; 
         [SerializeField] AppConfig app;
-        [SerializeField] EmitterConfig emitter;
         [SerializeField] GridConfig grid;
         [SerializeField] MidiConfig midi;
         [SerializeField] UIConfig ui;
 
         public static LoggingConfig Logging => Instance.logging;
         public static AppConfig App => Instance.app;
-        public static EmitterConfig Emitter => Instance.emitter;
         public static GridConfig Grid => Instance.grid;
         public static MidiConfig Midi => Instance.midi;
         public static UIConfig UI => Instance.ui;

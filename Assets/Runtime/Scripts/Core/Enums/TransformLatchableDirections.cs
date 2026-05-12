@@ -3,7 +3,7 @@ using System;
 namespace TemperaMental.Core
 {
     [Flags]
-    public enum TransformDirections
+    public enum TransformLatchableDirections
     {
         None = 0,
         Up = 1,
@@ -11,8 +11,8 @@ namespace TemperaMental.Core
         Left = 4,
         Right = 8,
 
-        // enabled direction buttons per transform
-        Random = Up | Down | Left | Right,
+        // latchable direction buttons per transform
+        Random = Left | Right,  
         Flip = Up | Down | Left | Right,
         Rotate = Left | Right,
         Swap = Up | Down | Left | Right,

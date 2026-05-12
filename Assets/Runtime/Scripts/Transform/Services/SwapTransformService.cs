@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using TemperaMental.Applications.Config;
 using TemperaMental.Core;
 
-namespace TemperaMental.Emitters
+namespace TemperaMental.Transforms
 {
     public class SwapTransformService : TransformBaseService
     {
@@ -12,7 +12,8 @@ namespace TemperaMental.Emitters
         {
             base.Awake();
 
-            allowedDirections = ConfigRegistry.Emitter.SwapTransformDirections;
+            allowedDirections = TransformDirections.Swap;
+            latchableDirections = TransformLatchableDirections.Swap;
         }
 
         protected override ulong[] DoSingleTransform(ulong[] groups, TransformDirections direction)

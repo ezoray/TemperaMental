@@ -2,7 +2,7 @@ using System;
 using TemperaMental.Applications.Config;
 using TemperaMental.Core;
 
-namespace TemperaMental.Emitters
+namespace TemperaMental.Transforms
 {
     public class ShiftTransformService : TransformBaseService
     {
@@ -16,7 +16,8 @@ namespace TemperaMental.Emitters
             gridWidth = ConfigRegistry.Grid.GridWidth;
             gridHeight = ConfigRegistry.Grid.GridHeight;
 
-            allowedDirections = ConfigRegistry.Emitter.ShiftTransformDirections;
+            allowedDirections = TransformDirections.Shift;
+            latchableDirections = TransformLatchableDirections.Shift;
         }
 
         public bool ToggleWrap()

@@ -5,18 +5,19 @@ using TemperaMental.Frames;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace TemperaMental.Emitters
+namespace TemperaMental.Transforms
 {
-    public class EmitterTransformManager : MonoBehaviour
+    public class TransformManager : MonoBehaviour
     {
-        [Header("Order: Random, Flip, Rotate, Swap, Shift")]
+        // transforms are called in this order so place shift first to prevent it interfering with other transforms
+        [Header("Order: Shift, Random, Flip, Rotate, Swap, Shift")]
         [SerializeField] List<TransformBaseService> transformServices;
         [SerializeField] FrameManager frameManager;
 
         RandomTransformService randomTransformService;
         ShiftTransformService shiftTransformService;
 
-        EmitterTransformMode transformMode;
+        TransformMode transformMode;
 
         int bpm;
         float nextEventTime;
@@ -24,7 +25,7 @@ namespace TemperaMental.Emitters
 
         PlaybackState playbackState;
 
-        [SerializeField] UnityEvent<EmitterTransformMode, EmitterTransformDetail> onTransformModeChanged;
+        [SerializeField] UnityEvent<TransformMode, TransformDetail> onTransformModeChanged;
         [SerializeField] UnityEvent<int, bool> onTransformEmitterChanged;
         [SerializeField] UnityEvent<ulong[]> onEmittersTransformed;
 
@@ -39,15 +40,15 @@ namespace TemperaMental.Emitters
             repeatRate = 60f / bpm;
             nextEventTime = Time.time + repeatRate;
 
-            randomTransformService = (RandomTransformService)transformServices[(int)EmitterTransformMode.Random];
-            shiftTransformService = (ShiftTransformService)transformServices[(int)EmitterTransformMode.Shift];
-            transformMode = EmitterTransformMode.Shift;
+            randomTransformService = (RandomTransformService)transformServices[(int)TransformMode.Random];
+            shiftTransformService = (ShiftTransformService)transformServices[(int)TransformMode.Shift];
+            transformMode = TransformMode.Shift;
         }
 
         private void Start()
         {
             // fire initial state to subscribers (UI)
-            EmitterTransformDetail detail = transformServices[(int)transformMode].GetTransformDetail();
+            TransformDetail detail = transformServices[(int)transformMode].GetTransformDetail();
             onTransformModeChanged?.Invoke(transformMode, detail);
         }
 
@@ -137,13 +138,13 @@ namespace TemperaMental.Emitters
             onTransformEmitterChanged?.Invoke(emitterId, isActive);
         }
 
-        public void SetTransformMode(EmitterTransformMode transformMode)
+        public void SetTransformMode(TransformMode transformMode)
         {
             if (transformMode != this.transformMode)
             {
                 this.transformMode = transformMode;
 
-                EmitterTransformDetail transformDetail = transformServices[(int)transformMode].GetTransformDetail();
+                TransformDetail transformDetail = transformServices[(int)transformMode].GetTransformDetail();
 
                 onTransformModeChanged?.Invoke(transformMode, transformDetail);
             }

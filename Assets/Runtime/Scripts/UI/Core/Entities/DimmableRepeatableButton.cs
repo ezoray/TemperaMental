@@ -12,7 +12,7 @@ namespace TemperaMental.UI.Core
         [SerializeField] UIConfig uiConfig;
         [SerializeField] TextMeshProUGUI buttonText;
 
-        [SerializeField] bool doRepeat;
+        [SerializeField] bool noRepeat;
         [SerializeField] float initialDelay;
 
         float alphaValue;
@@ -43,18 +43,19 @@ namespace TemperaMental.UI.Core
 
         void Update()
         {
-            if (!doRepeat || !isPressed) return;
-
-            if (Time.time >= nextEventTime)
+            if (!noRepeat && isPressed)
             {
-                onClick.Invoke();
-                nextEventTime = Time.time + repeatRate;
+                if (Time.time >= nextEventTime)
+                {
+                    onClick.Invoke();
+                    nextEventTime = Time.time + repeatRate;
+                }
             }
         }
 
-        public void SetRepeat(bool isOn)
+        public void SetNoRepeat(bool isOn)
         {
-            doRepeat = isOn;
+            noRepeat = isOn;
         }
 
         public override void OnPointerDown(PointerEventData eventData)

@@ -1,15 +1,18 @@
 using System.Collections.Generic;
 using TemperaMental.Applications.Config;
 using TemperaMental.Core;
+using TemperaMental.Logs;
 using TemperaMental.Utils;
 using UnityEngine;
 
-namespace TemperaMental.Emitters
+namespace TemperaMental.Transforms
 {
     public class RandomTransformService : TransformBaseService
     {
         int gridWidth, gridHeight;
         int maxEmitters;
+
+        int targetOffset;
 
         protected override void Awake()
         {
@@ -18,20 +21,41 @@ namespace TemperaMental.Emitters
             gridWidth = ConfigRegistry.Grid.GridWidth;
             gridHeight = ConfigRegistry.Grid.GridHeight;
             maxEmitters = ConfigRegistry.Grid.MaxEmitters;
-            allowedDirections = ConfigRegistry.Emitter.RandomTransformDirections;
+
+            targetOffset = 1;
+
+            allowedDirections = TransformDirections.Random;
+            latchableDirections = TransformLatchableDirections.Random;
         }
 
         protected override ulong[] DoSingleTransform(ulong[] groups, TransformDirections direction)
         {
-            int targetCount = EmitterUtils.GetEmitterCount(groups);
-            targetCount = direction.HasFlag(TransformDirections.Right) ? targetCount + 1 : targetCount - 1;
-
-            if (targetCount >= 0 && targetCount <= maxEmitters)
+            if (direction.HasFlag(TransformDirections.Up))
             {
-                return DoRandomTransform(groups, targetCount);
+                AdjustTargetOffset(1);
+                return groups;
             }
 
-            return groups;
+            if (direction.HasFlag(TransformDirections.Down))
+            {
+                AdjustTargetOffset(-1);
+                return groups;
+            }
+
+            int currentCount = EmitterUtils.GetEmitterCount(groups);
+            int targetCount = direction.HasFlag(TransformDirections.Right)
+                ? Mathf.Min(currentCount + targetOffset, maxEmitters)
+                : Mathf.Max(currentCount - targetOffset, 0);
+
+            return DoRandomTransform(groups, targetCount);
+        }
+
+        public void AdjustTargetOffset(int change)
+        {
+            targetOffset += change;
+            targetOffset = Mathf.Clamp(targetOffset, 1, maxEmitters);
+
+            LogMan.LogTemp("Random: + " + targetOffset);
         }
 
         public ulong[] DoRandomTransform(ulong[] groups, int targetCount)

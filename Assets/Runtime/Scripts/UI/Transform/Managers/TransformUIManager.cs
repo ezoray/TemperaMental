@@ -3,17 +3,16 @@ using TemperaMental.Applications.Config;
 using TemperaMental.Core;
 using TemperaMental.UI.Core;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.UI;
 
-namespace TemperaMental.UI.Emitters
+namespace TemperaMental.UI.Transforms
 {
-    public class EmitterTransformUIManager : MonoBehaviour
+    public class TransformUIManager : MonoBehaviour
     {
         [Header("Order: Blue, Red, Yellow, Green")]
         [SerializeField] DimmableButton[] emitterButtons;
 
-        [Header("Order: Random, Flip, Rotate, Switch, Shift")]
+        [Header("Order: Shift, Random, Flip, Rotate, Switch")]
         [SerializeField] LightableButton[] transformButtons;
 
         [SerializeField] Slider randomSlider;
@@ -29,19 +28,18 @@ namespace TemperaMental.UI.Emitters
         Color wrapOnColor;
         Color directionOnColor;
 
-        Dictionary<EmitterTransformMode, EmitterTransformUIState> transformModeStates;
+        Dictionary<TransformMode, TransformLitButtons> modeLitButtons;
 
-        [SerializeField] UnityEvent<float> onRandomValueChanged;
 
         private void Awake()
         {
-            transformModeStates = new Dictionary<EmitterTransformMode, EmitterTransformUIState>
+            modeLitButtons = new Dictionary<TransformMode, TransformLitButtons>
             {
-                { EmitterTransformMode.Random, new EmitterTransformUIState(TransformLitButtons.Random, TransformDirections.Random) },
-                { EmitterTransformMode.Flip, new EmitterTransformUIState(TransformLitButtons.Flip, TransformDirections.Flip) },
-                { EmitterTransformMode.Rotate, new EmitterTransformUIState(TransformLitButtons.Rotate, TransformDirections.Rotate) },
-                { EmitterTransformMode.Swap, new EmitterTransformUIState(TransformLitButtons.Swap, TransformDirections.Swap) },
-                { EmitterTransformMode.Shift, new EmitterTransformUIState(TransformLitButtons.Shift, TransformDirections.Shift) }
+                { TransformMode.Shift, TransformLitButtons.Shift },
+                { TransformMode.Random, TransformLitButtons.Random },
+                { TransformMode.Flip, TransformLitButtons.Flip },
+                { TransformMode.Rotate, TransformLitButtons.Rotate },
+                { TransformMode.Swap, TransformLitButtons.Swap }
             };
 
             randomSlider.minValue = 0;
@@ -106,7 +104,7 @@ namespace TemperaMental.UI.Emitters
 
             foreach (var directionButton in directionButtons)
             {
-                directionButton.SetRepeat(!isOn);
+                directionButton.SetNoRepeat(isOn);
 
                 if (!isOn)
                 {
@@ -140,24 +138,26 @@ namespace TemperaMental.UI.Emitters
             emitterButtons[emitterId].SetDimmed(!isActive);
         }
 
-        public void ActionOnTransformModeChanged(EmitterTransformMode transformMode, EmitterTransformDetail transformDetail)
+        public void ActionOnTransformModeChanged(TransformMode transformMode, TransformDetail transformDetail)
         {
             SetActiveEmitters(transformDetail.ActiveEmitters);
 
-            if (transformModeStates.TryGetValue(transformMode, out var transformUIState))
+            if (modeLitButtons.TryGetValue(transformMode, out var litButtons))
             {
-                SetModeLitState(transformUIState.LitButtons);
-                SetDirectionsInteractable(transformUIState.Directions);                
+                SetModeLitState(litButtons);
             }
+
+            SetDirectionsInteractable(transformDetail.AllowedDirections);
 
             latchButtonImage.color = transformDetail.IsLatched ? latchOnColor : defaultOffColor;
 
             for (int i = 0; i < directionButtons.Length; i++)
             {
-                directionButtons[i].SetRepeat(!transformDetail.IsLatched);
+                bool inLatchableMask = ((int)transformDetail.LatchableDirections & (1 << i)) != 0;
+                bool isLatched = transformDetail.IsLatched && inLatchableMask;
+                directionButtons[i].SetNoRepeat(isLatched);
 
-                bool isLit = ((int)transformDetail.CurrentDirections & (1 << i)) != 0;
-
+                bool isLit = isLatched && ((int)transformDetail.CurrentDirections & (1 << i)) != 0;
                 directionButtons[i].image.color = isLit ? directionOnColor : defaultOffColor;
             }
         }

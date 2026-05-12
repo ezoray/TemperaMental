@@ -2,11 +2,12 @@ using System;
 using TemperaMental.Core;
 using UnityEngine;
 
-namespace TemperaMental.Emitters
+namespace TemperaMental.Transforms
 {
     public abstract class TransformBaseService : MonoBehaviour
     {
         protected TransformDirections allowedDirections;
+        protected TransformLatchableDirections latchableDirections;
         protected TransformDirections currentDirections;
         protected bool isLatched;
         protected TransformEmitters activeEmitters;
@@ -39,18 +40,17 @@ namespace TemperaMental.Emitters
             return transformedGroups;
         }
 
-        public EmitterTransformDetail GetTransformDetail()
+        public TransformDetail GetTransformDetail()
         {
-            return new EmitterTransformDetail(activeEmitters, isLatched, currentDirections);
+            return new TransformDetail(activeEmitters, isLatched, allowedDirections, latchableDirections, currentDirections);
         }
 
         public void HandleDirectionChange(ulong[] emitterGroup, int directionValue)
         {
             TransformDirections direction = (TransformDirections)(1 << directionValue);
-
             if (!allowedDirections.HasFlag(direction)) return;
 
-            if (!isLatched)
+            if (!isLatched || !latchableDirections.HasFlag((TransformLatchableDirections)(1 << directionValue)))
             {
                 ulong[] transformedGroups = DoSingleTransform(emitterGroup, direction);
                 OnEmittersTransformed?.Invoke(transformedGroups);
@@ -67,7 +67,6 @@ namespace TemperaMental.Emitters
             TransformDirections opposing = (TransformDirections)(1 << (directionValue ^ 1));
             currentDirections &= ~opposing;
             OnDirectionLatchStateChanged?.Invoke(opposing, false);
-
             currentDirections |= direction;
             OnDirectionLatchStateChanged?.Invoke(direction, true);
         }

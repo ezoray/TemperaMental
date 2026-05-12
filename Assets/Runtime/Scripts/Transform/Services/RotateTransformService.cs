@@ -1,9 +1,9 @@
 using TemperaMental.Applications.Config;
 using TemperaMental.Core;
 
-namespace TemperaMental.Emitters
+namespace TemperaMental.Transforms
 {
-    public class FlipTransformService : TransformBaseService
+    public class RotateTransformService : TransformBaseService
     {
         int gridWidth, gridHeight;
 
@@ -14,32 +14,28 @@ namespace TemperaMental.Emitters
             gridWidth = ConfigRegistry.Grid.GridWidth;
             gridHeight = ConfigRegistry.Grid.GridHeight;
 
-            allowedDirections = ConfigRegistry.Emitter.FlipTransformDirections;
-        }
-
-        public override ulong[] DoTransform(ulong[] groups)
-        {
-            if (currentDirections == TransformDirections.None) return groups;
-            return DoSingleTransform(groups, currentDirections);
+            allowedDirections = TransformDirections.Rotate;
+            latchableDirections = TransformLatchableDirections.Rotate;
         }
 
         protected override ulong[] DoSingleTransform(ulong[] groups, TransformDirections direction)
         {
-            bool hasHorizontal = direction.HasFlag(TransformDirections.Left) || direction.HasFlag(TransformDirections.Right);
-            bool hasVertical = direction.HasFlag(TransformDirections.Up) || direction.HasFlag(TransformDirections.Down);
+            ulong[] transformedGroups = new ulong[groups.Length];
+            bool clockwise = direction.HasFlag(TransformDirections.Right);
 
-            ulong[] transformedGroup = new ulong[groups.Length];
-
+            // copy inactive emitters unchanged
             for (int i = 0; i < groups.Length; i++)
             {
                 if (!activeEmitters.HasFlag((TransformEmitters)(1 << i)))
-                {
-                    transformedGroup[i] = groups[i];
-                    continue;
-                }
+                    transformedGroups[i] = groups[i];
+            }
+
+            // transform active emitters
+            for (int i = 0; i < groups.Length; i++)
+            {
+                if (!activeEmitters.HasFlag((TransformEmitters)(1 << i))) continue;
 
                 ulong mask = groups[i];
-
                 for (int x = 0; x < gridWidth; x++)
                 {
                     for (int y = 0; y < gridHeight; y++)
@@ -47,10 +43,11 @@ namespace TemperaMental.Emitters
                         int index = x * gridHeight + y;
                         if ((mask & (1UL << index)) == 0) continue;
 
-                        int newX = hasHorizontal ? (gridWidth - 1) - x : x;
-                        int newY = hasVertical ? (gridHeight - 1) - y : y;
+                        int newX = clockwise ? (gridHeight - 1) - y : y;
+                        int newY = clockwise ? x : (gridWidth - 1) - x;
                         int newIndex = newX * gridHeight + newY;
 
+                        // skip if inactive emitter occupies destination in original
                         bool blocked = false;
                         for (int j = 0; j < groups.Length; j++)
                         {
@@ -59,12 +56,12 @@ namespace TemperaMental.Emitters
                         }
 
                         if (blocked) continue;
-                        transformedGroup[i] |= 1UL << newIndex;
+                        transformedGroups[i] |= 1UL << newIndex;
                     }
                 }
             }
 
-            return transformedGroup;
+            return transformedGroups;
         }
     }
 }
