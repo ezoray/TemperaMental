@@ -5,7 +5,8 @@ namespace TemperaMental.Transforms
 {
     public class RotateTransformService : TransformBaseService
     {
-        int gridWidth, gridHeight;
+        int gridWidth;
+        int gridHeight;
 
         protected override void Awake()
         {
@@ -20,43 +21,73 @@ namespace TemperaMental.Transforms
 
         protected override ulong[] DoSingleTransform(ulong[] groups, TransformDirections direction)
         {
-            ulong[] transformedGroups = new ulong[groups.Length];
-            bool clockwise = direction.HasFlag(TransformDirections.Right);
+            bool clockwise = (direction & TransformDirections.Right) != 0;
 
-            // copy inactive emitters unchanged
-            for (int i = 0; i < groups.Length; i++)
+            int groupCount = groups.Length;
+
+            // Copy inactive emitters unchanged
+            for (int i = 0; i < groupCount; i++)
             {
-                if (!activeEmitters.HasFlag((TransformEmitters)(1 << i)))
+                TransformEmitters emitterFlag = (TransformEmitters)(1 << i);
+
+                if ((activeEmitters & emitterFlag) == 0)
                     transformedGroups[i] = groups[i];
             }
 
-            // transform active emitters
-            for (int i = 0; i < groups.Length; i++)
+            // Transform active emitters
+            for (int i = 0; i < groupCount; i++)
             {
-                if (!activeEmitters.HasFlag((TransformEmitters)(1 << i))) continue;
+                TransformEmitters emitterFlag = (TransformEmitters)(1 << i);
+
+                if ((activeEmitters & emitterFlag) == 0)
+                    continue;
+
+                transformedGroups[i] = 0;
 
                 ulong mask = groups[i];
+
                 for (int x = 0; x < gridWidth; x++)
                 {
                     for (int y = 0; y < gridHeight; y++)
                     {
-                        int index = x * gridHeight + y;
-                        if ((mask & (1UL << index)) == 0) continue;
+                        int index = (x * gridHeight) + y;
+                        ulong bit = 1UL << index;
 
-                        int newX = clockwise ? (gridHeight - 1) - y : y;
-                        int newY = clockwise ? x : (gridWidth - 1) - x;
-                        int newIndex = newX * gridHeight + newY;
+                        // Skip unset bits
+                        if ((mask & bit) == 0)
+                            continue;
 
-                        // skip if inactive emitter occupies destination in original
+                        int newX = clockwise
+                            ? (gridHeight - 1) - y
+                            : y;
+
+                        int newY = clockwise
+                            ? x
+                            : (gridWidth - 1) - x;
+
+                        int newIndex = (newX * gridHeight) + newY;
+                        ulong newBit = 1UL << newIndex;
+
+                        // Skip if inactive emitter occupies destination
                         bool blocked = false;
-                        for (int j = 0; j < groups.Length; j++)
+
+                        for (int j = 0; j < groupCount; j++)
                         {
-                            if (activeEmitters.HasFlag((TransformEmitters)(1 << j))) continue;
-                            if ((groups[j] & (1UL << newIndex)) != 0) { blocked = true; break; }
+                            TransformEmitters otherEmitterFlag = (TransformEmitters)(1 << j);
+
+                            // Ignore active emitters
+                            if ((activeEmitters & otherEmitterFlag) != 0)
+                                continue;
+
+                            if ((groups[j] & newBit) != 0)
+                            {
+                                blocked = true;
+                                break;
+                            }
                         }
 
-                        if (blocked) continue;
-                        transformedGroups[i] |= 1UL << newIndex;
+                        if (!blocked)
+                            transformedGroups[i] |= newBit;
                     }
                 }
             }

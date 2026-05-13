@@ -125,6 +125,8 @@ namespace TemperaMental.Frames
         {
             currentFrame.ClearEmitters();
 
+            LogMan.Log("Frame cleared");
+
             NotifyFrameChanged();
         }
 

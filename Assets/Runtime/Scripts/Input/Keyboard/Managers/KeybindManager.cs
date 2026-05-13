@@ -79,6 +79,7 @@ namespace TemperaMental.Input
 
             var rebind = action.PerformInteractiveRebinding()
                 .WithCancelingThrough("<Keyboard>/escape")
+                .WithControlsExcluding("<Mouse>")
                 .OnMatchWaitForAnother(0.1f)
                 .OnComplete(op => CompleteRebind(action))
                 .OnCancel(op => CancelRebindInternal());
@@ -97,7 +98,8 @@ namespace TemperaMental.Input
                     .WithControlsExcluding(ModifierAlt)
                     .WithControlsExcluding(ModifierLeftAlt)
                     .WithControlsExcluding(ModifierRightAlt)
-                    .WithControlsHavingToMatchPath(KeyboardPath);
+                    .WithControlsHavingToMatchPath(KeyboardPath)
+                    .WithControlsExcluding("<Mouse>");
             }
 
             currentRebindOperation = rebind.Start();

@@ -30,7 +30,11 @@ namespace TemperaMental.Midi.Playbacks
         public bool IsFramePlaybackActive => isFramePlaybackActive;
 
         ulong[] previousGroups;
+        ulong[] frameSnapshot;
+        List<ControlChangeEvent> frameEvents;
         List<ControlChangeEvent> pendingEvents;
+        ControlChangeEvent[] ccPool;
+        int ccPoolIndex;
 
         Thread playbackThread;
         ManualResetEventSlim workReady;
@@ -55,6 +59,12 @@ namespace TemperaMental.Midi.Playbacks
             intervalTicks = (long)(Stopwatch.Frequency * ConfigRegistry.Midi.EventIntervalMS);
 
             previousGroups = new ulong[emitterCount];
+            frameSnapshot = new ulong[emitterCount];
+            frameEvents = new List<ControlChangeEvent>(68);
+
+            ccPool = new ControlChangeEvent[68];
+            for (int i = 0; i < ccPool.Length; i++)
+                ccPool[i] = new ControlChangeEvent((SevenBitNumber)0, (SevenBitNumber)0);
         }
 
         private void OnEnable()
@@ -70,13 +80,14 @@ namespace TemperaMental.Midi.Playbacks
 
         private void SendClearAllEmitters()
         {
+            ccPoolIndex = 0;
+
             for (byte i = 0; i < emitterCount; i++)
             {
-                outputDevice?.SendEvent(CreateCC(activateCC, i));
-                outputDevice?.SendEvent(CreateCC(removeCC, clearEmittersValue));
+                outputDevice?.SendEvent(PooledCC(activateCC, i));
+                outputDevice?.SendEvent(PooledCC(removeCC, clearEmittersValue));
             }
 
-            // reset previousGroups to match
             for (int i = 0; i < emitterCount; i++)
                 previousGroups[i] = 0;
         }
@@ -88,16 +99,15 @@ namespace TemperaMental.Midi.Playbacks
             this.frameDurationTicks = frameDurationTicks;
             this.fireCallback = fireCallback;
 
-            ulong[] snapshot = new ulong[emitterCount];
-            Array.Copy(emitterGroups, snapshot, emitterCount);
+            Array.Copy(emitterGroups, frameSnapshot, emitterCount);
 
-            List<ControlChangeEvent> events = BuildFrameEvents(snapshot);
+            BuildFrameEvents(frameSnapshot);
 
-            Array.Copy(snapshot, previousGroups, emitterCount);
+            Array.Copy(frameSnapshot, previousGroups, emitterCount);
 
-            lock(pendingLock)
+            lock (pendingLock)
             {
-                pendingEvents = events;
+                pendingEvents = frameEvents;
             }
 
             isFramePlaybackActive = true;
@@ -130,8 +140,6 @@ namespace TemperaMental.Midi.Playbacks
 
         public void AddEmitter(EmitterDetail emitterDetail)
         {
-      //      if (isFramePlaybackActive) return;
-
             byte emitterId = (byte)emitterDetail.EmitterId;
             byte pos = (byte)EmitterUtils.PositionToIndex(emitterDetail.Position);
 
@@ -139,25 +147,23 @@ namespace TemperaMental.Midi.Playbacks
                 previousGroups[i] &= ~(1UL << pos);
             previousGroups[emitterId] |= 1UL << pos;
 
-            outputDevice?.SendEvent(CreateCC(activateCC, emitterId));
-            outputDevice?.SendEvent(CreateCC(placeCC, pos));
+            outputDevice?.SendEvent(new ControlChangeEvent((SevenBitNumber)activateCC, (SevenBitNumber)emitterId));
+            outputDevice?.SendEvent(new ControlChangeEvent((SevenBitNumber)placeCC, (SevenBitNumber)pos));
         }
 
         public void RemoveEmitter(Vector2Int position)
         {
-       //     if (isFramePlaybackActive) return;
-
             byte pos = (byte)EmitterUtils.PositionToIndex(position);
 
             for (byte i = 0; i < emitterCount; i++)
                 previousGroups[i] &= ~(1UL << pos);
 
-            outputDevice?.SendEvent(CreateCC(removeCC, pos));
+            outputDevice?.SendEvent(new ControlChangeEvent((SevenBitNumber)removeCC, (SevenBitNumber)pos));
         }
 
         public void SetEmitterType(int emitterId)
         {
-            outputDevice?.SendEvent(CreateCC(activateCC, (byte)emitterId));
+            outputDevice?.SendEvent(new ControlChangeEvent((SevenBitNumber)activateCC, (SevenBitNumber)emitterId));
         }
 
         private void ThreadLoop()
@@ -170,7 +176,7 @@ namespace TemperaMental.Midi.Playbacks
                 if (!isRunning) break;
 
                 List<ControlChangeEvent> events;
-                lock(pendingLock)
+                lock (pendingLock)
                 {
                     events = pendingEvents;
                 }
@@ -194,7 +200,6 @@ namespace TemperaMental.Midi.Playbacks
                 outputDevice?.SendEvent(events[i]);
             }
 
-            // hold until frame duration has elapsed if set
             if (frameDurationTicks > 0)
             {
                 long endTicks = Stopwatch.GetTimestamp() - frameStopwatch.ElapsedTicks + frameDurationTicks;
@@ -203,19 +208,20 @@ namespace TemperaMental.Midi.Playbacks
                 if (remainingMs > 0)
                 {
                     cancelSignal.Wait((int)remainingMs);
-                }   
+                }
             }
 
             if (!isRunning) return;
 
             isFramePlaybackActive = false;
 
-            if(fireCallback) OnFramePlaybackCompleted?.Invoke();
+            if (fireCallback) OnFramePlaybackCompleted?.Invoke();
         }
 
-        private List<ControlChangeEvent> BuildFrameEvents(ulong[] emitterGroups)
+        private void BuildFrameEvents(ulong[] emitterGroups)
         {
-            var events = new List<ControlChangeEvent>();
+            frameEvents.Clear();
+            ccPoolIndex = 0;
 
             ulong allAdds = 0;
             for (byte emitterId = 0; emitterId < emitterCount; emitterId++)
@@ -231,23 +237,24 @@ namespace TemperaMental.Midi.Playbacks
 
                 if (toRemove == 0 && toAdd == 0) continue;
 
-                events.Add(CreateCC(activateCC, emitterId));
+                frameEvents.Add(PooledCC(activateCC, emitterId));
 
                 for (byte pos = 0; pos < gridSize; pos++)
                 {
                     if ((toRemove & (1UL << pos)) != 0)
-                        events.Add(CreateCC(removeCC, pos));
+                        frameEvents.Add(PooledCC(removeCC, pos));
                     else if ((toAdd & (1UL << pos)) != 0)
-                        events.Add(CreateCC(placeCC, pos));
+                        frameEvents.Add(PooledCC(placeCC, pos));
                 }
             }
-
-            return events;
         }
 
-        private ControlChangeEvent CreateCC(int cc, byte value)
+        private ControlChangeEvent PooledCC(int cc, byte value)
         {
-            return new ControlChangeEvent((SevenBitNumber)cc, (SevenBitNumber)value);
+            var e = ccPool[ccPoolIndex++];
+            e.ControlNumber = (SevenBitNumber)cc;
+            e.ControlValue = (SevenBitNumber)value;
+            return e;
         }
 
         private void OnDisable()

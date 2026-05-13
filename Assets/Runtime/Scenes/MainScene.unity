@@ -12347,7 +12347,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 400
+  m_text: 128
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: dc36b3fdc14f47ebb36fd484a67e268a, type: 2}
   m_sharedMaterial: {fileID: 2140032, guid: dc36b3fdc14f47ebb36fd484a67e268a, type: 2}
@@ -16142,9 +16142,9 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1330948702}
   m_Direction: 2
   m_MinValue: 1
-  m_MaxValue: 2000
+  m_MaxValue: 1000
   m_WholeNumbers: 1
-  m_Value: 400
+  m_Value: 128
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:

@@ -6,7 +6,9 @@ namespace TemperaMental.Transforms
 {
     public class ShiftTransformService : TransformBaseService
     {
-        int gridWidth, gridHeight;
+        int gridWidth;
+        int gridHeight;
+
         bool isWrapping;
 
         protected override void Awake()
@@ -23,36 +25,53 @@ namespace TemperaMental.Transforms
         public bool ToggleWrap()
         {
             isWrapping = !isWrapping;
-
             return isWrapping;
         }
 
         public override ulong[] DoTransform(ulong[] groups)
         {
-            if (currentDirections == TransformDirections.None) return groups;
+            if (currentDirections == TransformDirections.None)
+                return groups;
+
             return DoSingleTransform(groups, currentDirections);
         }
 
         protected override ulong[] DoSingleTransform(ulong[] groups, TransformDirections direction)
         {
-            bool hasHorizontal = direction.HasFlag(TransformDirections.Left) || direction.HasFlag(TransformDirections.Right);
-            bool hasVertical = direction.HasFlag(TransformDirections.Up) || direction.HasFlag(TransformDirections.Down);
+            bool hasHorizontal =
+                (direction & TransformDirections.Left) != 0 ||
+                (direction & TransformDirections.Right) != 0;
 
-            TransformDirections horizontalDirection = direction & (TransformDirections.Left | TransformDirections.Right);
-            TransformDirections verticalDirection = direction & (TransformDirections.Up | TransformDirections.Down);
+            bool hasVertical =
+                (direction & TransformDirections.Up) != 0 ||
+                (direction & TransformDirections.Down) != 0;
+
+            TransformDirections horizontalDirection =
+                direction & (TransformDirections.Left | TransformDirections.Right);
+
+            TransformDirections verticalDirection =
+                direction & (TransformDirections.Up | TransformDirections.Down);
+
+            int groupCount = groups.Length;
 
             ulong inactiveOccupied = 0;
-            for (int i = 0; i < groups.Length; i++)
+
+            // Build occupied mask from inactive emitters
+            for (int i = 0; i < groupCount; i++)
             {
-                if (!activeEmitters.HasFlag((TransformEmitters)(1 << i)))
+                TransformEmitters emitterFlag = (TransformEmitters)(1 << i);
+
+                if ((activeEmitters & emitterFlag) == 0)
                     inactiveOccupied |= groups[i];
             }
 
-            ulong[] transformedGroups = new ulong[groups.Length];
-
-            for (int i = 0; i < groups.Length; i++)
+            // Transform active emitters
+            for (int i = 0; i < groupCount; i++)
             {
-                if (!activeEmitters.HasFlag((TransformEmitters)(1 << i)))
+                TransformEmitters emitterFlag = (TransformEmitters)(1 << i);
+
+                // Pass inactive emitters through untouched
+                if ((activeEmitters & emitterFlag) == 0)
                 {
                     transformedGroups[i] = groups[i];
                     continue;
@@ -62,23 +81,34 @@ namespace TemperaMental.Transforms
 
                 if (hasHorizontal)
                     mask = ShiftBitmask(mask, horizontalDirection, isWrapping);
+
                 if (hasVertical)
                     mask = ShiftBitmask(mask, verticalDirection, isWrapping);
 
+                // Prevent overlap with inactive emitters
                 transformedGroups[i] = mask & ~inactiveOccupied;
             }
 
-            // last-writer-wins collision resolution between active emitters
+            // Last-writer-wins collision resolution between active emitters
             for (int i = 0; i < transformedGroups.Length; i++)
             {
-                if (!activeEmitters.HasFlag((TransformEmitters)(1 << i))) continue;
+                TransformEmitters emitterFlagI = (TransformEmitters)(1 << i);
+
+                if ((activeEmitters & emitterFlagI) == 0)
+                    continue;
 
                 ulong movedInto = transformedGroups[i] & ~groups[i];
 
                 for (int j = 0; j < transformedGroups.Length; j++)
                 {
-                    if (i == j) continue;
-                    if (!activeEmitters.HasFlag((TransformEmitters)(1 << j))) continue;
+                    if (i == j)
+                        continue;
+
+                    TransformEmitters emitterFlagJ = (TransformEmitters)(1 << j);
+
+                    if ((activeEmitters & emitterFlagJ) == 0)
+                        continue;
+
                     transformedGroups[j] &= ~movedInto;
                 }
             }
@@ -98,7 +128,7 @@ namespace TemperaMental.Transforms
             };
         }
 
-        // move emitters to lower x(subtract one column)
+        // Move emitters to lower x (subtract one column)
         private ulong ShiftLeft(ulong mask, bool wrap)
         {
             ulong lost = mask & ColumnMask(0);
@@ -110,7 +140,7 @@ namespace TemperaMental.Transforms
             return shifted;
         }
 
-        // move emitters to higher x(add one column)
+        // Move emitters to higher x (add one column)
         private ulong ShiftRight(ulong mask, bool wrap)
         {
             ulong lost = mask & ColumnMask(gridWidth - 1);
@@ -122,28 +152,30 @@ namespace TemperaMental.Transforms
             return shifted;
         }
 
-        // move emitters to higher y(decrease index within each column)
+        // Move emitters to higher y (decrease index within each column)
         private ulong ShiftUp(ulong mask, bool wrap)
         {
             ulong result = 0;
 
             for (int x = 0; x < gridWidth; x++)
             {
-                ulong col = (mask & ColumnMask(x)) >> (x * gridHeight);
+                int shift = x * gridHeight;
 
-                ulong lost = col & 1UL;                      // top of column, lowest index
+                ulong col = (mask & ColumnMask(x)) >> shift;
+
+                ulong lost = col & 1UL;
                 ulong shifted = col >> 1;
 
                 if (wrap)
-                    shifted |= lost << (gridHeight - 1);     // wrap to bottom of same column
+                    shifted |= lost << (gridHeight - 1);
 
-                result |= shifted << (x * gridHeight);
+                result |= shifted << shift;
             }
 
             return result;
         }
 
-        // move emitters to lower y(increase index within each column)
+        // Move emitters to lower y (increase index within each column)
         private ulong ShiftDown(ulong mask, bool wrap)
         {
             ulong result = 0;
@@ -151,15 +183,17 @@ namespace TemperaMental.Transforms
 
             for (int x = 0; x < gridWidth; x++)
             {
-                ulong col = (mask & ColumnMask(x)) >> (x * gridHeight);
+                int shift = x * gridHeight;
 
-                ulong lost = (col >> (gridHeight - 1)) & 1UL; // bottom of column, highest index
+                ulong col = (mask & ColumnMask(x)) >> shift;
+
+                ulong lost = (col >> (gridHeight - 1)) & 1UL;
                 ulong shifted = (col << 1) & colBits;
 
                 if (wrap)
-                    shifted |= lost;                           // wrap to top of same column
+                    shifted |= lost;
 
-                result |= shifted << (x * gridHeight);
+                result |= shifted << shift;
             }
 
             return result;
@@ -168,7 +202,10 @@ namespace TemperaMental.Transforms
         private ulong ValidMask()
         {
             int totalBits = gridWidth * gridHeight;
-            return totalBits >= 64 ? ulong.MaxValue : (1UL << totalBits) - 1;
+
+            return totalBits >= 64
+                ? ulong.MaxValue
+                : (1UL << totalBits) - 1;
         }
 
         private ulong ColumnMask(int column)
@@ -177,6 +214,10 @@ namespace TemperaMental.Transforms
             return colMask << (column * gridHeight);
         }
 
-        public bool Wrap { get => isWrapping; set => isWrapping = value; }
+        public bool Wrap
+        {
+            get => isWrapping;
+            set => isWrapping = value;
+        }
     }
 }

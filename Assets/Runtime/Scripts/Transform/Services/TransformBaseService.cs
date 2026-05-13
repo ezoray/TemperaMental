@@ -1,4 +1,5 @@
 using System;
+using TemperaMental.Applications.Config;
 using TemperaMental.Core;
 using UnityEngine;
 
@@ -9,82 +10,136 @@ namespace TemperaMental.Transforms
         protected TransformDirections allowedDirections;
         protected TransformLatchableDirections latchableDirections;
         protected TransformDirections currentDirections;
+
         protected bool isLatched;
+
         protected TransformEmitters activeEmitters;
 
-        public event Action<TransformDirections, bool> OnDirectionLatchStateChanged;
-        public event Action<ulong[]> OnEmittersTransformed;
+        protected ulong[] transformedGroups;
 
-        protected abstract ulong[] DoSingleTransform(ulong[] groups, TransformDirections direction);
+        public event Action<TransformDirections, bool>
+            OnDirectionLatchStateChanged;
 
+        public event Action<ulong[]>
+            OnEmittersTransformed;
+
+        protected abstract ulong[] DoSingleTransform(
+            ulong[] groups,
+            TransformDirections direction);
 
         protected virtual void Awake()
         {
-            activeEmitters = TransformEmitters.All;    
+            activeEmitters = TransformEmitters.All;
+
+            transformedGroups =
+                new ulong[ConfigRegistry.Grid.EmitterCount];
         }
 
         public virtual ulong[] DoTransform(ulong[] groups)
         {
-            ulong[] transformedGroups = groups;
+            ulong[] result = groups;
 
             for (int i = 0; i < 4; i++)
             {
-                TransformDirections direction = (TransformDirections)(1 << i);
+                TransformDirections direction =
+                    (TransformDirections)(1 << i);
 
-                if (currentDirections.HasFlag(direction))
+                if ((currentDirections & direction) != 0)
                 {
-                    transformedGroups = DoSingleTransform(transformedGroups, direction);
+                    result = DoSingleTransform(result, direction);
                 }
             }
 
-            return transformedGroups;
+            return result;
         }
 
         public TransformDetail GetTransformDetail()
         {
-            return new TransformDetail(activeEmitters, isLatched, allowedDirections, latchableDirections, currentDirections);
+            return new TransformDetail(
+                activeEmitters,
+                isLatched,
+                allowedDirections,
+                latchableDirections,
+                currentDirections);
         }
 
-        public void HandleDirectionChange(ulong[] emitterGroup, int directionValue)
+        public void HandleDirectionChange(
+            ulong[] emitterGroup,
+            int directionValue)
         {
-            TransformDirections direction = (TransformDirections)(1 << directionValue);
-            if (!allowedDirections.HasFlag(direction)) return;
+            TransformDirections direction =
+                (TransformDirections)(1 << directionValue);
 
-            if (!isLatched || !latchableDirections.HasFlag((TransformLatchableDirections)(1 << directionValue)))
+            if ((allowedDirections & direction) == 0)
+                return;
+
+            TransformLatchableDirections latchableDirection =
+                (TransformLatchableDirections)(1 << directionValue);
+
+            bool canLatch =
+                (latchableDirections & latchableDirection) != 0;
+
+            // Non-latched or non-latchable direction:
+            // perform immediate transform
+            if (!isLatched || !canLatch)
             {
-                ulong[] transformedGroups = DoSingleTransform(emitterGroup, direction);
-                OnEmittersTransformed?.Invoke(transformedGroups);
+                ulong[] result =
+                    DoSingleTransform(emitterGroup, direction);
+
+                OnEmittersTransformed?.Invoke(result);
+
                 return;
             }
 
-            if (currentDirections.HasFlag(direction))
+            // Toggle off existing latched direction
+            if ((currentDirections & direction) != 0)
             {
                 currentDirections &= ~direction;
-                OnDirectionLatchStateChanged?.Invoke(direction, false);
+
+                OnDirectionLatchStateChanged?.Invoke(
+                    direction,
+                    false);
+
                 return;
             }
 
-            TransformDirections opposing = (TransformDirections)(1 << (directionValue ^ 1));
-            currentDirections &= ~opposing;
-            OnDirectionLatchStateChanged?.Invoke(opposing, false);
+            // Remove opposing direction
+            TransformDirections opposing =
+                (TransformDirections)(1 << (directionValue ^ 1));
+
+            if ((currentDirections & opposing) != 0)
+            {
+                currentDirections &= ~opposing;
+
+                OnDirectionLatchStateChanged?.Invoke(
+                    opposing,
+                    false);
+            }
+
+            // Enable new direction
             currentDirections |= direction;
-            OnDirectionLatchStateChanged?.Invoke(direction, true);
+
+            OnDirectionLatchStateChanged?.Invoke(
+                direction,
+                true);
         }
 
         public bool ToggleEmitter(int emitterId)
         {
-            TransformEmitters emitter = (TransformEmitters)(1 << emitterId);
+            TransformEmitters emitter =
+                (TransformEmitters)(1 << emitterId);
 
             activeEmitters ^= emitter;
 
-            return activeEmitters.HasFlag(emitter);
+            return (activeEmitters & emitter) != 0;
         }
 
         public bool ToggleLatch()
         {
             isLatched = !isLatched;
 
-            if (!isLatched) currentDirections = TransformDirections.None;
+            if (!isLatched)
+                currentDirections = TransformDirections.None;
 
             return isLatched;
         }
@@ -92,11 +147,22 @@ namespace TemperaMental.Transforms
         public void ClearLatch()
         {
             isLatched = false;
-            currentDirections = 0;
+            currentDirections = TransformDirections.None;
         }
 
-        public bool IsLatched { get => isLatched; set => isLatched = value; }
-        public TransformDirections CurrentDirections => currentDirections;
-        public TransformDirections AllowedDirections { get => allowedDirections; set => allowedDirections = value; }
+        public bool IsLatched
+        {
+            get => isLatched;
+            set => isLatched = value;
+        }
+
+        public TransformDirections CurrentDirections =>
+            currentDirections;
+
+        public TransformDirections AllowedDirections
+        {
+            get => allowedDirections;
+            set => allowedDirections = value;
+        }
     }
 }
