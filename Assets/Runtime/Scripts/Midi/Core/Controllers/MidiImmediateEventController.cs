@@ -8,26 +8,24 @@ namespace TemperaMental.Midi.Core
     {
         [SerializeField] FrameManager frameManager;
         [SerializeField] MidiTempoManager midiTempoManager;
-        [SerializeField] MidiImmediateService immediateService;
+        [SerializeField] MidiImmediateManager immediateManager;
 
-        public void ActionOnPlaybackStateChanged(PlaybackState playbackState) => immediateService.SetPlaybackState(playbackState);
+        public void ActionOnPlaybackStateChanged(PlaybackState playbackState) => immediateManager.SetPlaybackState(playbackState);
 
-        public void ActionOnRemoveEmitter(Vector2Int position, int emitterCount) => immediateService.RemoveEmitter(position);
+        public void ActionOnRemoveEmitter(Vector2Int position, int emitterCount) => immediateManager.RemoveEmitter(position);
 
-        public void ActionOnAddEmitter(EmitterDetail emitterDetail) => immediateService.AddEmitter(emitterDetail);
+        public void ActionOnAddEmitter(EmitterDetail emitterDetail) => immediateManager.AddEmitter(emitterDetail);
 
-        public void ActionOnEmitterTypeChanged(int emitterId) => immediateService.SetEmitterType(emitterId);
+        public void ActionOnEmitterTypeChanged(int emitterId) => immediateManager.SetEmitterType(emitterId);
 
-        public void ActionOnFrameChanged(FrameDetail frameDetail) => immediateService.SendFrame(frameDetail.EmitterGroups);
-
-        public void ActionOnBpmValueChanged(float bpm) => midiTempoManager.SetBpm(Mathf.RoundToInt(bpm));
+        public void ActionOnFrameChanged(FrameDetail frameDetail) => immediateManager.SendFrame(frameDetail.EmitterGroups);
 
         public void ActionOnPlaybackReadyStateChanged(bool isReady)
         {
             if (isReady)
             {
                 ulong[] emitterGroups = frameManager.GetCurrentFrameEmitters();
-                immediateService.SendFrame(emitterGroups);
+                immediateManager.SendFrame(emitterGroups);
             }
         }
     }

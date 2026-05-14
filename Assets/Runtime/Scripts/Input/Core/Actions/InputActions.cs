@@ -1002,6 +1002,15 @@ namespace TemperaMental.Input
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Record"",
+                    ""type"": ""Button"",
+                    ""id"": ""4964e1de-8f56-43be-a619-6a4b5465754c"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -1079,6 +1088,17 @@ namespace TemperaMental.Input
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Wrap"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""aeec66fa-f254-4820-aca7-cb6824880084"",
+                    ""path"": ""<Keyboard>/m"",
+                    ""interactions"": ""NoModifier"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Record"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1237,6 +1257,7 @@ namespace TemperaMental.Input
             m_Transform_Shift = m_Transform.FindAction("Shift", throwIfNotFound: true);
             m_Transform_Latch = m_Transform.FindAction("Latch", throwIfNotFound: true);
             m_Transform_Wrap = m_Transform.FindAction("Wrap", throwIfNotFound: true);
+            m_Transform_Record = m_Transform.FindAction("Record", throwIfNotFound: true);
             // Direction
             m_Direction = asset.FindActionMap("Direction", throwIfNotFound: true);
             m_Direction_Up = m_Direction.FindAction("Up", throwIfNotFound: true);
@@ -2554,6 +2575,7 @@ namespace TemperaMental.Input
         private readonly InputAction m_Transform_Shift;
         private readonly InputAction m_Transform_Latch;
         private readonly InputAction m_Transform_Wrap;
+        private readonly InputAction m_Transform_Record;
         /// <summary>
         /// Provides access to input actions defined in input action map "Transform".
         /// </summary>
@@ -2593,6 +2615,10 @@ namespace TemperaMental.Input
             /// Provides access to the underlying input action "Transform/Wrap".
             /// </summary>
             public InputAction @Wrap => m_Wrapper.m_Transform_Wrap;
+            /// <summary>
+            /// Provides access to the underlying input action "Transform/Record".
+            /// </summary>
+            public InputAction @Record => m_Wrapper.m_Transform_Record;
             /// <summary>
             /// Provides access to the underlying input action map instance.
             /// </summary>
@@ -2640,6 +2666,9 @@ namespace TemperaMental.Input
                 @Wrap.started += instance.OnWrap;
                 @Wrap.performed += instance.OnWrap;
                 @Wrap.canceled += instance.OnWrap;
+                @Record.started += instance.OnRecord;
+                @Record.performed += instance.OnRecord;
+                @Record.canceled += instance.OnRecord;
             }
 
             /// <summary>
@@ -2672,6 +2701,9 @@ namespace TemperaMental.Input
                 @Wrap.started -= instance.OnWrap;
                 @Wrap.performed -= instance.OnWrap;
                 @Wrap.canceled -= instance.OnWrap;
+                @Record.started -= instance.OnRecord;
+                @Record.performed -= instance.OnRecord;
+                @Record.canceled -= instance.OnRecord;
             }
 
             /// <summary>
@@ -3201,6 +3233,13 @@ namespace TemperaMental.Input
             /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
             /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
             void OnWrap(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "Record" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnRecord(InputAction.CallbackContext context);
         }
         /// <summary>
         /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Direction" which allows adding and removing callbacks.

@@ -2950,12 +2950,13 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1125144673}
+  - {fileID: 1688906300}
   - {fileID: 1219916200}
   - {fileID: 1899363812}
   - {fileID: 1131015720}
   - {fileID: 688550773}
   - {fileID: 1587327798}
-  - {fileID: 371604530}
+  - {fileID: 1949886330}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &368916157
@@ -3141,12 +3142,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 371604529}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 342393026}
+  m_Father: {fileID: 1949886330}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &371604531
 MonoBehaviour:
@@ -7831,7 +7832,7 @@ GameObject:
   - component: {fileID: 1131015720}
   - component: {fileID: 1131015721}
   m_Layer: 0
-  m_Name: MidiImmediateService
+  m_Name: MidiImmediateManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8744,7 +8745,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1219916200}
   - component: {fileID: 1219916202}
-  - component: {fileID: 1219916201}
   m_Layer: 0
   m_Name: MidiTempoManager
   m_TagString: Untagged
@@ -8767,18 +8767,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 342393026}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1219916201
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1219916199}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5e25d3a3f2a9b461a87f97ec43aefd5e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TemperaMental.Midi.Transforms.TransformService
 --- !u!114 &1219916202
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12231,7 +12219,7 @@ GameObject:
   - component: {fileID: 1587327798}
   - component: {fileID: 1587327799}
   m_Layer: 0
-  m_Name: FileEventController
+  m_Name: MidiFileEventController
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -12265,9 +12253,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TemperaMental.Midi.IO.FileEventController
   midiTempoManager: {fileID: 1219916202}
-  midiTransformService: {fileID: 688550772}
-  midiFileService: {fileID: 371604531}
   frameManager: {fileID: 1457006301}
+  fileManager: {fileID: 1949886331}
 --- !u!114 &1593440926 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
@@ -12719,6 +12706,51 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1683433340}
   m_CullTransparentMesh: 1
+--- !u!1 &1688906298
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1688906300}
+  - component: {fileID: 1688906299}
+  m_Layer: 0
+  m_Name: MidiTempoEventController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1688906299
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1688906298}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 669af8fc8a9a2405fb4b1a7125a3cc78, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TemperaMental.Midi.Core.MidiTempoEventController
+  tempoManager: {fileID: 1219916202}
+--- !u!4 &1688906300
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1688906298}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 342393026}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1697593383
 GameObject:
   m_ObjectHideFlags: 0
@@ -14020,7 +14052,7 @@ PrefabInstance:
     - target: {fileID: -8221449181886604918, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: actionReference
       value: 
-      objectReference: {fileID: 4232709976363821783, guid: 868e564be3c22417f8244fc888ba1e30, type: 3}
+      objectReference: {fileID: 6279889932928978950, guid: 868e564be3c22417f8244fc888ba1e30, type: 3}
     - target: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
       value: 1
@@ -14987,7 +15019,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Tempera.Mental.Midi.Core.MidiEventController
   frameManager: {fileID: 1457006301}
   midiTempoManager: {fileID: 1219916202}
-  immediateService: {fileID: 1131015721}
+  immediateManager: {fileID: 1131015721}
 --- !u!4 &1899363812
 Transform:
   m_ObjectHideFlags: 0
@@ -15179,6 +15211,100 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1659232568}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1949886329
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1949886330}
+  - component: {fileID: 1949886331}
+  m_Layer: 0
+  m_Name: MidiFileManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1949886330
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1949886329}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 371604530}
+  m_Father: {fileID: 342393026}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1949886331
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1949886329}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f608b35460e8545af8245459ae29e8e6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TemperaMental.Midi.IO.MidiFileManager
+  fileService: {fileID: 371604531}
+  transformService: {fileID: 688550772}
+  onBpmLoaded:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1688906299}
+        m_TargetAssemblyTypeName: TemperaMental.Midi.Core.MidiTempoEventController,
+          Assembly-CSharp
+        m_MethodName: ActionOnBpmLoaded
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  onFramesLoaded:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1362657596}
+        m_TargetAssemblyTypeName: TemperaMental.Frames.FrameEventController, Assembly-CSharp
+        m_MethodName: ActionOnFramesLoaded
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 507064014}
+        m_TargetAssemblyTypeName: TemperaMental.Transforms.TransformEventController,
+          Assembly-CSharp
+        m_MethodName: ActionOnFramesLoaded
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  onFramesSaved:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1001 &1950119886
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -16148,8 +16274,9 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1899363811}
-        m_TargetAssemblyTypeName: Tempera.Mental.Midi.Core.MidiEventController, Assembly-CSharp
+      - m_Target: {fileID: 1688906299}
+        m_TargetAssemblyTypeName: TemperaMental.Midi.Core.MidiTempoEventController,
+          Assembly-CSharp
         m_MethodName: ActionOnBpmValueChanged
         m_Mode: 0
         m_Arguments:
@@ -16783,15 +16910,15 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 1553216988}
+  - {fileID: 1752810629}
+  - {fileID: 1001891066}
   - {fileID: 1659232568}
   - {fileID: 158003354}
   - {fileID: 1814786751}
   - {fileID: 1665524020}
   - {fileID: 342393026}
-  - {fileID: 1001891066}
   - {fileID: 1998837423}
   - {fileID: 2069221093}
   - {fileID: 1799877661}
   - {fileID: 1442173392}
   - {fileID: 1164451988}
-  - {fileID: 1752810629}

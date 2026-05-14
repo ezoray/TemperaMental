@@ -914,6 +914,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "Record",
+                    "type": "Button",
+                    "id": "4964e1de-8f56-43be-a619-6a4b5465754c",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -991,6 +1000,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Wrap",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "aeec66fa-f254-4820-aca7-cb6824880084",
+                    "path": "<Keyboard>/m",
+                    "interactions": "NoModifier",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Record",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using TemperaMental.Core;
 using TemperaMental.Grid;
 using UnityEngine;
@@ -25,6 +26,18 @@ namespace TemperaMental.Frames
         public void OnClickChangeEmitter(int emitterId) => frameManager.SetEmitterType(emitterId);
 
         public void OnClickNewFrame() => frameManager.InsertFrame();
+
+        public void ActionOnFramesLoaded(List<Frame> frames, bool isAppend)
+        {
+            if (isAppend)
+            {
+                frameManager.AppendFrames(frames);
+            }
+            else
+            {
+                frameManager.SetFrames(frames);
+            }
+        }
 
         public void ActionOnEmittersTransformed(ulong[] emitterGroups) => frameManager.ReceiveEmitterGroups(emitterGroups);
 

@@ -70,7 +70,7 @@ namespace TemperaMental.Transforms
             targetOffset += change;
             targetOffset = Mathf.Clamp(targetOffset, 1, maxEmitters);
 
-            LogMan.LogTemp("Random: + " + targetOffset);
+            LogMan.LogTemp("Random emitters +" + targetOffset);
         }
 
         public ulong[] DoRandomTransform(ulong[] groups, int targetCount)

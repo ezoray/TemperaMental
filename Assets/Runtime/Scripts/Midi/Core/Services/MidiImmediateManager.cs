@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace TemperaMental.Midi.Core
 {
-    public class MidiImmediateService : MonoBehaviour
+    public class MidiImmediateManager : MonoBehaviour
     {
         [SerializeField] PlaybackManager playbackManager;
 

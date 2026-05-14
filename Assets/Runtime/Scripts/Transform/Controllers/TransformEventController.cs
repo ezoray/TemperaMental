@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using TemperaMental.Core;
 using TemperaMental.Frames;
 using UnityEngine;
@@ -19,6 +20,11 @@ namespace TemperaMental.Transforms
         public void OnClickToggleLatch() => transformManager.ToggleTransformLatch();
 
         public void OnClickToggleWrapping() => transformManager.ToggleWrapping();
+
+        public void ActionOnFramesLoaded(List<Frame> frames, bool isAppend)
+        {
+            transformManager.StopTransforms();
+        }
 
         // slider
         public void ActionOnRandomValueChanged(float randomValue)

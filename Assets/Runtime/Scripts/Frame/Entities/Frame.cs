@@ -37,8 +37,7 @@ namespace TemperaMental.Frames
         {
             this.width = width;
             this.height = height;
-
-            this.emitterGroups = emitterGroups;
+            this.emitterGroups = (ulong[])emitterGroups.Clone();
         }
 
         public void SetEmitterGroups(ulong[] groups)

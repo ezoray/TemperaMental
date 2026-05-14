@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using TemperaMental.Applications.Config;
 using TemperaMental.Core;
 using TemperaMental.Frames;
 using UnityEngine;
@@ -79,7 +78,9 @@ namespace TemperaMental.Transforms
                         }
 
                         if (!GroupsEqual(original, transformed))
+                        {
                             onEmittersTransformed?.Invoke(transformed);
+                        }
                     }
 
                     nextEventTime = Time.time + repeatRate;
@@ -152,13 +153,18 @@ namespace TemperaMental.Transforms
 
             if (playbackState == PlaybackState.Playing)
             {
-                foreach (var transformService in transformServices)
-                {
-                    transformService.IsLatched = false;
-                }
-
-                onLatchStateChanged?.Invoke(false);
+                StopTransforms();
             }
+        }
+
+        public void StopTransforms()
+        {
+            foreach (var transformService in transformServices)
+            {
+                transformService.IsLatched = false;
+            }
+
+            onLatchStateChanged?.Invoke(false);
         }
 
         private void ActionOnEmittersTransformed(ulong[] transformedGroups)
