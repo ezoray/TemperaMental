@@ -7,7 +7,6 @@ using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Multimedia;
 using TemperaMental.Applications.Config;
 using TemperaMental.Core;
-using TemperaMental.Logs;
 using TemperaMental.Utils;
 using UnityEngine;
 using UnityEngine.Events;
@@ -28,6 +27,12 @@ namespace TemperaMental.Midi.Playbacks
 
         long intervalTicks;
         long frameDurationTicks;
+
+        // Absolute Stopwatch deadline for the current frame's hold period.
+        // Set in PlayFrame on the main thread before signalling the background thread,
+        // so the hold ends at a fixed point in time regardless of thread wakeup latency.
+        long frameDeadlineTicks;
+
         public bool IsFramePlaybackActive => isFramePlaybackActive;
 
         ulong[] previousGroups;
@@ -41,6 +46,11 @@ namespace TemperaMental.Midi.Playbacks
         ManualResetEventSlim workReady;
         ManualResetEventSlim cancelSignal;
         ManualResetEventSlim durationChangedSignal;
+
+        // Pre-allocated to avoid per-iteration heap allocation in the duration hold loop.
+        // Rebuilt in OnEnable after signals are recreated.
+        WaitHandle[] waitHandles;
+
         readonly object pendingLock = new object();
 
         volatile bool isFramePlaybackActive;
@@ -76,6 +86,10 @@ namespace TemperaMental.Midi.Playbacks
             workReady = new ManualResetEventSlim(false);
             cancelSignal = new ManualResetEventSlim(false);
             durationChangedSignal = new ManualResetEventSlim(false);
+
+            // Rebuild after signal recreation — WaitHandle references must stay current.
+            waitHandles = new WaitHandle[] { cancelSignal.WaitHandle, durationChangedSignal.WaitHandle };
+
             playbackThread = new Thread(ThreadLoop);
             playbackThread.Priority = System.Threading.ThreadPriority.Highest;
             playbackThread.IsBackground = true;
@@ -103,6 +117,11 @@ namespace TemperaMental.Midi.Playbacks
             Interlocked.Exchange(ref frameDurationTicks, duration);
             this.fireCallback = fireCallback;
 
+            // Anchor the deadline to now, before signalling the thread.
+            // This absorbs thread wakeup latency into the hold period rather than
+            // letting it accumulate as drift across frames.
+            Interlocked.Exchange(ref frameDeadlineTicks, Stopwatch.GetTimestamp() + duration);
+
             Array.Copy(emitterGroups, frameSnapshot, emitterCount);
 
             BuildFrameEvents(frameSnapshot);
@@ -121,9 +140,14 @@ namespace TemperaMental.Midi.Playbacks
             return true;
         }
 
-        public void NotifyDurationChanged(long duration)
+        public void NotifyDurationChanged(long newDurationTicks)
         {
-            Interlocked.Exchange(ref frameDurationTicks, duration);
+            // Shift the existing deadline by the delta so an in-flight BPM change
+            // extends or contracts the current frame's remaining hold proportionally,
+            // rather than snapping to an unanchored absolute value.
+            long oldDurationTicks = Interlocked.Exchange(ref frameDurationTicks, newDurationTicks);
+            long delta = newDurationTicks - oldDurationTicks;
+            Interlocked.Add(ref frameDeadlineTicks, delta);
             durationChangedSignal.Set();
         }
 
@@ -197,8 +221,6 @@ namespace TemperaMental.Midi.Playbacks
 
         private void SendEvents(List<ControlChangeEvent> events)
         {
-            Stopwatch frameStopwatch = Stopwatch.StartNew();
-
             for (int i = 0; i < events.Count; i++)
             {
                 if (!isRunning || cancelSignal.IsSet) break;
@@ -212,19 +234,34 @@ namespace TemperaMental.Midi.Playbacks
 
             if (frameDurationTicks > 0)
             {
-                long frameStartTicks = Stopwatch.GetTimestamp() - frameStopwatch.ElapsedTicks;
+                // Hold until the pre-anchored deadline rather than computing from now,
+                // so thread wakeup jitter doesn't accumulate into frame timing drift.
+                //
+                // Hybrid sleep/spin: WaitAny handles the bulk of the wait efficiently,
+                // then we spin the final 2ms to avoid OS scheduler wakeup latency
+                // (~1ms on macOS) causing the callback to fire late each frame.
+                long spinThresholdTicks = Stopwatch.Frequency * 2 / 1000;
 
                 while (true)
                 {
-                    long now = Stopwatch.GetTimestamp();
-                    long remainingMs = (frameStartTicks + frameDurationTicks - now) * 1000 / Stopwatch.Frequency;
+                    if (cancelSignal.IsSet || !isRunning) break;
 
-                    if (remainingMs <= 0) break;
+                    long remaining = Interlocked.Read(ref frameDeadlineTicks) - Stopwatch.GetTimestamp();
 
-                    int result = WaitHandle.WaitAny(new[] { cancelSignal.WaitHandle, durationChangedSignal.WaitHandle }, (int)remainingMs);
-                    durationChangedSignal.Reset();
+                    if (remaining <= 0) break;
 
-                    if (result == 0 || !isRunning) break; // cancelled
+                    if (remaining > spinThresholdTicks)
+                    {
+                        long sleepMs = (remaining - spinThresholdTicks) * 1000 / Stopwatch.Frequency;
+                        int result = WaitHandle.WaitAny(waitHandles, (int)sleepMs);
+                        durationChangedSignal.Reset();
+
+                        if (result == 0 || !isRunning) break; // cancelled
+                        // result == 1: durationChangedSignal — deadline already updated by
+                        // NotifyDurationChanged, loop recalculates remaining against new deadline.
+                        // result == WaitHandle.WaitTimeout: fell through naturally, continue to spin.
+                    }
+                    // else: within spin window — tight loop until deadline
                 }
             }
 
