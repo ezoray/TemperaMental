@@ -123,8 +123,6 @@ namespace TemperaMental.Midi.Playbacks
 
         public void NotifyDurationChanged(long duration)
         {
-            LogMan.Log("NotifyDurationChanged");
-
             Interlocked.Exchange(ref frameDurationTicks, duration);
             durationChangedSignal.Set();
         }
