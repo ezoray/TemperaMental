@@ -7,6 +7,7 @@ using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Multimedia;
 using TemperaMental.Applications.Config;
 using TemperaMental.Core;
+using TemperaMental.Logs;
 using TemperaMental.Utils;
 using UnityEngine;
 using UnityEngine.Events;
@@ -39,7 +40,9 @@ namespace TemperaMental.Midi.Playbacks
         Thread playbackThread;
         ManualResetEventSlim workReady;
         ManualResetEventSlim cancelSignal;
+        ManualResetEventSlim durationChangedSignal;
         readonly object pendingLock = new object();
+
         volatile bool isFramePlaybackActive;
         volatile bool fireCallback;
         volatile bool isRunning;
@@ -72,6 +75,7 @@ namespace TemperaMental.Midi.Playbacks
             isRunning = true;
             workReady = new ManualResetEventSlim(false);
             cancelSignal = new ManualResetEventSlim(false);
+            durationChangedSignal = new ManualResetEventSlim(false);
             playbackThread = new Thread(ThreadLoop);
             playbackThread.Priority = System.Threading.ThreadPriority.Highest;
             playbackThread.IsBackground = true;
@@ -92,11 +96,11 @@ namespace TemperaMental.Midi.Playbacks
                 previousGroups[i] = 0;
         }
 
-        public bool PlayFrame(ulong[] emitterGroups, long frameDurationTicks = 0, bool fireCallback = false)
+        public bool PlayFrame(ulong[] emitterGroups, long duration = 0, bool fireCallback = false)
         {
             if (isFramePlaybackActive) return true;
 
-            this.frameDurationTicks = frameDurationTicks;
+            Interlocked.Exchange(ref frameDurationTicks, duration);
             this.fireCallback = fireCallback;
 
             Array.Copy(emitterGroups, frameSnapshot, emitterCount);
@@ -115,6 +119,14 @@ namespace TemperaMental.Midi.Playbacks
             workReady.Set();
 
             return true;
+        }
+
+        public void NotifyDurationChanged(long duration)
+        {
+            LogMan.Log("NotifyDurationChanged");
+
+            Interlocked.Exchange(ref frameDurationTicks, duration);
+            durationChangedSignal.Set();
         }
 
         public void CancelFrame()
@@ -202,12 +214,19 @@ namespace TemperaMental.Midi.Playbacks
 
             if (frameDurationTicks > 0)
             {
-                long endTicks = Stopwatch.GetTimestamp() - frameStopwatch.ElapsedTicks + frameDurationTicks;
-                long remainingMs = (endTicks - Stopwatch.GetTimestamp()) * 1000 / Stopwatch.Frequency;
+                long frameStartTicks = Stopwatch.GetTimestamp() - frameStopwatch.ElapsedTicks;
 
-                if (remainingMs > 0)
+                while (true)
                 {
-                    cancelSignal.Wait((int)remainingMs);
+                    long now = Stopwatch.GetTimestamp();
+                    long remainingMs = (frameStartTicks + frameDurationTicks - now) * 1000 / Stopwatch.Frequency;
+
+                    if (remainingMs <= 0) break;
+
+                    int result = WaitHandle.WaitAny(new[] { cancelSignal.WaitHandle, durationChangedSignal.WaitHandle }, (int)remainingMs);
+                    durationChangedSignal.Reset();
+
+                    if (result == 0 || !isRunning) break; // cancelled
                 }
             }
 

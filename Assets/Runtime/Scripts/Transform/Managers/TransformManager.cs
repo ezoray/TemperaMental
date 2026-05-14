@@ -119,7 +119,7 @@ namespace TemperaMental.Transforms
         {
             bpm = newBpm;
             repeatRate = 60f / bpm;
-            nextEventTime = Time.time + repeatRate;
+            nextEventTime = Mathf.Min(nextEventTime, Time.time + repeatRate);
         }
 
         public void RandomiseEmitters(ulong[] emitterGroup, int targetCount)

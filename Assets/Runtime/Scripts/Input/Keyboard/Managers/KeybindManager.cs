@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 namespace TemperaMental.Input
@@ -37,6 +38,7 @@ namespace TemperaMental.Input
         Action<InputAction> onRebindComplete;
         Action<InputAction, string> onRebindConflict;
         Action onRebindCancelled;
+        EventSystem rebindEventSystem;
 
         private void Awake()
         {
@@ -60,6 +62,10 @@ namespace TemperaMental.Input
                 onConflict?.Invoke(action, null);
                 return;
             }
+
+            // store eventsystem as otherwise it's null when we try to re-enable
+            rebindEventSystem = EventSystem.current;
+            rebindEventSystem.enabled = false;
 
             isComposite = action.bindings[BindingRootIndex].isComposite;
 
@@ -191,6 +197,8 @@ namespace TemperaMental.Input
 
         private void ClearCallbacks()
         {
+            rebindEventSystem.enabled = true;
+
             onRebindComplete = null;
             onRebindConflict = null;
             onRebindCancelled = null;

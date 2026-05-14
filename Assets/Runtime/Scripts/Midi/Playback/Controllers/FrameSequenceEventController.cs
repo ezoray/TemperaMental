@@ -5,32 +5,32 @@ namespace TemperaMental.Midi.Playbacks
 {
     public class FrameSequenceEventController : MonoBehaviour
     {
-        [SerializeField] FrameSequenceManager frameSequencer;
+        [SerializeField] FrameSequenceManager sequenceManager;
         [SerializeField] FrameManager frameManager;
 
         public void ActionOnPlaybackReadyStateChanged(bool isReady)
         {
             if (!isReady)
             {
-                frameSequencer.Stop();
+                sequenceManager.Stop();
             }
         }
 
         // frame slider
-        public void ActionOnSelectedFrameChanged(float selectedFrame) => frameSequencer.SeekToFrame(Mathf.RoundToInt(selectedFrame));
+        public void ActionOnSelectedFrameChanged(float selectedFrame) => sequenceManager.SeekToFrame(Mathf.RoundToInt(selectedFrame));
 
-        public void ActionOnBpmChanged(int newBpm) => frameSequencer.SetBpm(newBpm);
+        public void ActionOnBpmChanged(int newBpm) => sequenceManager.SetBpm(newBpm);
 
-        public void OnClickToggleReverse() => frameSequencer.ToggleReverse();
+        public void OnClickToggleReverse() => sequenceManager.ToggleReverse();
 
-        public void OnClickChangeLoopState() => frameSequencer.ToggleLooping();
+        public void OnClickChangeLoopState() => sequenceManager.ToggleLooping();
 
-        public void OnClickStop() => frameSequencer.Stop();
+        public void OnClickStop() => sequenceManager.Stop();
 
         public void OnClickTogglePlayPause()
         {
             int initialFrame = frameManager.GetCurrentFrameNumber();
-            frameSequencer.TogglePlayPause(initialFrame);
+            sequenceManager.TogglePlayPause(initialFrame);
         }
     }
 }

@@ -14275,7 +14275,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 86f57ed6195164b5ebd55e7ebe2aa933, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TemperaMental.Midi.Playbacks.FrameSequencerEventController
-  frameSequencer: {fileID: 723133473}
+  sequenceManager: {fileID: 723133473}
   frameManager: {fileID: 1457006301}
 --- !u!4 &1855239584
 Transform:

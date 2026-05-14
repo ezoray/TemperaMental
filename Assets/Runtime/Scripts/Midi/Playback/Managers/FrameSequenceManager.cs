@@ -193,6 +193,7 @@ namespace TemperaMental.Midi.Playbacks
         {
             bpm = newBpm;
             frameDurationTicks = (long)(60.0 / bpm * Stopwatch.Frequency);
+            playbackManager.NotifyDurationChanged(frameDurationTicks);
         }
 
         private void PlayFrame()
