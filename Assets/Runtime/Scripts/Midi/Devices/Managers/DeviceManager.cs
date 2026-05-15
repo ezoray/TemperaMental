@@ -37,7 +37,6 @@ namespace TemperaMental.Midi.Devices
             pollingInterval = ConfigRegistry.Midi.PollingInterval;
         }
 
-
         private void OnEnable()
         {
 #if !UNITY_STANDALONE_WIN

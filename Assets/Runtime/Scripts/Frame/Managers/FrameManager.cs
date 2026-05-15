@@ -181,7 +181,7 @@ namespace TemperaMental.Frames
 
             frames.AddRange(newFrames);
 
-            LogMan.Log($"Appended {newFrames.Count} frames. Total frames: {frames.Count}");
+            LogMan.Log($"{newFrames.Count} frames appended");
 
             SetCurrentFrame(frames.Count - newFrames.Count);
         }

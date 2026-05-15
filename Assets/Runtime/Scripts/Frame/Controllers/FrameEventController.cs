@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using TemperaMental.Core;
 using TemperaMental.Grid;
+using TemperaMental.Logs;
 using UnityEngine;
 
 namespace TemperaMental.Frames

@@ -5292,6 +5292,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TemperaMental.Midi.Core.FrameSequencer
   frameManager: {fileID: 1457006301}
   playbackManager: {fileID: 773543396}
+  immediateManager: {fileID: 1131015721}
   onPlaybackFrameChanged:
     m_PersistentCalls:
       m_Calls:
@@ -5324,19 +5325,6 @@ MonoBehaviour:
         m_CallState: 2
       - m_Target: {fileID: 1244920275}
         m_TargetAssemblyTypeName: TemperaMental.UI.Playbacks.PlaybackUIManager, Assembly-CSharp
-        m_MethodName: ActionOnPlaybackStateChanged
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 1899363811}
-        m_TargetAssemblyTypeName: TemperaMental.Midi.Core.MidiImmediateEventController,
-          Assembly-CSharp
         m_MethodName: ActionOnPlaybackStateChanged
         m_Mode: 0
         m_Arguments:
@@ -5664,6 +5652,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5aaf06063110543d4becbce324afd9ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FrameMidiPlayer
+  isPlaybackActive: 0
   onPlaybackReadyStateChanged:
     m_PersistentCalls:
       m_Calls:
@@ -6521,7 +6510,7 @@ GameObject:
   - component: {fileID: 940783812}
   - component: {fileID: 940783813}
   m_Layer: 0
-  m_Name: EmitterTransformUIManager
+  m_Name: TransformUIManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

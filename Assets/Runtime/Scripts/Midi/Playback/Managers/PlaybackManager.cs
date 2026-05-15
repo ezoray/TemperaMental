@@ -18,6 +18,8 @@ namespace TemperaMental.Midi.Playbacks
     {
         OutputDevice outputDevice;
 
+        const int EventAllocation = 68;
+
         int activateCC;
         int placeCC;
         int removeCC;
@@ -32,8 +34,6 @@ namespace TemperaMental.Midi.Playbacks
         // Set in PlayFrame on the main thread before signalling the background thread,
         // so the hold ends at a fixed point in time regardless of thread wakeup latency.
         long frameDeadlineTicks;
-
-        public bool IsFramePlaybackActive => isFramePlaybackActive;
 
         ulong[] previousGroups;
         ulong[] frameSnapshot;
@@ -53,8 +53,8 @@ namespace TemperaMental.Midi.Playbacks
 
         readonly object pendingLock = new object();
 
-        volatile bool isFramePlaybackActive;
-        volatile bool fireCallback;
+        public volatile bool isPlaybackActive;
+        volatile bool firePlaybackCompleteCallback;
         volatile bool isRunning;
 
         public event Action OnFramePlaybackCompleted;
@@ -73,9 +73,9 @@ namespace TemperaMental.Midi.Playbacks
 
             previousGroups = new ulong[emitterCount];
             frameSnapshot = new ulong[emitterCount];
-            frameEvents = new List<ControlChangeEvent>(68);
+            frameEvents = new List<ControlChangeEvent>(EventAllocation);
 
-            ccPool = new ControlChangeEvent[68];
+            ccPool = new ControlChangeEvent[EventAllocation];
             for (int i = 0; i < ccPool.Length; i++)
                 ccPool[i] = new ControlChangeEvent((SevenBitNumber)0, (SevenBitNumber)0);
         }
@@ -96,26 +96,12 @@ namespace TemperaMental.Midi.Playbacks
             playbackThread.Start();
         }
 
-        private void SendClearAllEmitters()
-        {
-            ccPoolIndex = 0;
-
-            for (byte i = 0; i < emitterCount; i++)
-            {
-                outputDevice?.SendEvent(PooledCC(activateCC, i));
-                outputDevice?.SendEvent(PooledCC(removeCC, clearEmittersValue));
-            }
-
-            for (int i = 0; i < emitterCount; i++)
-                previousGroups[i] = 0;
-        }
-
         public bool PlayFrame(ulong[] emitterGroups, long duration = 0, bool fireCallback = false)
         {
-            if (isFramePlaybackActive) return true;
+            if (isPlaybackActive) return false;
 
             Interlocked.Exchange(ref frameDurationTicks, duration);
-            this.fireCallback = fireCallback;
+            firePlaybackCompleteCallback = fireCallback;
 
             // Anchor the deadline to now, before signalling the thread.
             // This absorbs thread wakeup latency into the hold period rather than
@@ -133,7 +119,7 @@ namespace TemperaMental.Midi.Playbacks
                 pendingEvents = frameEvents;
             }
 
-            isFramePlaybackActive = true;
+            isPlaybackActive = true;
             cancelSignal.Reset();
             workReady.Set();
 
@@ -200,6 +186,20 @@ namespace TemperaMental.Midi.Playbacks
             outputDevice?.SendEvent(new ControlChangeEvent((SevenBitNumber)activateCC, (SevenBitNumber)emitterId));
         }
 
+        private void SendClearAllEmitters()
+        {
+            ccPoolIndex = 0;
+
+            for (byte i = 0; i < emitterCount; i++)
+            {
+                outputDevice?.SendEvent(PooledCC(activateCC, i));
+                outputDevice?.SendEvent(PooledCC(removeCC, clearEmittersValue));
+            }
+
+            for (int i = 0; i < emitterCount; i++)
+                previousGroups[i] = 0;
+        }
+
         private void ThreadLoop()
         {
             while (isRunning)
@@ -223,12 +223,14 @@ namespace TemperaMental.Midi.Playbacks
         {
             for (int i = 0; i < events.Count; i++)
             {
-                if (!isRunning || cancelSignal.IsSet) break;
+                if (!isRunning) break;
 
                 long waitUntil = Stopwatch.GetTimestamp() + intervalTicks;
-                while (Stopwatch.GetTimestamp() < waitUntil)
-                    if (!isRunning || cancelSignal.IsSet) break;
 
+                while (Stopwatch.GetTimestamp() < waitUntil)
+                {
+                    if (!isRunning) break;
+                }
                 outputDevice?.SendEvent(events[i]);
             }
 
@@ -244,7 +246,12 @@ namespace TemperaMental.Midi.Playbacks
 
                 while (true)
                 {
-                    if (cancelSignal.IsSet || !isRunning) break;
+                    if (cancelSignal.IsSet)
+                    {
+                        cancelSignal.Reset();
+                        break;
+                    }
+                    if (!isRunning) break;
 
                     long remaining = Interlocked.Read(ref frameDeadlineTicks) - Stopwatch.GetTimestamp();
 
@@ -267,9 +274,9 @@ namespace TemperaMental.Midi.Playbacks
 
             if (!isRunning) return;
 
-            isFramePlaybackActive = false;
+            isPlaybackActive = false;
 
-            if (fireCallback) OnFramePlaybackCompleted?.Invoke();
+            if (firePlaybackCompleteCallback) OnFramePlaybackCompleted?.Invoke();
         }
 
         private void BuildFrameEvents(ulong[] emitterGroups)

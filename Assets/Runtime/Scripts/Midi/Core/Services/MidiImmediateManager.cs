@@ -1,4 +1,5 @@
 using TemperaMental.Core;
+using TemperaMental.Logs;
 using TemperaMental.Midi.Playbacks;
 using UnityEngine;
 
@@ -8,14 +9,15 @@ namespace TemperaMental.Midi.Core
     {
         [SerializeField] PlaybackManager playbackManager;
 
-        PlaybackState playbackState;
+        volatile PlaybackState playbackState;
         ulong[] pendingGroups;
         bool hasPending;
 
+        private bool SequencerRunning => playbackState == PlaybackState.Playing;
 
         private void Update()
         {
-            if (hasPending && !playbackManager.IsFramePlaybackActive)
+            if (hasPending && !playbackManager.isPlaybackActive && !SequencerRunning)
             {
                 hasPending = false;
                 playbackManager.PlayFrame(pendingGroups);
@@ -42,14 +44,21 @@ namespace TemperaMental.Midi.Core
         public void SetPlaybackState(PlaybackState state)
         {
             playbackState = state;
+            if (SequencerRunning)
+            {
+                hasPending = false;
+                pendingGroups = null;
+            }
         }
 
         public void SendFrame(ulong[] emitterGroups)
         {
-            if (playbackState == PlaybackState.Playing) return;
+            if (SequencerRunning) return;
 
             if (!playbackManager.PlayFrame(emitterGroups))
             {
+                LogMan.LogWarning($"SendFrame: already sending frame: {playbackState} {playbackManager.isPlaybackActive}");
+
                 pendingGroups = emitterGroups;
                 hasPending = true;
             }

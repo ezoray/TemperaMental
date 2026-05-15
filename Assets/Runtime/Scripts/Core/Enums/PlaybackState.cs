@@ -4,10 +4,7 @@ namespace TemperaMental.Core
     {
         Reset,
         Playing,
-        Seeking,
-        Pausing,
         Paused,
-        Stopping,
         Stopped
     }
 }

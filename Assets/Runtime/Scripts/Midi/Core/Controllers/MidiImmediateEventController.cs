@@ -10,8 +10,6 @@ namespace TemperaMental.Midi.Core
         [SerializeField] MidiTempoManager midiTempoManager;
         [SerializeField] MidiImmediateManager immediateManager;
 
-        public void ActionOnPlaybackStateChanged(PlaybackState playbackState) => immediateManager.SetPlaybackState(playbackState);
-
         public void ActionOnRemoveEmitter(Vector2Int position, int emitterCount) => immediateManager.RemoveEmitter(position);
 
         public void ActionOnAddEmitter(EmitterDetail emitterDetail) => immediateManager.AddEmitter(emitterDetail);

@@ -3,6 +3,7 @@ using System.Diagnostics;
 using TemperaMental.Core;
 using TemperaMental.Frames;
 using TemperaMental.Logs;
+using TemperaMental.Midi.Core;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -12,6 +13,7 @@ namespace TemperaMental.Midi.Playbacks
     {
         [SerializeField] FrameManager frameManager;
         [SerializeField] PlaybackManager playbackManager;
+        [SerializeField] MidiImmediateManager immediateManager;
 
         IReadOnlyList<Frame> frames;
         volatile bool isNewPlayFrame;
@@ -25,7 +27,8 @@ namespace TemperaMental.Midi.Playbacks
         int bpm;
         long frameDurationTicks;
 
-        PlaybackState playbackState;
+        volatile PlaybackState playbackState;
+        volatile TransientState transientState;
         volatile bool isPlaybackStateChanged;
 
         readonly object playbackStateLock = new object();
@@ -40,7 +43,6 @@ namespace TemperaMental.Midi.Playbacks
         {
             playbackState = PlaybackState.Reset;
         }
-
 
         private void OnEnable()
         {
@@ -77,18 +79,6 @@ namespace TemperaMental.Midi.Playbacks
             }
         }
 
-        public void Play(int initialFrame)
-        {
-            int fromFrame = (playbackState == PlaybackState.Playing) ? anchorFrame : initialFrame;
-
-            anchorFrame = fromFrame;
-            LogMan.Log($"Play: fromFrame {fromFrame} anchor {anchorFrame} count: {frames.Count}");
-
-            SetPlaybackState(PlaybackState.Playing);
-            SetPlayFrame(fromFrame);
-            PlayFrame();
-        }
-
         public void TogglePlayPause(int initialFrame)
         {
             lock (playbackStateLock)
@@ -105,6 +95,7 @@ namespace TemperaMental.Midi.Playbacks
 
                     case PlaybackState.Reset:
                     case PlaybackState.Stopped:
+                        if (playbackManager.isPlaybackActive) return;
                         SetPlaybackState(PlaybackState.Playing);
                         SetPlayFrame(initialFrame);
                         PlayFrame();
@@ -124,7 +115,7 @@ namespace TemperaMental.Midi.Playbacks
                 switch (playbackState)
                 {
                     case PlaybackState.Playing:
-                        SetPlaybackState(PlaybackState.Stopping);
+                        transientState = TransientState.Stopping;
                         playbackManager.CancelFrame();
                         break;
 
@@ -163,17 +154,15 @@ namespace TemperaMental.Midi.Playbacks
                 {
                     case PlaybackState.Playing:
                         pendingSeekFrame = clampedFrame;
-                        SetPlaybackState(PlaybackState.Seeking);
+                        transientState = TransientState.Seeking;
                         playbackManager.CancelFrame();
                         break;
 
-                    case PlaybackState.Pausing:
                     case PlaybackState.Paused:
-                    case PlaybackState.Stopping:
                     case PlaybackState.Stopped:
                     case PlaybackState.Reset:
                         anchorFrame = clampedFrame;
-                        SetPlayFrame(clampedFrame);
+                        playFrame = clampedFrame;
                         break;
 
                     default:
@@ -212,7 +201,11 @@ namespace TemperaMental.Midi.Playbacks
 
             if (!isSent)
             {
-                LogMan.LogWarning($"PlayFrame dropped — frame {playFrame} could not be sent, device busy");
+                // failure for the sequencer to send due to already sending a frame shouldn't happen unless
+                // there's a collision with an immediate frame which 'may' be possible
+                // we need an exit plan otherwise the app gets stuck in limbo state waiting for a playback callback that never arrives
+                transientState = TransientState.Stopping;
+                ActionOnFramePlaybackCompleted();
             }
         }
 
@@ -228,7 +221,7 @@ namespace TemperaMental.Midi.Playbacks
             {
                 if (playbackState != PlaybackState.Playing) return;
 
-                SetPlaybackState(PlaybackState.Pausing);
+                transientState = TransientState.Pausing;
                 playbackManager.CancelFrame();
             }
         }
@@ -236,6 +229,7 @@ namespace TemperaMental.Midi.Playbacks
         private void ResumePlayback()
         {
             if (playbackState != PlaybackState.Paused) return;
+            if (playbackManager.isPlaybackActive) return;
 
             SetPlaybackState(PlaybackState.Playing);
             PlayFrame();
@@ -244,35 +238,44 @@ namespace TemperaMental.Midi.Playbacks
         private void SetPlaybackState(PlaybackState state)
         {
             playbackState = state;
-            isPlaybackStateChanged = true;
+            immediateManager.SetPlaybackState(state);
+
+            switch (state)
+            {
+                case PlaybackState.Playing:
+                case PlaybackState.Paused:
+                case PlaybackState.Stopped:
+                case PlaybackState.Reset:
+                    isPlaybackStateChanged = true;
+                    break;
+            }
         }
 
         private void ActionOnFramePlaybackCompleted()
         {
             lock (playbackStateLock)
             {
-                switch (playbackState)
+                switch (transientState)
                 {
-                    case PlaybackState.Playing:
-                        AdvancePlayback();
-                        break;
-
-                    case PlaybackState.Pausing:
+                    case TransientState.Pausing:
+                        transientState = TransientState.None;
                         SetPlaybackState(PlaybackState.Paused);
                         break;
 
-                    case PlaybackState.Stopping:
+                    case TransientState.Stopping:
+                        transientState = TransientState.None;
                         SetPlaybackState(PlaybackState.Stopped);
                         break;
 
-                    case PlaybackState.Seeking:
+                    case TransientState.Seeking:
+                        transientState = TransientState.None;
                         SetPlayFrame(pendingSeekFrame);
                         SetPlaybackState(PlaybackState.Playing);
                         PlayFrame();
                         break;
 
-                    default:
-                        // no-op
+                    case TransientState.None:
+                        AdvancePlayback();
                         break;
                 }
             }
