@@ -272,7 +272,7 @@ namespace TemperaMental.Input
                 {
                     ""name"": """",
                     ""id"": ""bd3f2045-4b4c-435c-9ecc-b20570061b24"",
-                    ""path"": ""<Keyboard>/j"",
+                    ""path"": ""<Keyboard>/b"",
                     ""interactions"": ""NoModifier"",
                     ""processors"": """",
                     ""groups"": """",
@@ -283,7 +283,7 @@ namespace TemperaMental.Input
                 {
                     ""name"": """",
                     ""id"": ""ce167575-0948-4115-9995-aa073176818f"",
-                    ""path"": ""<Keyboard>/l"",
+                    ""path"": ""<Keyboard>/n"",
                     ""interactions"": ""NoModifier"",
                     ""processors"": """",
                     ""groups"": """",
@@ -294,7 +294,7 @@ namespace TemperaMental.Input
                 {
                     ""name"": """",
                     ""id"": ""aed89a94-f63b-4c2d-909c-038b8ff439d5"",
-                    ""path"": ""<Keyboard>/leftBracket"",
+                    ""path"": ""<Keyboard>/rightBracket"",
                     ""interactions"": ""NoModifier"",
                     ""processors"": """",
                     ""groups"": """",
@@ -305,7 +305,7 @@ namespace TemperaMental.Input
                 {
                     ""name"": """",
                     ""id"": ""4493ea5b-8969-44c0-9d6a-a2fd85dcc4b6"",
-                    ""path"": ""<Keyboard>/rightBracket"",
+                    ""path"": ""<Keyboard>/leftBracket"",
                     ""interactions"": ""NoModifier"",
                     ""processors"": """",
                     ""groups"": """",
@@ -316,7 +316,7 @@ namespace TemperaMental.Input
                 {
                     ""name"": """",
                     ""id"": ""6f14da67-afe5-4ea9-9e5e-997e85f45cd5"",
-                    ""path"": ""<Keyboard>/k"",
+                    ""path"": ""<Keyboard>/m"",
                     ""interactions"": ""NoModifier"",
                     ""processors"": """",
                     ""groups"": """",
@@ -502,7 +502,7 @@ namespace TemperaMental.Input
                 {
                     ""name"": """",
                     ""id"": ""f47f54fb-919d-42df-b416-cb8fc4f5a82d"",
-                    ""path"": ""<Keyboard>/q"",
+                    ""path"": ""<Keyboard>/g"",
                     ""interactions"": ""NoModifier"",
                     ""processors"": """",
                     ""groups"": """",
@@ -546,7 +546,7 @@ namespace TemperaMental.Input
                 {
                     ""name"": """",
                     ""id"": ""529c536c-e7db-4577-935b-e4d59566d929"",
-                    ""path"": ""<Keyboard>/w"",
+                    ""path"": ""<Keyboard>/h"",
                     ""interactions"": ""NoModifier"",
                     ""processors"": """",
                     ""groups"": """",
@@ -590,7 +590,7 @@ namespace TemperaMental.Input
                 {
                     ""name"": """",
                     ""id"": ""50eb4ffd-bec7-4b6d-921e-b06098e97aa2"",
-                    ""path"": ""<Keyboard>/e"",
+                    ""path"": ""<Keyboard>/j"",
                     ""interactions"": ""NoModifier"",
                     ""processors"": """",
                     ""groups"": """",
@@ -689,7 +689,7 @@ namespace TemperaMental.Input
                 {
                     ""name"": """",
                     ""id"": ""afa537dc-b87f-4227-940f-531d7e4dd597"",
-                    ""path"": ""<Keyboard>/a"",
+                    ""path"": ""<Keyboard>/z"",
                     ""interactions"": ""NoModifier"",
                     ""processors"": """",
                     ""groups"": """",
@@ -700,7 +700,7 @@ namespace TemperaMental.Input
                 {
                     ""name"": """",
                     ""id"": ""9aab069e-0f86-4f19-83ae-e9c031ad5c95"",
-                    ""path"": ""<Keyboard>/d"",
+                    ""path"": ""<Keyboard>/c"",
                     ""interactions"": ""NoModifier"",
                     ""processors"": """",
                     ""groups"": """",
@@ -711,7 +711,7 @@ namespace TemperaMental.Input
                 {
                     ""name"": """",
                     ""id"": ""8c567153-14f5-4477-9e8b-0cac638b0dfd"",
-                    ""path"": ""<Keyboard>/f"",
+                    ""path"": ""<Keyboard>/v"",
                     ""interactions"": ""NoModifier"",
                     ""processors"": """",
                     ""groups"": """",
@@ -722,39 +722,11 @@ namespace TemperaMental.Input
                 {
                     ""name"": """",
                     ""id"": ""331afc9e-51b3-442b-95bc-42833288c301"",
-                    ""path"": ""<Keyboard>/s"",
+                    ""path"": ""<Keyboard>/x"",
                     ""interactions"": ""NoModifier"",
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Previous"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                }
-            ]
-        },
-        {
-            ""name"": ""System"",
-            ""id"": ""6031bd1b-b99f-4bf4-a068-be5be97fdf23"",
-            ""actions"": [
-                {
-                    ""name"": ""Quit"",
-                    ""type"": ""Button"",
-                    ""id"": ""4361c7f2-572f-4502-a939-c52edf119111"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                }
-            ],
-            ""bindings"": [
-                {
-                    ""name"": """",
-                    ""id"": ""f05dd0b3-90ea-4476-a215-e9fc2dff0532"",
-                    ""path"": """",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Quit"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -816,7 +788,7 @@ namespace TemperaMental.Input
                 {
                     ""name"": ""modifier"",
                     ""id"": ""6d8dee7e-83f9-4f64-b3e5-4a294b1631a8"",
-                    ""path"": ""<Keyboard>/ctrl"",
+                    ""path"": ""<Keyboard>/shift"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -849,7 +821,7 @@ namespace TemperaMental.Input
                 {
                     ""name"": ""modifier"",
                     ""id"": ""a744d6c0-dc92-48a4-9db0-dd5181d6fbd0"",
-                    ""path"": ""<Keyboard>/ctrl"",
+                    ""path"": ""<Keyboard>/shift"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -882,7 +854,7 @@ namespace TemperaMental.Input
                 {
                     ""name"": ""modifier"",
                     ""id"": ""e00751ec-b3aa-4626-92d0-8d317c43fe50"",
-                    ""path"": ""<Keyboard>/ctrl"",
+                    ""path"": ""<Keyboard>/shift"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -915,7 +887,7 @@ namespace TemperaMental.Input
                 {
                     ""name"": ""modifier"",
                     ""id"": ""b8f5f767-4f7a-4ef9-b99d-3af3fe3a75fc"",
-                    ""path"": ""<Keyboard>/ctrl"",
+                    ""path"": ""<Keyboard>/shift"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -940,15 +912,6 @@ namespace TemperaMental.Input
             ""name"": ""Transform"",
             ""id"": ""22b43ec7-56aa-4f29-a8b9-187be462af9e"",
             ""actions"": [
-                {
-                    ""name"": ""Reset"",
-                    ""type"": ""Button"",
-                    ""id"": ""9b47a04a-b998-4f78-a813-9938baf80baa"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
                 {
                     ""name"": ""Random"",
                     ""type"": ""Button"",
@@ -1020,13 +983,22 @@ namespace TemperaMental.Input
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Reset"",
+                    ""type"": ""Button"",
+                    ""id"": ""9b47a04a-b998-4f78-a813-9938baf80baa"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
                 {
                     ""name"": """",
                     ""id"": ""e2b891ed-fff2-40d5-beac-0bef7b6de50e"",
-                    ""path"": ""<Keyboard>/backquote"",
+                    ""path"": ""<Keyboard>/q"",
                     ""interactions"": ""NoModifier"",
                     ""processors"": """",
                     ""groups"": """",
@@ -1037,7 +1009,7 @@ namespace TemperaMental.Input
                 {
                     ""name"": """",
                     ""id"": ""18a47548-564c-4a90-ad85-3405b38fa51d"",
-                    ""path"": ""<Keyboard>/comma"",
+                    ""path"": ""<Keyboard>/p"",
                     ""interactions"": ""NoModifier"",
                     ""processors"": """",
                     ""groups"": """",
@@ -1048,7 +1020,7 @@ namespace TemperaMental.Input
                 {
                     ""name"": """",
                     ""id"": ""4eee25b5-c097-4d47-9b5a-97f01e1e5c83"",
-                    ""path"": ""<Keyboard>/z"",
+                    ""path"": ""<Keyboard>/w"",
                     ""interactions"": ""NoModifier"",
                     ""processors"": """",
                     ""groups"": """",
@@ -1059,7 +1031,7 @@ namespace TemperaMental.Input
                 {
                     ""name"": """",
                     ""id"": ""2dba437b-dd8f-4c72-af30-6874abcfd5e4"",
-                    ""path"": ""<Keyboard>/x"",
+                    ""path"": ""<Keyboard>/e"",
                     ""interactions"": ""NoModifier"",
                     ""processors"": """",
                     ""groups"": """",
@@ -1070,7 +1042,7 @@ namespace TemperaMental.Input
                 {
                     ""name"": """",
                     ""id"": ""5df494e7-36f1-42b3-a121-3c5be3754765"",
-                    ""path"": ""<Keyboard>/c"",
+                    ""path"": ""<Keyboard>/r"",
                     ""interactions"": ""NoModifier"",
                     ""processors"": """",
                     ""groups"": """",
@@ -1081,7 +1053,7 @@ namespace TemperaMental.Input
                 {
                     ""name"": """",
                     ""id"": ""caff2019-c072-43e2-9bb1-4798e44ff04e"",
-                    ""path"": ""<Keyboard>/v"",
+                    ""path"": ""<Keyboard>/t"",
                     ""interactions"": ""NoModifier"",
                     ""processors"": """",
                     ""groups"": """",
@@ -1092,7 +1064,7 @@ namespace TemperaMental.Input
                 {
                     ""name"": """",
                     ""id"": ""3c1e5cee-bb56-4daa-98ec-ac69d5dfb149"",
-                    ""path"": ""<Keyboard>/n"",
+                    ""path"": ""<Keyboard>/y"",
                     ""interactions"": ""NoModifier"",
                     ""processors"": """",
                     ""groups"": """",
@@ -1103,7 +1075,7 @@ namespace TemperaMental.Input
                 {
                     ""name"": """",
                     ""id"": ""6775694c-d176-4b90-ba3c-7d59b799fc38"",
-                    ""path"": ""<Keyboard>/b"",
+                    ""path"": ""<Keyboard>/u"",
                     ""interactions"": ""NoModifier"",
                     ""processors"": """",
                     ""groups"": """",
@@ -1114,7 +1086,7 @@ namespace TemperaMental.Input
                 {
                     ""name"": """",
                     ""id"": ""aeec66fa-f254-4820-aca7-cb6824880084"",
-                    ""path"": ""<Keyboard>/m"",
+                    ""path"": ""<Keyboard>/i"",
                     ""interactions"": ""NoModifier"",
                     ""processors"": """",
                     ""groups"": """",
@@ -1169,7 +1141,7 @@ namespace TemperaMental.Input
                 {
                     ""name"": """",
                     ""id"": ""a7b33fc2-12a6-42ae-a258-846583aca494"",
-                    ""path"": ""<Keyboard>/upArrow"",
+                    ""path"": ""<Keyboard>/s"",
                     ""interactions"": ""NoModifier"",
                     ""processors"": """",
                     ""groups"": """",
@@ -1180,7 +1152,7 @@ namespace TemperaMental.Input
                 {
                     ""name"": """",
                     ""id"": ""544f6beb-3660-40b7-9f0f-3671a4cf5c5f"",
-                    ""path"": ""<Keyboard>/downArrow"",
+                    ""path"": ""<Keyboard>/d"",
                     ""interactions"": ""NoModifier"",
                     ""processors"": """",
                     ""groups"": """",
@@ -1191,7 +1163,7 @@ namespace TemperaMental.Input
                 {
                     ""name"": """",
                     ""id"": ""5030a97b-34bd-4e25-8f22-ff9b64fa8f35"",
-                    ""path"": ""<Keyboard>/leftArrow"",
+                    ""path"": ""<Keyboard>/a"",
                     ""interactions"": ""NoModifier"",
                     ""processors"": """",
                     ""groups"": """",
@@ -1202,7 +1174,7 @@ namespace TemperaMental.Input
                 {
                     ""name"": """",
                     ""id"": ""bbc25992-758e-40e7-beac-4651bd8469e2"",
-                    ""path"": ""<Keyboard>/rightArrow"",
+                    ""path"": ""<Keyboard>/f"",
                     ""interactions"": ""NoModifier"",
                     ""processors"": """",
                     ""groups"": """",
@@ -1259,9 +1231,6 @@ namespace TemperaMental.Input
             m_Select_Previous = m_Select.FindAction("Previous", throwIfNotFound: true);
             m_Select_Next = m_Select.FindAction("Next", throwIfNotFound: true);
             m_Select_End = m_Select.FindAction("End", throwIfNotFound: true);
-            // System
-            m_System = asset.FindActionMap("System", throwIfNotFound: true);
-            m_System_Quit = m_System.FindAction("Quit", throwIfNotFound: true);
             // TransformEmitter
             m_TransformEmitter = asset.FindActionMap("TransformEmitter", throwIfNotFound: true);
             m_TransformEmitter_Blue = m_TransformEmitter.FindAction("Blue", throwIfNotFound: true);
@@ -1270,7 +1239,6 @@ namespace TemperaMental.Input
             m_TransformEmitter_Green = m_TransformEmitter.FindAction("Green", throwIfNotFound: true);
             // Transform
             m_Transform = asset.FindActionMap("Transform", throwIfNotFound: true);
-            m_Transform_Reset = m_Transform.FindAction("Reset", throwIfNotFound: true);
             m_Transform_Random = m_Transform.FindAction("Random", throwIfNotFound: true);
             m_Transform_Flip = m_Transform.FindAction("Flip", throwIfNotFound: true);
             m_Transform_Rotate = m_Transform.FindAction("Rotate", throwIfNotFound: true);
@@ -1279,6 +1247,7 @@ namespace TemperaMental.Input
             m_Transform_Latch = m_Transform.FindAction("Latch", throwIfNotFound: true);
             m_Transform_Wrap = m_Transform.FindAction("Wrap", throwIfNotFound: true);
             m_Transform_Record = m_Transform.FindAction("Record", throwIfNotFound: true);
+            m_Transform_Reset = m_Transform.FindAction("Reset", throwIfNotFound: true);
             // Direction
             m_Direction = asset.FindActionMap("Direction", throwIfNotFound: true);
             m_Direction_Up = m_Direction.FindAction("Up", throwIfNotFound: true);
@@ -1297,7 +1266,6 @@ namespace TemperaMental.Input
             UnityEngine.Debug.Assert(!m_Mode.enabled, "This will cause a leak and performance issues, TemperaMentalInputActions.Mode.Disable() has not been called.");
             UnityEngine.Debug.Assert(!m_Create.enabled, "This will cause a leak and performance issues, TemperaMentalInputActions.Create.Disable() has not been called.");
             UnityEngine.Debug.Assert(!m_Select.enabled, "This will cause a leak and performance issues, TemperaMentalInputActions.Select.Disable() has not been called.");
-            UnityEngine.Debug.Assert(!m_System.enabled, "This will cause a leak and performance issues, TemperaMentalInputActions.System.Disable() has not been called.");
             UnityEngine.Debug.Assert(!m_TransformEmitter.enabled, "This will cause a leak and performance issues, TemperaMentalInputActions.TransformEmitter.Disable() has not been called.");
             UnityEngine.Debug.Assert(!m_Transform.enabled, "This will cause a leak and performance issues, TemperaMentalInputActions.Transform.Disable() has not been called.");
             UnityEngine.Debug.Assert(!m_Direction.enabled, "This will cause a leak and performance issues, TemperaMentalInputActions.Direction.Disable() has not been called.");
@@ -2361,102 +2329,6 @@ namespace TemperaMental.Input
         /// </summary>
         public SelectActions @Select => new SelectActions(this);
 
-        // System
-        private readonly InputActionMap m_System;
-        private List<ISystemActions> m_SystemActionsCallbackInterfaces = new List<ISystemActions>();
-        private readonly InputAction m_System_Quit;
-        /// <summary>
-        /// Provides access to input actions defined in input action map "System".
-        /// </summary>
-        public struct SystemActions
-        {
-            private @TemperaMentalInputActions m_Wrapper;
-
-            /// <summary>
-            /// Construct a new instance of the input action map wrapper class.
-            /// </summary>
-            public SystemActions(@TemperaMentalInputActions wrapper) { m_Wrapper = wrapper; }
-            /// <summary>
-            /// Provides access to the underlying input action "System/Quit".
-            /// </summary>
-            public InputAction @Quit => m_Wrapper.m_System_Quit;
-            /// <summary>
-            /// Provides access to the underlying input action map instance.
-            /// </summary>
-            public InputActionMap Get() { return m_Wrapper.m_System; }
-            /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Enable()" />
-            public void Enable() { Get().Enable(); }
-            /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Disable()" />
-            public void Disable() { Get().Disable(); }
-            /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.enabled" />
-            public bool enabled => Get().enabled;
-            /// <summary>
-            /// Implicitly converts an <see ref="SystemActions" /> to an <see ref="InputActionMap" /> instance.
-            /// </summary>
-            public static implicit operator InputActionMap(SystemActions set) { return set.Get(); }
-            /// <summary>
-            /// Adds <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
-            /// </summary>
-            /// <param name="instance">Callback instance.</param>
-            /// <remarks>
-            /// If <paramref name="instance" /> is <c>null</c> or <paramref name="instance"/> have already been added this method does nothing.
-            /// </remarks>
-            /// <seealso cref="SystemActions" />
-            public void AddCallbacks(ISystemActions instance)
-            {
-                if (instance == null || m_Wrapper.m_SystemActionsCallbackInterfaces.Contains(instance)) return;
-                m_Wrapper.m_SystemActionsCallbackInterfaces.Add(instance);
-                @Quit.started += instance.OnQuit;
-                @Quit.performed += instance.OnQuit;
-                @Quit.canceled += instance.OnQuit;
-            }
-
-            /// <summary>
-            /// Removes <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
-            /// </summary>
-            /// <remarks>
-            /// Calling this method when <paramref name="instance" /> have not previously been registered has no side-effects.
-            /// </remarks>
-            /// <seealso cref="SystemActions" />
-            private void UnregisterCallbacks(ISystemActions instance)
-            {
-                @Quit.started -= instance.OnQuit;
-                @Quit.performed -= instance.OnQuit;
-                @Quit.canceled -= instance.OnQuit;
-            }
-
-            /// <summary>
-            /// Unregisters <param cref="instance" /> and unregisters all input action callbacks via <see cref="SystemActions.UnregisterCallbacks(ISystemActions)" />.
-            /// </summary>
-            /// <seealso cref="SystemActions.UnregisterCallbacks(ISystemActions)" />
-            public void RemoveCallbacks(ISystemActions instance)
-            {
-                if (m_Wrapper.m_SystemActionsCallbackInterfaces.Remove(instance))
-                    UnregisterCallbacks(instance);
-            }
-
-            /// <summary>
-            /// Replaces all existing callback instances and previously registered input action callbacks associated with them with callbacks provided via <param cref="instance" />.
-            /// </summary>
-            /// <remarks>
-            /// If <paramref name="instance" /> is <c>null</c>, calling this method will only unregister all existing callbacks but not register any new callbacks.
-            /// </remarks>
-            /// <seealso cref="SystemActions.AddCallbacks(ISystemActions)" />
-            /// <seealso cref="SystemActions.RemoveCallbacks(ISystemActions)" />
-            /// <seealso cref="SystemActions.UnregisterCallbacks(ISystemActions)" />
-            public void SetCallbacks(ISystemActions instance)
-            {
-                foreach (var item in m_Wrapper.m_SystemActionsCallbackInterfaces)
-                    UnregisterCallbacks(item);
-                m_Wrapper.m_SystemActionsCallbackInterfaces.Clear();
-                AddCallbacks(instance);
-            }
-        }
-        /// <summary>
-        /// Provides a new <see cref="SystemActions" /> instance referencing this action map.
-        /// </summary>
-        public SystemActions @System => new SystemActions(this);
-
         // TransformEmitter
         private readonly InputActionMap m_TransformEmitter;
         private List<ITransformEmitterActions> m_TransformEmitterActionsCallbackInterfaces = new List<ITransformEmitterActions>();
@@ -2589,7 +2461,6 @@ namespace TemperaMental.Input
         // Transform
         private readonly InputActionMap m_Transform;
         private List<ITransformActions> m_TransformActionsCallbackInterfaces = new List<ITransformActions>();
-        private readonly InputAction m_Transform_Reset;
         private readonly InputAction m_Transform_Random;
         private readonly InputAction m_Transform_Flip;
         private readonly InputAction m_Transform_Rotate;
@@ -2598,6 +2469,7 @@ namespace TemperaMental.Input
         private readonly InputAction m_Transform_Latch;
         private readonly InputAction m_Transform_Wrap;
         private readonly InputAction m_Transform_Record;
+        private readonly InputAction m_Transform_Reset;
         /// <summary>
         /// Provides access to input actions defined in input action map "Transform".
         /// </summary>
@@ -2609,10 +2481,6 @@ namespace TemperaMental.Input
             /// Construct a new instance of the input action map wrapper class.
             /// </summary>
             public TransformActions(@TemperaMentalInputActions wrapper) { m_Wrapper = wrapper; }
-            /// <summary>
-            /// Provides access to the underlying input action "Transform/Reset".
-            /// </summary>
-            public InputAction @Reset => m_Wrapper.m_Transform_Reset;
             /// <summary>
             /// Provides access to the underlying input action "Transform/Random".
             /// </summary>
@@ -2646,6 +2514,10 @@ namespace TemperaMental.Input
             /// </summary>
             public InputAction @Record => m_Wrapper.m_Transform_Record;
             /// <summary>
+            /// Provides access to the underlying input action "Transform/Reset".
+            /// </summary>
+            public InputAction @Reset => m_Wrapper.m_Transform_Reset;
+            /// <summary>
             /// Provides access to the underlying input action map instance.
             /// </summary>
             public InputActionMap Get() { return m_Wrapper.m_Transform; }
@@ -2671,9 +2543,6 @@ namespace TemperaMental.Input
             {
                 if (instance == null || m_Wrapper.m_TransformActionsCallbackInterfaces.Contains(instance)) return;
                 m_Wrapper.m_TransformActionsCallbackInterfaces.Add(instance);
-                @Reset.started += instance.OnReset;
-                @Reset.performed += instance.OnReset;
-                @Reset.canceled += instance.OnReset;
                 @Random.started += instance.OnRandom;
                 @Random.performed += instance.OnRandom;
                 @Random.canceled += instance.OnRandom;
@@ -2698,6 +2567,9 @@ namespace TemperaMental.Input
                 @Record.started += instance.OnRecord;
                 @Record.performed += instance.OnRecord;
                 @Record.canceled += instance.OnRecord;
+                @Reset.started += instance.OnReset;
+                @Reset.performed += instance.OnReset;
+                @Reset.canceled += instance.OnReset;
             }
 
             /// <summary>
@@ -2709,9 +2581,6 @@ namespace TemperaMental.Input
             /// <seealso cref="TransformActions" />
             private void UnregisterCallbacks(ITransformActions instance)
             {
-                @Reset.started -= instance.OnReset;
-                @Reset.performed -= instance.OnReset;
-                @Reset.canceled -= instance.OnReset;
                 @Random.started -= instance.OnRandom;
                 @Random.performed -= instance.OnRandom;
                 @Random.canceled -= instance.OnRandom;
@@ -2736,6 +2605,9 @@ namespace TemperaMental.Input
                 @Record.started -= instance.OnRecord;
                 @Record.performed -= instance.OnRecord;
                 @Record.canceled -= instance.OnRecord;
+                @Reset.started -= instance.OnReset;
+                @Reset.performed -= instance.OnReset;
+                @Reset.canceled -= instance.OnReset;
             }
 
             /// <summary>
@@ -3159,21 +3031,6 @@ namespace TemperaMental.Input
             void OnEnd(InputAction.CallbackContext context);
         }
         /// <summary>
-        /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "System" which allows adding and removing callbacks.
-        /// </summary>
-        /// <seealso cref="SystemActions.AddCallbacks(ISystemActions)" />
-        /// <seealso cref="SystemActions.RemoveCallbacks(ISystemActions)" />
-        public interface ISystemActions
-        {
-            /// <summary>
-            /// Method invoked when associated input action "Quit" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
-            /// </summary>
-            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
-            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
-            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-            void OnQuit(InputAction.CallbackContext context);
-        }
-        /// <summary>
         /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "TransformEmitter" which allows adding and removing callbacks.
         /// </summary>
         /// <seealso cref="TransformEmitterActions.AddCallbacks(ITransformEmitterActions)" />
@@ -3216,13 +3073,6 @@ namespace TemperaMental.Input
         /// <seealso cref="TransformActions.RemoveCallbacks(ITransformActions)" />
         public interface ITransformActions
         {
-            /// <summary>
-            /// Method invoked when associated input action "Reset" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
-            /// </summary>
-            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
-            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
-            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-            void OnReset(InputAction.CallbackContext context);
             /// <summary>
             /// Method invoked when associated input action "Random" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
             /// </summary>
@@ -3279,6 +3129,13 @@ namespace TemperaMental.Input
             /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
             /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
             void OnRecord(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "Reset" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnReset(InputAction.CallbackContext context);
         }
         /// <summary>
         /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Direction" which allows adding and removing callbacks.

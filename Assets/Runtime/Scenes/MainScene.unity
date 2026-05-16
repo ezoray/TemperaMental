@@ -5670,11 +5670,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3649716732437688853, guid: cdf7151bfea7c4db287b1a49f3aacd43, type: 3}
       propertyPath: m_fontColor.b
-      value: 0.47843137
+      value: 0.015686275
       objectReference: {fileID: 0}
     - target: {fileID: 3649716732437688853, guid: cdf7151bfea7c4db287b1a49f3aacd43, type: 3}
       propertyPath: m_fontColor.g
-      value: 0.627451
+      value: 0.92156863
       objectReference: {fileID: 0}
     - target: {fileID: 3649716732437688853, guid: cdf7151bfea7c4db287b1a49f3aacd43, type: 3}
       propertyPath: m_fontColor.r
@@ -5682,7 +5682,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3649716732437688853, guid: cdf7151bfea7c4db287b1a49f3aacd43, type: 3}
       propertyPath: m_fontColor32.rgba
-      value: 4286226687
+      value: 4278512639
       objectReference: {fileID: 0}
     - target: {fileID: 7678822410706752483, guid: cdf7151bfea7c4db287b1a49f3aacd43, type: 3}
       propertyPath: m_Pivot.x
@@ -12085,9 +12085,9 @@ Camera:
   m_NormalizedViewPortRect:
     serializedVersion: 2
     x: 0
-    y: 0.059375003
-    width: 1.0416667
-    height: 1.0416667
+    y: 0
+    width: 1
+    height: 1
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 60
