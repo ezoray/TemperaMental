@@ -231,7 +231,16 @@ namespace TemperaMental.Midi.Playbacks
                 {
                     if (!isRunning) break;
                 }
-                outputDevice?.SendEvent(events[i]);
+
+                try
+                {
+                    outputDevice?.SendEvent(events[i]);
+                }
+                catch (ObjectDisposedException)
+                {
+                    outputDevice = null;
+                    break;
+                }
             }
 
             if (frameDurationTicks > 0)

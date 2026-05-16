@@ -20,7 +20,7 @@ namespace TemperaMental.UI.Core
 
         // presets
         All = Device | File | Mode | Frame | Transform | Direction | Record | Playback | Creation | Selection,
-        Playing = Playback | Frame | Selection,
+        Playing = Playback | Device | Frame | Creation | Selection,
         Paused = Playback | Device | Frame | Creation | Selection,
 
         Recording = Device | File | Mode | Frame | Transform | Direction | Record | Creation | Selection,

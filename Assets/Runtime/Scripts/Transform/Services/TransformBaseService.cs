@@ -11,7 +11,7 @@ namespace TemperaMental.Transforms
         protected TransformLatchableDirections latchableDirections;
         protected TransformDirections currentDirections;
 
-        protected bool isLatched;
+        private bool isLatched;
 
         protected TransformEmitters activeEmitters;
 
@@ -63,9 +63,7 @@ namespace TemperaMental.Transforms
                 currentDirections);
         }
 
-        public void HandleDirectionChange(
-            ulong[] emitterGroup,
-            int directionValue)
+        public void HandleDirectionChange(ulong[] emitterGroup, int directionValue)
         {
             TransformDirections direction =
                 (TransformDirections)(1 << directionValue);
@@ -83,8 +81,7 @@ namespace TemperaMental.Transforms
             // perform immediate transform
             if (!isLatched || !canLatch)
             {
-                ulong[] result =
-                    DoSingleTransform(emitterGroup, direction);
+                ulong[] result = DoSingleTransform(emitterGroup, direction);
 
                 OnEmittersTransformed?.Invoke(result);
 
@@ -96,38 +93,30 @@ namespace TemperaMental.Transforms
             {
                 currentDirections &= ~direction;
 
-                OnDirectionLatchStateChanged?.Invoke(
-                    direction,
-                    false);
+                OnDirectionLatchStateChanged?.Invoke(direction, false);
 
                 return;
             }
 
             // Remove opposing direction
-            TransformDirections opposing =
-                (TransformDirections)(1 << (directionValue ^ 1));
+            TransformDirections opposing = (TransformDirections)(1 << (directionValue ^ 1));
 
             if ((currentDirections & opposing) != 0)
             {
                 currentDirections &= ~opposing;
 
-                OnDirectionLatchStateChanged?.Invoke(
-                    opposing,
-                    false);
+                OnDirectionLatchStateChanged?.Invoke(opposing, false);
             }
 
             // Enable new direction
             currentDirections |= direction;
 
-            OnDirectionLatchStateChanged?.Invoke(
-                direction,
-                true);
+            OnDirectionLatchStateChanged?.Invoke(direction, true);
         }
 
         public bool ToggleEmitter(int emitterId)
         {
-            TransformEmitters emitter =
-                (TransformEmitters)(1 << emitterId);
+            TransformEmitters emitter = (TransformEmitters)(1 << emitterId);
 
             activeEmitters ^= emitter;
 
@@ -144,25 +133,19 @@ namespace TemperaMental.Transforms
             return isLatched;
         }
 
+        public virtual void Reset()
+        {
+            ClearLatch();
+            activeEmitters = TransformEmitters.All;
+        }
+
         public void ClearLatch()
         {
             isLatched = false;
             currentDirections = TransformDirections.None;
         }
 
-        public bool IsLatched
-        {
-            get => isLatched;
-            set => isLatched = value;
-        }
-
-        public TransformDirections CurrentDirections =>
-            currentDirections;
-
-        public TransformDirections AllowedDirections
-        {
-            get => allowedDirections;
-            set => allowedDirections = value;
-        }
+        public bool IsLatched { get => isLatched; }
+        public TransformDirections AllowedDirections { get => allowedDirections; }
     }
 }

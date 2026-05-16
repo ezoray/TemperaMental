@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using TemperaMental.Core;
 using TemperaMental.Frames;
+using TemperaMental.Logs;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -9,7 +10,7 @@ namespace TemperaMental.Transforms
     public class TransformManager : MonoBehaviour
     {
         // transforms are called in this order so place shift first to prevent it interfering with other transforms
-        [Header("Order: Shift, Random, Flip, Rotate, Swap, Shift")]
+        [Header("Order: Shift, Random, Flip, Rotate, Swap")]
         [SerializeField] List<TransformBaseService> transformServices;
         [SerializeField] FrameManager frameManager;
 
@@ -31,6 +32,7 @@ namespace TemperaMental.Transforms
         [SerializeField] UnityEvent<bool> onLatchStateChanged;
         [SerializeField] UnityEvent<bool> onWrapStateChanged;
         [SerializeField] UnityEvent<TransformDirections, bool> onDirectionLatchStateChanged;
+        [SerializeField] UnityEvent onTransformsReset;
 
 
         private void Awake()
@@ -153,15 +155,27 @@ namespace TemperaMental.Transforms
 
             if (playbackState == PlaybackState.Playing)
             {
-                StopTransforms();
+                UnlatchTransforms();
             }
         }
 
-        public void StopTransforms()
+        public void ResetTransforms()
         {
             foreach (var transformService in transformServices)
             {
-                transformService.IsLatched = false;
+                transformService.Reset();
+            }
+
+            LogMan.Log("Transforms Reset");
+
+            onTransformsReset?.Invoke();
+        }
+
+        public void UnlatchTransforms()
+        {
+            foreach (var transformService in transformServices)
+            {
+                transformService.ClearLatch();
             }
 
             onLatchStateChanged?.Invoke(false);

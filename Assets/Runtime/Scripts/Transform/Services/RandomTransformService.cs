@@ -12,6 +12,7 @@ namespace TemperaMental.Transforms
         int gridWidth;
         int gridHeight;
         int maxEmitters;
+        int totalBits;
 
         int targetOffset;
 
@@ -19,7 +20,6 @@ namespace TemperaMental.Transforms
         List<int> occupiedPositions;
         List<int> emptyPositions;
 
-        int totalBits;
 
         protected override void Awake()
         {
@@ -33,12 +33,18 @@ namespace TemperaMental.Transforms
 
             targetOffset = 1;
 
-            activeEmitterIds = new List<int>(4);
-            occupiedPositions = new List<int>(64);
-            emptyPositions = new List<int>(64);
+            activeEmitterIds = new List<int>(ConfigRegistry.Grid.EmitterCount);
+            occupiedPositions = new List<int>(ConfigRegistry.Grid.MaxEmitters);
+            emptyPositions = new List<int>(ConfigRegistry.Grid.MaxEmitters);
 
             allowedDirections = TransformDirections.Random;
             latchableDirections = TransformLatchableDirections.Random;
+        }
+
+        public override void Reset()
+        {
+            base.Reset();
+            targetOffset = 1;
         }
 
         protected override ulong[] DoSingleTransform(ulong[] groups, TransformDirections direction)

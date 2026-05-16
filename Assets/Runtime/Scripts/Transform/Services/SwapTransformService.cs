@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using TemperaMental.Applications.Config;
 using TemperaMental.Core;
 
 namespace TemperaMental.Transforms
@@ -12,7 +13,7 @@ namespace TemperaMental.Transforms
         {
             base.Awake();
 
-            activeEmitterIds = new List<int>(4);
+            activeEmitterIds = new List<int>(ConfigRegistry.Grid.EmitterCount);
 
             allowedDirections = TransformDirections.Swap;
             latchableDirections = TransformLatchableDirections.Swap;

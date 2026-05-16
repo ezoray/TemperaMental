@@ -853,6 +853,15 @@
             "id": "22b43ec7-56aa-4f29-a8b9-187be462af9e",
             "actions": [
                 {
+                    "name": "Reset",
+                    "type": "Button",
+                    "id": "9b47a04a-b998-4f78-a813-9938baf80baa",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "Random",
                     "type": "Button",
                     "id": "1c7b4e83-de04-415e-b15f-bc3ed1274072",
@@ -934,6 +943,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Random",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "18a47548-564c-4a90-ad85-3405b38fa51d",
+                    "path": "<Keyboard>/comma",
+                    "interactions": "NoModifier",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Reset",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

@@ -25,7 +25,7 @@ namespace TemperaMental.Midi.Devices
         bool isWatcherSubscribed;
 
         [SerializeField] UnityEvent<string> onInitialDeviceFound;
-        [SerializeField] UnityEvent<List<string>> onDevicesUpdated;
+        [SerializeField] UnityEvent<List<string>, string> onDevicesUpdated;
         [SerializeField] UnityEvent<OutputDevice> onDeviceSelected;
         [SerializeField] UnityEvent onCurrentDeviceRemoved;
 
@@ -108,7 +108,7 @@ namespace TemperaMental.Midi.Devices
 
             connectedDevices = hardware;
 
-            onDevicesUpdated?.Invoke(connectedDevices);
+            onDevicesUpdated?.Invoke(connectedDevices, currentDeviceName);
 
             if (isInitialSync)
             {

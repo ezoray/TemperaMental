@@ -941,6 +941,15 @@ namespace TemperaMental.Input
             ""id"": ""22b43ec7-56aa-4f29-a8b9-187be462af9e"",
             ""actions"": [
                 {
+                    ""name"": ""Reset"",
+                    ""type"": ""Button"",
+                    ""id"": ""9b47a04a-b998-4f78-a813-9938baf80baa"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
                     ""name"": ""Random"",
                     ""type"": ""Button"",
                     ""id"": ""1c7b4e83-de04-415e-b15f-bc3ed1274072"",
@@ -1022,6 +1031,17 @@ namespace TemperaMental.Input
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Random"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""18a47548-564c-4a90-ad85-3405b38fa51d"",
+                    ""path"": ""<Keyboard>/comma"",
+                    ""interactions"": ""NoModifier"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Reset"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -1250,6 +1270,7 @@ namespace TemperaMental.Input
             m_TransformEmitter_Green = m_TransformEmitter.FindAction("Green", throwIfNotFound: true);
             // Transform
             m_Transform = asset.FindActionMap("Transform", throwIfNotFound: true);
+            m_Transform_Reset = m_Transform.FindAction("Reset", throwIfNotFound: true);
             m_Transform_Random = m_Transform.FindAction("Random", throwIfNotFound: true);
             m_Transform_Flip = m_Transform.FindAction("Flip", throwIfNotFound: true);
             m_Transform_Rotate = m_Transform.FindAction("Rotate", throwIfNotFound: true);
@@ -2568,6 +2589,7 @@ namespace TemperaMental.Input
         // Transform
         private readonly InputActionMap m_Transform;
         private List<ITransformActions> m_TransformActionsCallbackInterfaces = new List<ITransformActions>();
+        private readonly InputAction m_Transform_Reset;
         private readonly InputAction m_Transform_Random;
         private readonly InputAction m_Transform_Flip;
         private readonly InputAction m_Transform_Rotate;
@@ -2587,6 +2609,10 @@ namespace TemperaMental.Input
             /// Construct a new instance of the input action map wrapper class.
             /// </summary>
             public TransformActions(@TemperaMentalInputActions wrapper) { m_Wrapper = wrapper; }
+            /// <summary>
+            /// Provides access to the underlying input action "Transform/Reset".
+            /// </summary>
+            public InputAction @Reset => m_Wrapper.m_Transform_Reset;
             /// <summary>
             /// Provides access to the underlying input action "Transform/Random".
             /// </summary>
@@ -2645,6 +2671,9 @@ namespace TemperaMental.Input
             {
                 if (instance == null || m_Wrapper.m_TransformActionsCallbackInterfaces.Contains(instance)) return;
                 m_Wrapper.m_TransformActionsCallbackInterfaces.Add(instance);
+                @Reset.started += instance.OnReset;
+                @Reset.performed += instance.OnReset;
+                @Reset.canceled += instance.OnReset;
                 @Random.started += instance.OnRandom;
                 @Random.performed += instance.OnRandom;
                 @Random.canceled += instance.OnRandom;
@@ -2680,6 +2709,9 @@ namespace TemperaMental.Input
             /// <seealso cref="TransformActions" />
             private void UnregisterCallbacks(ITransformActions instance)
             {
+                @Reset.started -= instance.OnReset;
+                @Reset.performed -= instance.OnReset;
+                @Reset.canceled -= instance.OnReset;
                 @Random.started -= instance.OnRandom;
                 @Random.performed -= instance.OnRandom;
                 @Random.canceled -= instance.OnRandom;
@@ -3184,6 +3216,13 @@ namespace TemperaMental.Input
         /// <seealso cref="TransformActions.RemoveCallbacks(ITransformActions)" />
         public interface ITransformActions
         {
+            /// <summary>
+            /// Method invoked when associated input action "Reset" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnReset(InputAction.CallbackContext context);
             /// <summary>
             /// Method invoked when associated input action "Random" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
             /// </summary>

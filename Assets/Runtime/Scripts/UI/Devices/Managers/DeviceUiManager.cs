@@ -54,10 +54,9 @@ namespace TemperaMental.UI.Devices
             }
         }
 
-        public void ActionOnDevicesUpdated(List<string> newList)
+        public void ActionOnDevicesUpdated(List<string> newList, string currentDevice)
         {
             deviceDropdown.ClearOptions();
-
             if (newList == null || newList.Count == 0)
             {
                 deviceDropdown.AddOptions(new List<string> { noDevicesText });
@@ -68,12 +67,19 @@ namespace TemperaMental.UI.Devices
             }
 
             deviceDropdown.interactable = true;
-
             List<string> options = new List<string> { selectDeviceText };
             options.AddRange(newList);
-
             deviceDropdown.AddOptions(options);
-            deviceDropdown.SetValueWithoutNotify(0);
+
+            int selectedIndex = 0;
+            if (currentDevice != null)
+            {
+                int match = newList.IndexOf(currentDevice);
+                if (match >= 0)
+                    selectedIndex = match + 1; // +1 for selectDeviceText placeholder
+            }
+
+            deviceDropdown.SetValueWithoutNotify(selectedIndex);
             deviceDropdown.RefreshShownValue();
         }
     }

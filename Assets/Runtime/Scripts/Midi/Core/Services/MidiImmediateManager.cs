@@ -57,8 +57,6 @@ namespace TemperaMental.Midi.Core
 
             if (!playbackManager.PlayFrame(emitterGroups))
             {
-                LogMan.LogWarning($"SendFrame: already sending frame: {playbackState} {playbackManager.isPlaybackActive}");
-
                 pendingGroups = emitterGroups;
                 hasPending = true;
             }

@@ -11,6 +11,9 @@ namespace TemperaMental.Transforms
         [SerializeField] TransformManager transformManager;
         [SerializeField] FrameManager frameManager;
 
+
+        public void OnReset() => transformManager.ResetTransforms();
+
         public void OnClickDirection(int directionValue)
         {
             ulong[] emitterGroup = frameManager.GetCurrentFrameEmitters();
@@ -21,10 +24,7 @@ namespace TemperaMental.Transforms
 
         public void OnClickToggleWrapping() => transformManager.ToggleWrapping();
 
-        public void ActionOnFramesLoaded(List<Frame> frames, bool isAppend)
-        {
-            transformManager.StopTransforms();
-        }
+        public void ActionOnFramesLoaded(List<Frame> frames, bool isAppend) => transformManager.UnlatchTransforms();
 
         // slider
         public void ActionOnRandomValueChanged(float randomValue)

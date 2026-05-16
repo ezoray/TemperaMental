@@ -22,6 +22,12 @@ namespace TemperaMental.Transforms
             latchableDirections = TransformLatchableDirections.Shift;
         }
 
+        public override void Reset()
+        {
+            base.Reset();
+            isWrapping = false;
+        }
+
         public bool ToggleWrap()
         {
             isWrapping = !isWrapping;

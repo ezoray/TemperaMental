@@ -82,6 +82,17 @@ namespace TemperaMental.UI.Transforms
             }
         }
 
+        public void ActionOnTransformsReset()
+        {
+            wrapButtonImage.color = defaultOffColor;
+            SetElementsByLatchState(false);
+
+            foreach (var emitter in emitterButtons)
+            {
+                emitter.SetDimmed(false);
+            }
+        }
+
         public void ActionOnDirectionLatchStateChanged(TransformDirections direction, bool isLatched)
         {
             int directionIndex = 0;
@@ -100,6 +111,12 @@ namespace TemperaMental.UI.Transforms
 
         public void ActionOnLatchStateChanged(bool isOn)
         {
+            SetElementsByLatchState(isOn);
+        }
+
+
+        private void SetElementsByLatchState(bool isOn)
+        {
             latchButtonImage.color = isOn ? latchOnColor : defaultOffColor;
 
             foreach (var directionButton in directionButtons)
@@ -112,6 +129,7 @@ namespace TemperaMental.UI.Transforms
                 }
             }
         }
+    
 
         public void ActionWrapStateChanged(bool isOn)
         {
