@@ -804,6 +804,51 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TemperaMental.Midi.Devices.DeviceEventController
   deviceManager: {fileID: 1125144674}
+--- !u!1 &56300610
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 56300611}
+  - component: {fileID: 56300612}
+  m_Layer: 0
+  m_Name: GridEventController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &56300611
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 56300610}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1164451988}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &56300612
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 56300610}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c4be65c74be0e4ac59fc16a2fcce67d1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TemperaMental.Grid.GridEventController
+  gridManager: {fileID: 1166318856}
 --- !u!1 &84394325
 GameObject:
   m_ObjectHideFlags: 0
@@ -8382,8 +8427,9 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 302310980}
+  - {fileID: 56300611}
   - {fileID: 1166318855}
+  - {fileID: 302310980}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1166318854
@@ -11414,8 +11460,8 @@ MonoBehaviour:
   onAddEmitter:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1166318856}
-        m_TargetAssemblyTypeName: Tempera.Mental.Grid.GridManager, Assembly-CSharp
+      - m_Target: {fileID: 56300612}
+        m_TargetAssemblyTypeName: TemperaMental.Grid.GridEventController, Assembly-CSharp
         m_MethodName: ActionOnAddEmitter
         m_Mode: 0
         m_Arguments:
@@ -11466,8 +11512,8 @@ MonoBehaviour:
   onRemoveEmitter:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1166318856}
-        m_TargetAssemblyTypeName: Tempera.Mental.Grid.GridManager, Assembly-CSharp
+      - m_Target: {fileID: 56300612}
+        m_TargetAssemblyTypeName: TemperaMental.Grid.GridEventController, Assembly-CSharp
         m_MethodName: ActionOnRemoveEmitter
         m_Mode: 0
         m_Arguments:
@@ -11518,8 +11564,8 @@ MonoBehaviour:
   onFrameChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1166318856}
-        m_TargetAssemblyTypeName: TemperaMental.Grid.GridManager, Assembly-CSharp
+      - m_Target: {fileID: 56300612}
+        m_TargetAssemblyTypeName: TemperaMental.Grid.GridEventController, Assembly-CSharp
         m_MethodName: ActionOnFrameChanged
         m_Mode: 0
         m_Arguments:
@@ -16160,8 +16206,8 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 413820965}
   - {fileID: 507064013}
+  - {fileID: 413820965}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!224 &2009707538 stripped

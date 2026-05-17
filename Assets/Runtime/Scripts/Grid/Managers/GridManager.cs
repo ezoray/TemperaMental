@@ -28,21 +28,20 @@ namespace TemperaMental.Grid
             return gridBounds.Contains(cellPosition);
         }
 
-        public void ActionOnFrameChanged(FrameDetail frameDetail)
-        {
-            emitterTilemapManager.ClearTiles();
-            emitterTilemapManager.AddTiles(frameDetail.EmitterGroups);
-        }
-
-        public void ActionOnRemoveEmitter(Vector2Int position, int emitterCount)
+        public void RemoveTile(Vector2Int position)
         {
             emitterTilemapManager.RemoveTile(position);
         }
 
-
-        public void ActionOnAddEmitter(EmitterDetail emitterDetail)
+        public void AddTile(EmitterDetail emitterDetail)
         {
             emitterTilemapManager.AddTile(emitterDetail);
+        }
+
+        public void DrawFrame(FrameDetail frameDetail)
+        {
+            emitterTilemapManager.ClearTiles();
+            emitterTilemapManager.AddTiles(frameDetail.EmitterGroups);
         }
     }
 }
