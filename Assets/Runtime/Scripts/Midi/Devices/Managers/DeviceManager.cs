@@ -165,7 +165,7 @@ namespace TemperaMental.Midi.Devices
             onInitialDeviceFound?.Invoke(targetDevice);
         }
 
-        public void ActionOnDeviceSelected(string deviceName)
+        public void SetOutputDevice(string deviceName)
         {
             try
             {
