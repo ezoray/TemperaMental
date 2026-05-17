@@ -68,6 +68,7 @@ namespace TemperaMental.Midi.Playbacks
             if(isPlaybackStateChanged)
             {
                 LogMan.Log($"Playback {playbackState}");
+
                 isPlaybackStateChanged = false;            
                 onPlaybackStateChanged?.Invoke(playbackState);
             }
@@ -291,6 +292,14 @@ namespace TemperaMental.Midi.Playbacks
             {
                 if (isLooped)
                 {
+                    // check anchor frame isn't the same as final frame, prevents looping over single frame
+                    // no emitter data would be sent anyway and static playback could be confusing
+                    if (frames.Count == 1 || (isReversed ? anchorFrame == 1 : anchorFrame == frames.Count))
+                    {
+                        SetPlaybackState(PlaybackState.Reset);
+                        isPlaybackFinished = true;
+                        return;
+                    }
                     SetPlayFrame(anchorFrame);
                 }
                 else
