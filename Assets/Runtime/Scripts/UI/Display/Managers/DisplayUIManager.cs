@@ -38,6 +38,8 @@ namespace TemperaMental.UI.Display
 
         public void ActionOnTempMessage(string message)
         {
+            SetMessageAlpha(1f);
+
             if (tempMessageCoroutine != null) StopCoroutine(tempMessageCoroutine);
             tempMessageCoroutine = StartCoroutine(ShowTempMessage(message));
         }
