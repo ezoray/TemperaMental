@@ -18,7 +18,7 @@ namespace TemperaMental.Midi.Playbacks
         IReadOnlyList<Frame> frames;
         volatile bool isNewPlayFrame;
         volatile bool isPlaybackFinished;
-        volatile int pendingSeekFrame;
+        volatile int seekFrame;
         bool isLooped;
         bool isReversed;
 
@@ -98,6 +98,7 @@ namespace TemperaMental.Midi.Playbacks
                     case PlaybackState.Stopped:
                         if (playbackManager.isPlaybackActive) return;
                         SetPlaybackState(PlaybackState.Playing);
+                        SetAnchorFrame(initialFrame);
                         SetPlayFrame(initialFrame);
                         PlayFrame();
                         break;
@@ -145,16 +146,14 @@ namespace TemperaMental.Midi.Playbacks
             }
         }
 
-        public void SeekToFrame(int seekFrame)
+        public void SeekToFrame(int newSeekFrame)
         {
-            int clampedFrame = Mathf.Clamp(seekFrame, 1, frames.Count);
-
             lock (playbackStateLock)
             {
                 switch (playbackState)
                 {
                     case PlaybackState.Playing:
-                        pendingSeekFrame = clampedFrame;
+                        SetSeekFrame(newSeekFrame);
                         transientState = TransientState.Seeking;
                         playbackManager.CancelFrame();
                         break;
@@ -162,8 +161,8 @@ namespace TemperaMental.Midi.Playbacks
                     case PlaybackState.Paused:
                     case PlaybackState.Stopped:
                     case PlaybackState.Reset:
-                        anchorFrame = clampedFrame;
-                        playFrame = clampedFrame;
+                        SetAnchorFrame(newSeekFrame);
+                        SetPlayFrame(newSeekFrame);
                         break;
 
                     default:
@@ -177,7 +176,7 @@ namespace TemperaMental.Midi.Playbacks
         {
             isReversed = !isReversed;
 
-            anchorFrame = playFrame;
+            SetAnchorFrame(playFrame);
 
             onReverseStateChanged?.Invoke(isReversed);
         }
@@ -210,6 +209,16 @@ namespace TemperaMental.Midi.Playbacks
             }
         }
 
+        private void SetSeekFrame(int frame)
+        {
+            seekFrame = Mathf.Clamp(frame, 1, frames.Count);
+        }
+
+        private void SetAnchorFrame(int frame)
+        {
+            anchorFrame = Mathf.Clamp(frame, 1, frames.Count);
+        }
+
         private void SetPlayFrame(int frame)
         {
             playFrame = Mathf.Clamp(frame, 1, frames.Count);
@@ -238,17 +247,12 @@ namespace TemperaMental.Midi.Playbacks
 
         private void SetPlaybackState(PlaybackState state)
         {
-            playbackState = state;
-            immediateManager.SetPlaybackState(state);
-
-            switch (state)
+            if (playbackState != state)
             {
-                case PlaybackState.Playing:
-                case PlaybackState.Paused:
-                case PlaybackState.Stopped:
-                case PlaybackState.Reset:
-                    isPlaybackStateChanged = true;
-                    break;
+                playbackState = state;
+                immediateManager.SetPlaybackState(state);
+
+                isPlaybackStateChanged = true;
             }
         }
 
@@ -270,7 +274,7 @@ namespace TemperaMental.Midi.Playbacks
 
                     case TransientState.Seeking:
                         transientState = TransientState.None;
-                        SetPlayFrame(pendingSeekFrame);
+                        SetPlayFrame(seekFrame);
                         SetPlaybackState(PlaybackState.Playing);
                         PlayFrame();
                         break;

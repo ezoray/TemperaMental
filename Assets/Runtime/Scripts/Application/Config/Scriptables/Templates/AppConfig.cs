@@ -10,8 +10,8 @@ namespace TemperaMental.Applications.Config
         // app aspect ratio handling
         public float TargetRatio = 3f / 4f;
 
-        public int MinWidth = 540;
-        public int MinHeight = 720;
+        public int MinWidth = 360;
+        public int MinHeight = 480;
 
         // mouse drag settings
         public float DragDelay = 0.1f;
