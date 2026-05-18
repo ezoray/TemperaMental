@@ -18,6 +18,10 @@ namespace TemperaMental.Applications.Core
         float resizeDelay = 0.75f;
         float resizeTimer = 0f;
 
+        // Track exactly which dimensions changed during this resize cycle
+        bool widthChanged = false;
+        bool heightChanged = false;
+
         private void Awake()
         {
             lastWidth = Screen.width;
@@ -37,6 +41,10 @@ namespace TemperaMental.Applications.Core
 
                 if (!isOurCorrection)
                 {
+                    // Track which frame boundaries were dragged by the user
+                    if (Screen.width != lastWidth) widthChanged = true;
+                    if (Screen.height != lastHeight) heightChanged = true;
+
                     lastWidth = Screen.width;
                     lastHeight = Screen.height;
                     resizeTimer = resizeDelay;
@@ -63,25 +71,47 @@ namespace TemperaMental.Applications.Core
 
             float currentRatio = (float)width / height;
 
+            // If it's already close enough, reset tracking flags and exit
             if (Mathf.Abs(currentRatio - targetRatio) < 0.01f)
+            {
+                ResetTrackingFlags();
                 return;
-
-            int heightFromWidth = Mathf.RoundToInt(width / targetRatio);
-            int widthFromHeight = Mathf.RoundToInt(height * targetRatio);
+            }
 
             int newWidth, newHeight;
 
-            if (Mathf.Abs(heightFromWidth - height) < Mathf.Abs(widthFromHeight - width))
+            // Explicit, historical determination of layout shifts
+            if (widthChanged && !heightChanged)
             {
+                // Grabbing side borders: Calculate height based on user's new width
                 newWidth = width;
-                newHeight = heightFromWidth;
+                newHeight = Mathf.RoundToInt(width / targetRatio);
+            }
+            else if (heightChanged && !widthChanged)
+            {
+                // Grabbing top/bottom borders: Calculate width based on user's new height
+                newWidth = Mathf.RoundToInt(height * targetRatio);
+                newHeight = height;
             }
             else
             {
-                newWidth = widthFromHeight;
-                newHeight = height;
+                // Diagonal/corner drag, or fallback: Use closest distance heuristic
+                int heightFromWidth = Mathf.RoundToInt(width / targetRatio);
+                int widthFromHeight = Mathf.RoundToInt(height * targetRatio);
+
+                if (Mathf.Abs(heightFromWidth - height) < Mathf.Abs(widthFromHeight - width))
+                {
+                    newWidth = width;
+                    newHeight = heightFromWidth;
+                }
+                else
+                {
+                    newWidth = widthFromHeight;
+                    newHeight = height;
+                }
             }
 
+            // Enforce layout constraints
             if (newWidth < minWidth)
             {
                 newWidth = minWidth;
@@ -101,6 +131,14 @@ namespace TemperaMental.Applications.Core
 
             lastWidth = newWidth;
             lastHeight = newHeight;
+
+            ResetTrackingFlags();
+        }
+
+        private void ResetTrackingFlags()
+        {
+            widthChanged = false;
+            heightChanged = false;
         }
     }
 }
