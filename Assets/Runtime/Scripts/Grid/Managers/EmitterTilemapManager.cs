@@ -12,7 +12,6 @@ namespace TemperaMental.Grid
         [SerializeField] TileBase tile;
 
         Color[] emitterColors;
-        int emitterCount;
         int gridSize;
 
         private void Awake()
@@ -25,7 +24,6 @@ namespace TemperaMental.Grid
                 ConfigRegistry.Grid.EmitterGreen
             };
 
-            emitterCount = ConfigRegistry.Grid.EmitterCount;
             gridSize = ConfigRegistry.Grid.GridWidth * ConfigRegistry.Grid.GridHeight;
         }
 
@@ -47,12 +45,10 @@ namespace TemperaMental.Grid
         // draw all emitters from ulong groups
         public void AddTiles(ulong[] emitterGroups)
         {
-            for (byte emitterId = 0; emitterId < emitterCount; emitterId++)
+            for (byte emitterId = 0; emitterId < emitterGroups.Length; emitterId++)
             {
                 ulong group = emitterGroups[emitterId];
-
                 if (group == 0) continue;
-
                 for (byte pos = 0; pos < gridSize; pos++)
                 {
                     if ((group & (1UL << pos)) != 0)

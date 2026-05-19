@@ -17,22 +17,17 @@ namespace TemperaMental.Transforms
 
         protected ulong[] transformedGroups;
 
-        public event Action<TransformDirections, bool>
-            OnDirectionLatchStateChanged;
+        public event Action<TransformDirections, bool> OnDirectionLatchStateChanged;
 
-        public event Action<ulong[]>
-            OnEmittersTransformed;
+        public event Action<ulong[]> OnEmittersTransformed;
 
-        protected abstract ulong[] DoSingleTransform(
-            ulong[] groups,
-            TransformDirections direction);
+        protected abstract ulong[] DoSingleTransform(ulong[] groups, TransformDirections direction);
 
         protected virtual void Awake()
         {
             activeEmitters = TransformEmitters.All;
 
-            transformedGroups =
-                new ulong[ConfigRegistry.Grid.EmitterCount];
+            transformedGroups = new ulong[ConfigRegistry.Grid.EmitterCount];
         }
 
         public virtual ulong[] DoTransform(ulong[] groups)
@@ -65,17 +60,14 @@ namespace TemperaMental.Transforms
 
         public void HandleDirectionChange(ulong[] emitterGroup, int directionValue)
         {
-            TransformDirections direction =
-                (TransformDirections)(1 << directionValue);
+            TransformDirections direction = (TransformDirections)(1 << directionValue);
 
             if ((allowedDirections & direction) == 0)
                 return;
 
-            TransformLatchableDirections latchableDirection =
-                (TransformLatchableDirections)(1 << directionValue);
+            TransformLatchableDirections latchableDirection = (TransformLatchableDirections)(1 << directionValue);
 
-            bool canLatch =
-                (latchableDirections & latchableDirection) != 0;
+            bool canLatch = (latchableDirections & latchableDirection) != 0;
 
             // Non-latched or non-latchable direction:
             // perform immediate transform

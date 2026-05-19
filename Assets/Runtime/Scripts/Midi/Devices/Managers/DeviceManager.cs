@@ -187,6 +187,9 @@ namespace TemperaMental.Midi.Devices
             catch (Exception ex)
             {
                 LogMan.LogError($"Failed to open device {deviceName}: {ex.Message}");
+
+                connectedDevices.Remove(deviceName);
+                onDevicesUpdated?.Invoke(connectedDevices, currentDeviceName);
             }
         }
 

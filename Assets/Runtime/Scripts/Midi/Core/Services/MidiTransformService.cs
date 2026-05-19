@@ -182,7 +182,7 @@ namespace TemperaMental.Midi.Transforms
                         frames.Add(currentFrame);
                     }
 
-                    currentFrame = new Frame(gridWidth, gridHeight);
+                    currentFrame = new Frame();
                     currentFrameTick = frameTick;
                     currentEmitterId = 0;
                 }

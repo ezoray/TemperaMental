@@ -12,6 +12,20 @@ namespace TemperaMental.Utils
             gridHeight = ConfigRegistry.Grid.GridHeight;
         }
 
+        public static bool CheckGroupsDifferent(ulong[] aGroup, ulong[] bGroup)
+        {
+            if (aGroup == null || bGroup == null)
+                return false;
+
+            for (int i = 0; i < aGroup.Length; i++)
+            {
+                if (aGroup[i] != bGroup[i])
+                    return true;
+            }
+
+            return false;
+        }
+
         public static int GetEmitterCount(ulong[] emitterGroups)
         {
             int placedEmitterCount = 0;

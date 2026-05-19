@@ -10,9 +10,6 @@ namespace TemperaMental.Frames
 {
     public class FrameManager : MonoBehaviour
     {
-        int gridWidth;
-        int gridHeight;
-
         readonly List<Frame> frames = new List<Frame>();
         Frame currentFrame;
         int currentFrameIndex;
@@ -35,9 +32,6 @@ namespace TemperaMental.Frames
 
         private void Awake()
         {
-            gridWidth = ConfigRegistry.Grid.GridWidth;
-            gridHeight = ConfigRegistry.Grid.GridHeight;
-
             currentEmitterId = ConfigRegistry.Grid.DefaultEmitterId;
 
             onText = ConfigRegistry.UI.OnText;
@@ -133,12 +127,13 @@ namespace TemperaMental.Frames
         public void DuplicateFrame()
         {
             LogMan.Log($"Frame duplicated");
+
             InsertFrameAt(currentFrameIndex + 1, new Frame(frames[currentFrameIndex]));
         }
 
         public void InsertFrame()
         {
-            InsertFrameAt(currentFrameIndex + 1, new Frame(gridWidth, gridHeight));
+            InsertFrameAt(currentFrameIndex + 1, new Frame());
 
             LogMan.Log("New frame");
         }
@@ -261,8 +256,8 @@ namespace TemperaMental.Frames
         private void RecordFrame(ulong[] emitterGroups)
         {
             if (playbackState == PlaybackState.Playing) return;
-
-            InsertFrameAt(currentFrameIndex + 1, new Frame(gridWidth, gridHeight, emitterGroups));
+      
+            InsertFrameAt(currentFrameIndex + 1, new Frame(emitterGroups));
         }
 
         private void SetCurrentFrame(int index)
@@ -279,17 +274,17 @@ namespace TemperaMental.Frames
         {
             if (frames.Count == 0)
             {
-                frames.Add(new Frame(gridWidth, gridHeight));
+                frames.Add(new Frame());
                 SetCurrentFrame(0);
             }
             else
             {
-                InsertFrameAt(currentFrameIndex + 1, new Frame(gridWidth, gridHeight));
+                InsertFrameAt(currentFrameIndex + 1, new Frame());
             }
         }
 
         private void InsertFrameAt(int index, Frame frame)
-        {
+        {        
             frames.Insert(index, frame);
             SetCurrentFrame(index);
         }

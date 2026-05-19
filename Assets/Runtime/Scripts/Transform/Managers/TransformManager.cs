@@ -1,7 +1,9 @@
 using System.Collections.Generic;
+using TemperaMental.Applications.Config;
 using TemperaMental.Core;
 using TemperaMental.Frames;
 using TemperaMental.Logs;
+using TemperaMental.Utils;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -18,6 +20,9 @@ namespace TemperaMental.Transforms
         ShiftTransformService shiftTransformService;
 
         TransformMode transformMode;
+
+        ulong[] originalGroups;
+        ulong[] transformGroups;
 
         int bpm;
         float nextEventTime;
@@ -40,6 +45,9 @@ namespace TemperaMental.Transforms
             randomTransformService = (RandomTransformService)transformServices[(int)TransformMode.Random];
             shiftTransformService = (ShiftTransformService)transformServices[(int)TransformMode.Shift];
             transformMode = TransformMode.Shift;
+
+            originalGroups = new ulong[ConfigRegistry.Grid.MaxEmitters];
+            transformGroups = new ulong[ConfigRegistry.Grid.MaxEmitters];
         }
 
         private void Start()
@@ -70,32 +78,24 @@ namespace TemperaMental.Transforms
 
                     if (anyLatched)
                     {
-                        ulong[] original = frameManager.GetCurrentFrameEmitters();
-                        ulong[] transformed = frameManager.GetCurrentFrameEmitters();
+                        originalGroups = frameManager.GetCurrentFrameEmitters();
+                        transformGroups = frameManager.GetCurrentFrameEmitters();
 
                         foreach (var transformService in transformServices)
                         {
                             if (transformService.IsLatched)
-                                transformed = transformService.DoTransform(transformed);
+                                transformGroups = transformService.DoTransform(transformGroups);
                         }
 
-                        if (!GroupsEqual(original, transformed))
+                        if (EmitterUtils.CheckGroupsDifferent(originalGroups, transformGroups))
                         {
-                            onEmittersTransformed?.Invoke(transformed);
+                            onEmittersTransformed?.Invoke(transformGroups);
                         }
                     }
 
                     nextEventTime = Time.time + repeatRate;
                 }
             }
-        }
-
-        private bool GroupsEqual(ulong[] a, ulong[] b)
-        {
-            if (a == null || b == null || a.Length != b.Length) return false;
-            for (int i = 0; i < a.Length; i++)
-                if (a[i] != b[i]) return false;
-            return true;
         }
 
         public void HandleDirectionChange(ulong[] emitterGroup, int directionValue)
@@ -183,7 +183,12 @@ namespace TemperaMental.Transforms
 
         private void ActionOnEmittersTransformed(ulong[] transformedGroups)
         {
-            onEmittersTransformed?.Invoke(transformedGroups);
+            originalGroups = frameManager.GetCurrentFrameEmitters();
+
+            if (EmitterUtils.CheckGroupsDifferent(originalGroups, transformedGroups))
+            {
+                onEmittersTransformed?.Invoke(transformedGroups);
+            }
         }
 
         private void ActionOnServiceDirectionLatchChanged(TransformDirections directions, bool state)

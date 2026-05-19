@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: MidiConfig
   m_EditorClassIdentifier: Assembly-CSharp::Tempera.Mental.Applications.Config.MidiConfig
   PrimaryDevice: Tempera
-  PollingInterval: 0.5
+  PollingInterval: 0.25
   FilterName: Midi
   FilterType: mid
   AppendTitle: Append Midi File

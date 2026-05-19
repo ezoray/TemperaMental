@@ -7,39 +7,26 @@ namespace TemperaMental.Frames
 {
     public class Frame
     {
-        readonly int width;
-        readonly int height;
-        readonly int emitterCount;
+        // slightly dangerous to assume ConfigRegistry is initialised here
+        static readonly int EmitterCount = ConfigRegistry.Grid.EmitterCount;
 
-        // one ulong per emitter, bits map to Tempera grid positions
         readonly ulong[] emitterGroups;
 
-        public Frame(int width, int height)
+        public Frame()
         {
-            this.width = width;
-            this.height = height;
-
-            emitterCount = ConfigRegistry.Grid.EmitterCount;
-            emitterGroups = new ulong[emitterCount];
+            emitterGroups = new ulong[EmitterCount];
         }
 
         public Frame(Frame otherFrame)
         {
-            width = otherFrame.width;
-            height = otherFrame.height;
-            emitterCount = otherFrame.emitterCount;
-
-            emitterGroups = new ulong[emitterCount];
-            Array.Copy(otherFrame.emitterGroups, emitterGroups, emitterGroups.Length);
+            emitterGroups = new ulong[EmitterCount];
+            Array.Copy(otherFrame.emitterGroups, emitterGroups, EmitterCount);
         }
 
-        public Frame(int width, int height, ulong[] emitterGroups)
+        public Frame(ulong[] emitterGroups)
         {
-            this.width = width;
-            this.height = height;
             this.emitterGroups = (ulong[])emitterGroups.Clone();
         }
-
         public void SetEmitterGroups(ulong[] groups)
         {
             Array.Copy(groups, emitterGroups, emitterGroups.Length);
@@ -56,7 +43,7 @@ namespace TemperaMental.Frames
             int pos = EmitterUtils.PositionToIndex(position);
 
             // evict any other emitter at this position
-            for (int i = 0; i < emitterCount; i++)
+            for (int i = 0; i < EmitterCount; i++)
             {
                 if (i == emitterId) continue;
                 emitterGroups[i] &= ~(1UL << pos);
@@ -69,7 +56,7 @@ namespace TemperaMental.Frames
         {
             int pos = EmitterUtils.PositionToIndex(position);
 
-            for (int emitterId = 0; emitterId < emitterCount; emitterId++)
+            for (int emitterId = 0; emitterId < EmitterCount; emitterId++)
             {
                 if ((emitterGroups[emitterId] & (1UL << pos)) != 0)
                 {
@@ -89,7 +76,7 @@ namespace TemperaMental.Frames
 
         public void ClearEmitters()
         {
-            for (int i = 0; i < emitterCount; i++)
+            for (int i = 0; i < EmitterCount; i++)
             {
                 emitterGroups[i] = 0;
             }

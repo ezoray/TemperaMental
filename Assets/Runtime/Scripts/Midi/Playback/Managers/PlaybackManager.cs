@@ -7,6 +7,7 @@ using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Multimedia;
 using TemperaMental.Applications.Config;
 using TemperaMental.Core;
+using TemperaMental.Logs;
 using TemperaMental.Utils;
 using UnityEngine;
 using UnityEngine.Events;
@@ -237,6 +238,11 @@ namespace TemperaMental.Midi.Playbacks
                     outputDevice?.SendEvent(events[i]);
                 }
                 catch (ObjectDisposedException)
+                {
+                    outputDevice = null;
+                    break;
+                }
+                catch (MidiDeviceException e)
                 {
                     outputDevice = null;
                     break;
