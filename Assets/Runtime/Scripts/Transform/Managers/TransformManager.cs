@@ -19,14 +19,15 @@ namespace TemperaMental.Transforms
         RandomTransformService randomTransformService;
         ShiftTransformService shiftTransformService;
 
+        int bpm;
+        float masterTickRate;
+        float masterTickTime;
+        int masterTickCount;
+
         TransformMode transformMode;
 
         ulong[] originalGroups;
         ulong[] transformGroups;
-
-        int bpm;
-        float nextEventTime;
-        float repeatRate;
 
         PlaybackState playbackState;
 
@@ -38,6 +39,7 @@ namespace TemperaMental.Transforms
         [SerializeField] UnityEvent<bool> onWrapStateChanged;
         [SerializeField] UnityEvent<TransformDirections, bool> onDirectionLatchStateChanged;
         [SerializeField] UnityEvent onTransformsReset;
+        [SerializeField] UnityEvent<float> onTransformRateChanged;
 
 
         private void Awake()
@@ -53,8 +55,9 @@ namespace TemperaMental.Transforms
         private void Start()
         {
             // fire initial state to subscribers (UI)
-            TransformDetail detail = transformServices[(int)transformMode].GetTransformDetail();
-            onTransformModeChanged?.Invoke(transformMode, detail);
+            TransformDetail transformDetail = transformServices[(int)transformMode].GetTransformDetail();
+            onTransformModeChanged?.Invoke(transformMode, transformDetail);
+            onTransformRateChanged?.Invoke(transformDetail.Rate);
         }
 
         private void OnEnable()
@@ -66,34 +69,29 @@ namespace TemperaMental.Transforms
             }
         }
 
-        void Update()
+        private void Update()
         {
-            if (Time.time >= nextEventTime)
+            if (Time.time >= masterTickTime)
             {
-                if (playbackState == PlaybackState.Stopped || playbackState == PlaybackState.Reset)
-                {
-                    bool anyLatched = false;
-                    foreach (var transformService in transformServices)
-                        if (transformService.IsLatched) { anyLatched = true; break; }
+                masterTickTime = Time.time + masterTickRate;
+                masterTickCount++;
 
-                    if (anyLatched)
+                if (playbackState == PlaybackState.Stopped || playbackState == PlaybackState.Reset)
+                { 
+                    foreach (var transformService in transformServices)
                     {
+                        if (!transformService.IsLatched || !transformService.TickAndCheck()) continue;
+
                         originalGroups = frameManager.GetCurrentFrameEmitters();
                         transformGroups = frameManager.GetCurrentFrameEmitters();
 
-                        foreach (var transformService in transformServices)
-                        {
-                            if (transformService.IsLatched)
-                                transformGroups = transformService.DoTransform(transformGroups);
-                        }
+                        transformGroups = transformService.DoTransform(transformGroups);
 
                         if (EmitterUtils.CheckGroupsDifferent(originalGroups, transformGroups))
                         {
                             onEmittersTransformed?.Invoke(transformGroups);
                         }
                     }
-
-                    nextEventTime = Time.time + repeatRate;
                 }
             }
         }
@@ -112,16 +110,24 @@ namespace TemperaMental.Transforms
 
         public void ToggleTransformLatch()
         {
-            bool isLatched = transformServices[(int)transformMode].ToggleLatch();
-
+            bool isLatched = transformServices[(int)transformMode].ToggleLatch(masterTickCount);
             onLatchStateChanged?.Invoke(isLatched);
-        }       
+        }
+
+        public void SetTransformRate(float rate)
+        {
+            transformServices[(int)transformMode].SetTransformRate(rate, masterTickCount);
+
+            onTransformRateChanged?.Invoke(rate);
+        }
 
         public void SetBpm(int newBpm)
         {
             bpm = newBpm;
-            repeatRate = 60f / bpm;
-            nextEventTime = Mathf.Min(nextEventTime, Time.time + repeatRate);
+            masterTickRate = (60f / bpm) / 10f;
+            masterTickTime = Mathf.Min(masterTickTime, Time.time + masterTickRate);
+            foreach (var transformService in transformServices)
+                transformService.RecalculateTicksPerFire();
         }
 
         public void RandomiseEmitters(ulong[] emitterGroup, int targetCount)
@@ -146,6 +152,8 @@ namespace TemperaMental.Transforms
                 TransformDetail transformDetail = transformServices[(int)transformMode].GetTransformDetail();
 
                 onTransformModeChanged?.Invoke(transformMode, transformDetail);
+
+                onTransformRateChanged?.Invoke(transformDetail.Rate);
             }
         }
 
@@ -163,12 +171,13 @@ namespace TemperaMental.Transforms
         {
             foreach (var transformService in transformServices)
             {
-                transformService.Reset();
+                transformService.ResetTransform(masterTickCount);
             }
 
             LogMan.Log("Transforms Reset");
 
             onTransformsReset?.Invoke();
+            onTransformRateChanged?.Invoke(1f);
         }
 
         public void UnlatchTransforms()

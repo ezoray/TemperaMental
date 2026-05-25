@@ -135,7 +135,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-  uiConfig: {fileID: 11400000, guid: e59a02da33e8f484596c9908f49e0736, type: 2}
+  uiConfig: {fileID: 11400000, guid: 3d4ec93189c694957a3ac7f5aa72e29e, type: 2}
   buttonImage: {fileID: 798090048526325104}
 --- !u!114 &8444108714152769748
 MonoBehaviour:

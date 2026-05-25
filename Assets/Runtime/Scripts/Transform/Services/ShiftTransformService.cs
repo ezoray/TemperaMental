@@ -22,9 +22,9 @@ namespace TemperaMental.Transforms
             latchableDirections = TransformLatchableDirections.Shift;
         }
 
-        public override void Reset()
+        public override void ResetTransform(int masterTickCount)
         {
-            base.Reset();
+            base.ResetTransform(masterTickCount);
             isWrapping = false;
         }
 

@@ -26,6 +26,9 @@ namespace TemperaMental.Transforms
 
         public void ActionOnFramesLoaded(List<Frame> frames, bool isAppend) => transformManager.UnlatchTransforms();
 
+        // transform rate slider after conversion by UI manager
+        public void ActionOnTransformRateChanged(float rate) => transformManager.SetTransformRate(rate);
+
         // slider
         public void ActionOnRandomValueChanged(float randomValue)
         {

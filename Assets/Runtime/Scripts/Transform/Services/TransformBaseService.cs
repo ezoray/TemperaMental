@@ -11,17 +11,21 @@ namespace TemperaMental.Transforms
         protected TransformLatchableDirections latchableDirections;
         protected TransformDirections currentDirections;
 
-        private bool isLatched;
+        bool isLatched;
+
+        float rate = 1f;
+        int ticksPerFire = 10;
+        int tickCounter;
 
         protected TransformEmitters activeEmitters;
 
         protected ulong[] transformedGroups;
 
         public event Action<TransformDirections, bool> OnDirectionLatchStateChanged;
-
         public event Action<ulong[]> OnEmittersTransformed;
 
         protected abstract ulong[] DoSingleTransform(ulong[] groups, TransformDirections direction);
+
 
         protected virtual void Awake()
         {
@@ -55,7 +59,8 @@ namespace TemperaMental.Transforms
                 isLatched,
                 allowedDirections,
                 latchableDirections,
-                currentDirections);
+                currentDirections,
+                rate);
         }
 
         public void HandleDirectionChange(ulong[] emitterGroup, int directionValue)
@@ -106,6 +111,28 @@ namespace TemperaMental.Transforms
             OnDirectionLatchStateChanged?.Invoke(direction, true);
         }
 
+        public void SetTransformRate(float rate, int masterTickCount)
+        {
+            this.rate = Mathf.Clamp(rate, 0.1f, 10f);
+            RecalculateTicksPerFire();
+            tickCounter = masterTickCount % ticksPerFire;
+        }
+
+        public bool TickAndCheck()
+        {
+            tickCounter++;
+
+            if (tickCounter < ticksPerFire) return false;
+
+            tickCounter = 0;
+            return true;
+        }
+
+        public void RecalculateTicksPerFire()
+        {
+            ticksPerFire = Mathf.Max(1, Mathf.RoundToInt(10f / rate));
+        }
+
         public bool ToggleEmitter(int emitterId)
         {
             TransformEmitters emitter = (TransformEmitters)(1 << emitterId);
@@ -115,29 +142,33 @@ namespace TemperaMental.Transforms
             return (activeEmitters & emitter) != 0;
         }
 
-        public bool ToggleLatch()
+        public bool ToggleLatch(int masterTickCount)
         {
             isLatched = !isLatched;
 
             if (!isLatched)
                 currentDirections = TransformDirections.None;
 
+            tickCounter = masterTickCount % ticksPerFire;
+
             return isLatched;
         }
 
-        public virtual void Reset()
+        public virtual void ResetTransform(int masterTickCount)
         {
             ClearLatch();
             activeEmitters = TransformEmitters.All;
+
+            SetTransformRate(1f, masterTickCount);
         }
 
         public void ClearLatch()
         {
             isLatched = false;
             currentDirections = TransformDirections.None;
+            tickCounter = 0;
         }
 
         public bool IsLatched { get => isLatched; }
-        public TransformDirections AllowedDirections { get => allowedDirections; }
     }
 }

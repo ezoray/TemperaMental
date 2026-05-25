@@ -41,9 +41,9 @@ namespace TemperaMental.Transforms
             latchableDirections = TransformLatchableDirections.Random;
         }
 
-        public override void Reset()
+        public override void ResetTransform(int masterTickCount)
         {
-            base.Reset();
+            base.ResetTransform(masterTickCount);
             targetOffset = 1;
         }
 

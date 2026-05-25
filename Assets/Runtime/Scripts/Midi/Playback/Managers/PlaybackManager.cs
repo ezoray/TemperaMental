@@ -7,7 +7,6 @@ using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Multimedia;
 using TemperaMental.Applications.Config;
 using TemperaMental.Core;
-using TemperaMental.Logs;
 using TemperaMental.Utils;
 using UnityEngine;
 using UnityEngine.Events;

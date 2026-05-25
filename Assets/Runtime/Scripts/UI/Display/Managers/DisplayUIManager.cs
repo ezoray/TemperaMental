@@ -1,15 +1,16 @@
-using UnityEngine;
-using TMPro;
-using TemperaMental.Core;
-using TemperaMental.Applications.Config;
 using System.Collections;
-using TemperaMental.Logs;
+using System.Collections.Generic;
+using TemperaMental.Applications.Config;
+using TemperaMental.Core;
+using TMPro;
+using UnityEngine;
 
 namespace TemperaMental.UI.Display
 {
     public class DisplayUIManager : MonoBehaviour
     {
         [SerializeField] TextMeshProUGUI bpmText;
+        [SerializeField] TextMeshProUGUI transformText;
         [SerializeField] TextMeshProUGUI frameText;
         [SerializeField] TextMeshProUGUI emittersText;
         [SerializeField] TextMeshProUGUI logText;
@@ -20,10 +21,28 @@ namespace TemperaMental.UI.Display
         private Coroutine tempMessageCoroutine;
         private string lastLogMessage;
 
+        Dictionary<float, string> transformRates;
+
+
         private void Awake()
         {
             tempMessageDuration = ConfigRegistry.UI.TempMessageDuration;
             tempMessageFadeDuration = ConfigRegistry.UI.TempMessageFadeDuration;
+
+            transformRates = new Dictionary<float, string>();
+
+            foreach (var timePair in ConfigRegistry.Transform.RatePairs)
+            {
+                transformRates.Add(timePair.Value, timePair.Label);
+            }
+        }
+
+        public void ActionOnTransformRateChanged(float rate)
+        {
+            if(transformRates.TryGetValue(rate, out var label))
+            {
+                transformText.text = label;
+            }
         }
 
         public void ActionOnRemoveEmitter(Vector2Int position, int emitterCount)

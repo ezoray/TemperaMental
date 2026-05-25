@@ -12,12 +12,14 @@ namespace TemperaMental.Applications.Config
         [SerializeField] GridConfig grid;
         [SerializeField] MidiConfig midi;
         [SerializeField] UIConfig ui;
+        [SerializeField] TransformConfig trans;
 
         public static LoggingConfig Logging => Instance.logging;
         public static AppConfig App => Instance.app;
         public static GridConfig Grid => Instance.grid;
         public static MidiConfig Midi => Instance.midi;
         public static UIConfig UI => Instance.ui;
+        public static TransformConfig Transform => Instance.trans;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void OnRuntimeMethodLoad()

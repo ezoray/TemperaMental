@@ -7,26 +7,26 @@ namespace TemperaMental.Applications.Config
     {
         // button colours
         public Color DefaultColor = new Color(0.55f, 0.55f, 0.55f);
-        public Color YellowColor = new Color(0.8f, 0.8f, 0f);
+        public Color YellowColor = new Color(0.85f, 0.85f, 0f);
         public Color GreenColor = new Color(0.4f, 0.8f, 0.4f);
         public Color PurpleColor = new Color(1f, 0.5f, 1f);
         public Color CyanColor = new Color(0.5f, 0.8f, 1f);
-        public Color OrangeColor = new Color(1f, 0.5f, 0.4f);
-        public Color RedColor = new Color(1f, 0.2f, 0f);
+        public Color OrangeColor = new Color(1f, 0.5f, 0f);
+        public Color RedColor = new Color(1f, 0.25f, 0f);
 
         // dimmable button text alpha value
         public float DimAlphaValue = 0.3f;
 
         // dimmable button image colour reduction
-        public float ColorDimFactor = 0.75f;
+        public float ColorDimFactor = 0.6f;
 
         // display text
         public string OnText = "ON";
         public string OffText = "OFF";
 
         // device dropdown placeholders
-        public string NoDevicesText = "No Devices";
-        public string SelectDeviceText = "Select Device";
+        public string NoDevicesText = "Connect Midi Device";
+        public string SelectDeviceText = "Select Midi Device";
 
         // fading log message
         public float TempMessageDuration = 2f;

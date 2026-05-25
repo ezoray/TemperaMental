@@ -138,7 +138,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
-  uiConfig: {fileID: 11400000, guid: e59a02da33e8f484596c9908f49e0736, type: 2}
+  uiConfig: {fileID: 11400000, guid: 3d4ec93189c694957a3ac7f5aa72e29e, type: 2}
   buttonText: {fileID: 1175797879279421861}
 --- !u!114 &-8221449181886604918
 MonoBehaviour:
@@ -152,8 +152,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fea093e8116aa476987bf777c4e3a02e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TemperaMental.Applications.Core.KeyHandler
-  button: {fileID: 7418040803222182}
   actionReference: {fileID: 0}
+  button: {fileID: 7418040803222182}
 --- !u!1 &2546696621927505518
 GameObject:
   m_ObjectHideFlags: 0
