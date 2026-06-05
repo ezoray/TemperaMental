@@ -131,9 +131,9 @@ namespace TemperaMental.UI.Transforms
             onTransformRateChanged?.Invoke(multiplier);
         }
 
-        public void ActionOnRemoveEmitter(Vector2Int position, int emitterCount)
+        public void ActionOnRemoveEmitter(EmitterDetail emitterDetail)
         {
-            randomSlider.SetValueWithoutNotify(emitterCount);
+            randomSlider.SetValueWithoutNotify(emitterDetail.EmitterCount);
         }
 
         public void ActionOnAddEmitter(EmitterDetail emitterDetail)

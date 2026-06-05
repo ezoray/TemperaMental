@@ -5,9 +5,9 @@ using TemperaMental.Core;
 using TMPro;
 using UnityEngine;
 
-namespace TemperaMental.UI.Display
+namespace TemperaMental.UI.Display.MainView
 {
-    public class DisplayUIManager : MonoBehaviour
+    public class MainViewManager : MonoBehaviour
     {
         [SerializeField] TextMeshProUGUI bpmText;
         [SerializeField] TextMeshProUGUI transformText;
@@ -45,9 +45,9 @@ namespace TemperaMental.UI.Display
             }
         }
 
-        public void ActionOnRemoveEmitter(Vector2Int position, int emitterCount)
+        public void ActionOnRemoveEmitter(EmitterDetail emitterDetail)
         {
-            emittersText.text = $"{emitterCount}";
+            emittersText.text = $"{emitterDetail.EmitterCount}";
         }
 
         public void ActionOnAddEmitter(EmitterDetail emitterDetail)

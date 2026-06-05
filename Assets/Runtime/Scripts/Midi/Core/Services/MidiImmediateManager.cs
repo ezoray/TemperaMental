@@ -30,9 +30,9 @@ namespace TemperaMental.Midi.Core
             playbackManager.AddEmitter(emitterDetail);
         }
 
-        public void RemoveEmitter(Vector2Int position)
+        public void RemoveEmitter(EmitterDetail emitterDetail)
         {
-            playbackManager.RemoveEmitter(position);
+            playbackManager.RemoveEmitter(emitterDetail);
         }
 
         public void SetEmitterType(int emitterId)

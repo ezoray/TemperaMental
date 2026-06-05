@@ -10,7 +10,7 @@ namespace TemperaMental.Midi.Core
         [SerializeField] MidiTempoManager midiTempoManager;
         [SerializeField] MidiImmediateManager immediateManager;
 
-        public void ActionOnRemoveEmitter(Vector2Int position, int emitterCount) => immediateManager.RemoveEmitter(position);
+        public void ActionOnRemoveEmitter(EmitterDetail emitterDetail) => immediateManager.RemoveEmitter(emitterDetail);
 
         public void ActionOnAddEmitter(EmitterDetail emitterDetail) => immediateManager.AddEmitter(emitterDetail);
 

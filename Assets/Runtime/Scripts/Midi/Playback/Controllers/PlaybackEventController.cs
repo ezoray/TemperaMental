@@ -7,6 +7,9 @@ namespace TemperaMental.Midi.Playbacks
     {
         [SerializeField] PlaybackManager playbackManager;
 
+
+        public void ActionOnMidiChannelChanged(int channel) => playbackManager.SetMidiChannel(channel);
+
         public void ActionOnCurrentDeviceRemoved() => playbackManager.ClearOutputDevice();
 
         public void ActionOnDeviceChanged(OutputDevice device) => playbackManager.SetOutputDevice(device);

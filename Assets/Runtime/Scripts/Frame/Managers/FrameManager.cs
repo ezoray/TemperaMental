@@ -25,7 +25,7 @@ namespace TemperaMental.Frames
 
         [SerializeField] UnityEvent<int> onEmitterTypeChanged;
         [SerializeField] UnityEvent<EmitterDetail> onAddEmitter;
-        [SerializeField] UnityEvent<Vector2Int, int> onRemoveEmitter;
+        [SerializeField] UnityEvent<EmitterDetail> onRemoveEmitter;
         [SerializeField] UnityEvent<FrameDetail> onFrameChanged;
         [SerializeField] UnityEvent<bool> onRecordingStateChanged;
 
@@ -207,11 +207,10 @@ namespace TemperaMental.Frames
 
         public void RemoveEmitter(Vector2Int position)
         {
-            if (currentFrame.TryRemoveEmitter(position))
+            if (currentFrame.TryRemoveEmitter(position, out int emitterId))
             {
                 int emitterCount = EmitterUtils.GetEmitterCount(currentFrame.GetEmitterGroups());
-
-                onRemoveEmitter?.Invoke(position, emitterCount);
+                onRemoveEmitter?.Invoke(new EmitterDetail(position, emitterId, emitterCount));
             }
         }
 
@@ -221,11 +220,11 @@ namespace TemperaMental.Frames
             {
                 currentFrame.AddEmitter(cellPosition, currentEmitterId);
 
-                EmitterDetail emitterDetail = new EmitterDetail(cellPosition, currentEmitterId, currentFrame.GetEmitterGroups());
+                EmitterDetail emitterDetail = new EmitterDetail(cellPosition, currentEmitterId);
 
                 onAddEmitter?.Invoke(emitterDetail);
             }
-        }
+        } 
 
         public IReadOnlyList<Frame> GetFramesFromCurrentPosition()
         {

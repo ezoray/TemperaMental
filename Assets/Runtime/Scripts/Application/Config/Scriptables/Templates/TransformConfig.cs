@@ -13,11 +13,11 @@ namespace TemperaMental.Applications.Config
         {
             RatePairs = new List<TransformRatePair>
             {
-                new TransformRatePair(0.0625f, "1/16"),
-                new TransformRatePair(0.125f, "1/8"),
-                new TransformRatePair(0.25f, "1/4"),
-                new TransformRatePair(0.5f, "1/2"),
-                new TransformRatePair(1f, "1/1"),
+                new TransformRatePair(0.0625f, "16 Beats"),
+                new TransformRatePair(0.125f, "8 Beats"),
+                new TransformRatePair(0.25f, "4 Beats"),
+                new TransformRatePair(0.5f, "2 Beats"),
+                new TransformRatePair(1f, "1 Beat"),
             };
         }
     }

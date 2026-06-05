@@ -52,19 +52,19 @@ namespace TemperaMental.Frames
             emitterGroups[emitterId] |= 1UL << pos;
         }
 
-        public bool TryRemoveEmitter(Vector2Int position)
+        public bool TryRemoveEmitter(Vector2Int position, out int emitterId)
         {
-            int pos = EmitterUtils.PositionToIndex(position);
-
-            for (int emitterId = 0; emitterId < EmitterCount; emitterId++)
+            emitterId = -1;
+            int index = EmitterUtils.PositionToIndex(position);
+            for (int i = 0; i < EmitterCount; i++)
             {
-                if ((emitterGroups[emitterId] & (1UL << pos)) != 0)
+                if ((emitterGroups[i] & (1UL << index)) != 0)
                 {
-                    emitterGroups[emitterId] &= ~(1UL << pos);
+                    emitterGroups[i] &= ~(1UL << index);
+                    emitterId = i;
                     return true;
                 }
             }
-
             return false;
         }
 

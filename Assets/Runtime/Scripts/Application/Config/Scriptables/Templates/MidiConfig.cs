@@ -25,6 +25,9 @@ namespace TemperaMental.Applications.Config
         public short TicksPerFrame = 120; // used only when creating midifiles
         public float EventIntervalMS = 0.0001f; // 0.1ms
 
+        public int DefaultMidiChannel = 1;
+        public int MidiChannelCount = 16;
+
         // cc numbers for emitters
         public int ActivateCC = 10;
         public int PlaceCC = 11;

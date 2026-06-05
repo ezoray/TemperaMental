@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using TemperaMental.Applications.Config;
 using TemperaMental.Core;
@@ -48,16 +49,8 @@ namespace TemperaMental.Transforms
             shiftTransformService = (ShiftTransformService)transformServices[(int)TransformMode.Shift];
             transformMode = TransformMode.Shift;
 
-            originalGroups = new ulong[ConfigRegistry.Grid.MaxEmitters];
-            transformGroups = new ulong[ConfigRegistry.Grid.MaxEmitters];
-        }
-
-        private void Start()
-        {
-            // fire initial state to subscribers (UI)
-            TransformDetail transformDetail = transformServices[(int)transformMode].GetTransformDetail();
-            onTransformModeChanged?.Invoke(transformMode, transformDetail);
-            onTransformRateChanged?.Invoke(transformDetail.Rate);
+            originalGroups = new ulong[ConfigRegistry.Grid.EmitterCount];
+            transformGroups = new ulong[ConfigRegistry.Grid.EmitterCount];
         }
 
         private void OnEnable()
@@ -69,6 +62,15 @@ namespace TemperaMental.Transforms
             }
         }
 
+        private void Start()
+        {
+            // fire initial state to subscribers (UI)
+            TransformDetail transformDetail = transformServices[(int)transformMode].GetTransformDetail();
+            onTransformModeChanged?.Invoke(transformMode, transformDetail);
+            onTransformRateChanged?.Invoke(transformDetail.Rate);
+        }
+ 
+
         private void Update()
         {
             if (Time.time >= masterTickTime)
@@ -77,20 +79,20 @@ namespace TemperaMental.Transforms
                 masterTickCount++;
 
                 if (playbackState == PlaybackState.Stopped || playbackState == PlaybackState.Reset)
-                { 
+                {
+                    originalGroups = frameManager.GetCurrentFrameEmitters();
+                    Array.Copy(originalGroups, transformGroups, originalGroups.Length);
+
                     foreach (var transformService in transformServices)
                     {
                         if (!transformService.IsLatched || !transformService.TickAndCheck()) continue;
+                        ulong[] result = transformService.DoTransform(transformGroups);
+                        Array.Copy(result, transformGroups, transformGroups.Length);
+                    }
 
-                        originalGroups = frameManager.GetCurrentFrameEmitters();
-                        transformGroups = frameManager.GetCurrentFrameEmitters();
-
-                        transformGroups = transformService.DoTransform(transformGroups);
-
-                        if (EmitterUtils.CheckGroupsDifferent(originalGroups, transformGroups))
-                        {
-                            onEmittersTransformed?.Invoke(transformGroups);
-                        }
+                    if (EmitterUtils.CheckGroupsDifferent(originalGroups, transformGroups))
+                    {
+                        onEmittersTransformed?.Invoke(transformGroups);
                     }
                 }
             }

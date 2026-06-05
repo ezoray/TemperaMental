@@ -12,9 +12,9 @@ namespace TemperaMental.Grid
             gridManager.AddTile(emitterDetail);
         }
 
-        public void ActionOnRemoveEmitter(Vector2Int position, int emitterCount)
+        public void ActionOnRemoveEmitter(EmitterDetail emitterDetail)
         {
-            gridManager.RemoveTile(position);
+            gridManager.RemoveTile(emitterDetail.Position);
         }
 
         public void ActionOnFrameChanged(FrameDetail frameDetail)
