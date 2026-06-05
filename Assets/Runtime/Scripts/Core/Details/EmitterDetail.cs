@@ -14,12 +14,5 @@ namespace TemperaMental.Core
             EmitterId = emitterId;
             EmitterCount = emitterCount;
         }
-
-        public EmitterDetail(Vector2Int position, int emitterId)
-        {
-            Position = position;
-            EmitterId = emitterId;
-            EmitterCount = default;
-        }
     }
 }

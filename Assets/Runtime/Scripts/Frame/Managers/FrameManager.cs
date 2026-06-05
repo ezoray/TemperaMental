@@ -220,7 +220,8 @@ namespace TemperaMental.Frames
             {
                 currentFrame.AddEmitter(cellPosition, currentEmitterId);
 
-                EmitterDetail emitterDetail = new EmitterDetail(cellPosition, currentEmitterId);
+                int emitterCount = EmitterUtils.GetEmitterCount(currentFrame.GetEmitterGroups());
+                EmitterDetail emitterDetail = new EmitterDetail(cellPosition, currentEmitterId, emitterCount);
 
                 onAddEmitter?.Invoke(emitterDetail);
             }
