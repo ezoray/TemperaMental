@@ -21,6 +21,7 @@ namespace TemperaMental.Transforms
         ShiftTransformService shiftTransformService;
 
         int bpm;
+        int ticksPerBpm;
         float masterTickRate;
         float masterTickTime;
         int masterTickCount;
@@ -51,6 +52,8 @@ namespace TemperaMental.Transforms
 
             originalGroups = new ulong[ConfigRegistry.Grid.EmitterCount];
             transformGroups = new ulong[ConfigRegistry.Grid.EmitterCount];
+
+            ticksPerBpm = ConfigRegistry.Transform.TicksPerBpm;
         }
 
         private void OnEnable()

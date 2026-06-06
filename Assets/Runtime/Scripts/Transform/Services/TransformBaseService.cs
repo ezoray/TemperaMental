@@ -13,8 +13,9 @@ namespace TemperaMental.Transforms
 
         bool isLatched;
 
-        float rate = 1f;
-        int ticksPerFire = 10;
+        float defaultRate;
+        float rate;
+        int ticksPerFire;
         int tickCounter;
 
         protected TransformEmitters activeEmitters;
@@ -32,6 +33,9 @@ namespace TemperaMental.Transforms
             activeEmitters = TransformEmitters.All;
 
             transformedGroups = new ulong[ConfigRegistry.Grid.EmitterCount];
+
+            defaultRate = rate = ConfigRegistry.Transform.DefaultRate;
+            ticksPerFire = ConfigRegistry.Transform.TicksPerBpm;
         }
 
         public virtual ulong[] DoTransform(ulong[] groups)
@@ -113,7 +117,7 @@ namespace TemperaMental.Transforms
 
         public void SetTransformRate(float rate, int masterTickCount)
         {
-            this.rate = Mathf.Clamp(rate, 0.1f, 10f);
+            this.rate = rate;
             RecalculateTicksPerFire();
             tickCounter = masterTickCount % ticksPerFire;
         }
@@ -159,7 +163,7 @@ namespace TemperaMental.Transforms
             ClearLatch();
             activeEmitters = TransformEmitters.All;
 
-            SetTransformRate(1f, masterTickCount);
+            SetTransformRate(defaultRate, masterTickCount);
         }
 
         public void ClearLatch()

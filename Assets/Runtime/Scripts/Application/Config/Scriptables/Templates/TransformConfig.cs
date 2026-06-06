@@ -6,6 +6,9 @@ namespace TemperaMental.Applications.Config
     [CreateAssetMenu(fileName = "TransformConfig", menuName = "Scriptable Objects/TransformConfig")]
     public class TransformConfig : ScriptableObject
     {
+        public int TicksPerBpm = 10;
+        public float DefaultRate = 1f;
+
         // transform trigger time relative to a single beat
         public List<TransformRatePair> RatePairs;
 

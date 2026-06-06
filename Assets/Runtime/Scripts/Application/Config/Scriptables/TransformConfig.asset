@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TemperaMental.Applications.Config.TransformConfig
   RatePairs:
   - Value: 0.0625
-    Label: 1/16
+    Label: 16 Beats
   - Value: 0.125
-    Label: 1/8
+    Label: 8 Beats
   - Value: 0.25
-    Label: 1/4
+    Label: 4 Beats
   - Value: 0.5
-    Label: 1/2
+    Label: 2 Beats
   - Value: 1
-    Label: 1/1
+    Label: 1 Beat

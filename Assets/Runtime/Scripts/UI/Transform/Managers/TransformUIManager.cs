@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using TemperaMental.Applications.Config;
 using TemperaMental.Core;
-using TemperaMental.Logs;
 using TemperaMental.UI.Core;
 using UnityEngine;
 using UnityEngine.Events;
