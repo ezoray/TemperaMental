@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using TemperaMental.Core;
 using UnityEngine;
 
-namespace TemperaMental.UI.Core
+namespace TemperaMental.UI.State
 {
     public class UIStateManager : MonoBehaviour
     {

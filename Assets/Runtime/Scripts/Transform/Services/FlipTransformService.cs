@@ -8,6 +8,8 @@ namespace TemperaMental.Transforms
         int gridWidth;
         int gridHeight;
 
+        protected ulong[] intermediateGroups;
+
         protected override void Awake()
         {
             base.Awake();
@@ -17,16 +19,45 @@ namespace TemperaMental.Transforms
 
             allowedDirections = TransformDirections.Flip;
             latchableDirections = TransformLatchableDirections.Flip;
+
+            intermediateGroups = new ulong[ConfigRegistry.Grid.EmitterCount];
         }
 
         public override ulong[] DoTransform(ulong[] groups)
         {
-            if (currentDirections == TransformDirections.None)
-                return groups;
+            if (TransformMode == TransformMode.Simple)
+            {
+                TransformDirections directions = GetDirections();
 
-            return DoSingleTransform(groups, currentDirections);
+                if (directions == TransformDirections.None)
+                    return groups;
+
+                return DoSingleTransform(groups, directions);
+            }
+            else
+            {
+                // copy input into intermediate buffer so each emitter's result
+                // feeds into the next pass without aliasing transformedGroups
+                System.Array.Copy(groups, intermediateGroups, groups.Length);
+
+                for (int i = 0; i < 4; i++)
+                {
+                    if (!ShouldEmitterFire(i))
+                        continue;
+
+                    TransformDirections direction = GetEmitterDirections(i);
+
+                    if (direction == TransformDirections.None)
+                        continue;
+
+                    DoSingleTransformForEmitter(intermediateGroups, direction, i);
+                }
+
+                return intermediateGroups;
+            }
         }
 
+        // simple mode — flips all active emitters with the same direction
         protected override ulong[] DoSingleTransform(ulong[] groups, TransformDirections direction)
         {
             bool hasHorizontal =
@@ -41,10 +72,10 @@ namespace TemperaMental.Transforms
 
             for (int i = 0; i < groupCount; i++)
             {
-                TransformEmitters emitterFlag = (TransformEmitters)(1 << i);
+                TransformActiveEmitters emitterFlag = (TransformActiveEmitters)(1 << i);
 
-                // Skip inactive emitters
-                if ((activeEmitters & emitterFlag) == 0)
+                // skip inactive emitters
+                if ((ActiveEmitters & emitterFlag) == 0)
                 {
                     transformedGroups[i] = groups[i];
                     continue;
@@ -73,14 +104,15 @@ namespace TemperaMental.Transforms
                         int newIndex = (newX * gridHeight) + newY;
                         ulong newBit = 1UL << newIndex;
 
+                        // skip if inactive emitter occupies destination
                         bool blocked = false;
 
                         for (int j = 0; j < groupCount; j++)
                         {
-                            TransformEmitters otherEmitterFlag = (TransformEmitters)(1 << j);
+                            TransformActiveEmitters otherEmitterFlag = (TransformActiveEmitters)(1 << j);
 
-                            // Ignore active emitters
-                            if ((activeEmitters & otherEmitterFlag) != 0)
+                            // ignore active emitters
+                            if ((ActiveEmitters & otherEmitterFlag) != 0)
                                 continue;
 
                             if ((groups[j] & newBit) != 0)
@@ -97,6 +129,62 @@ namespace TemperaMental.Transforms
             }
 
             return transformedGroups;
+        }
+
+        // individual mode — flips only the specified emitter in place within intermediateGroups
+        private void DoSingleTransformForEmitter(ulong[] groups, TransformDirections direction, int emitterId)
+        {
+            bool hasHorizontal =
+                (direction & TransformDirections.Left) != 0 ||
+                (direction & TransformDirections.Right) != 0;
+
+            bool hasVertical =
+                (direction & TransformDirections.Up) != 0 ||
+                (direction & TransformDirections.Down) != 0;
+
+            int groupCount = groups.Length;
+
+            ulong mask = groups[emitterId];
+            groups[emitterId] = 0;
+
+            for (int x = 0; x < gridWidth; x++)
+            {
+                int flippedX = (gridWidth - 1) - x;
+
+                for (int y = 0; y < gridHeight; y++)
+                {
+                    int index = (x * gridHeight) + y;
+                    ulong bit = 1UL << index;
+
+                    // skip unset bits
+                    if ((mask & bit) == 0)
+                        continue;
+
+                    int newX = hasHorizontal ? flippedX : x;
+                    int newY = hasVertical ? (gridHeight - 1) - y : y;
+
+                    int newIndex = (newX * gridHeight) + newY;
+                    ulong newBit = 1UL << newIndex;
+
+                    // skip if any other emitter occupies destination
+                    bool blocked = false;
+
+                    for (int j = 0; j < groupCount; j++)
+                    {
+                        if (j == emitterId)
+                            continue;
+
+                        if ((groups[j] & newBit) != 0)
+                        {
+                            blocked = true;
+                            break;
+                        }
+                    }
+
+                    if (!blocked)
+                        groups[emitterId] |= newBit;
+                }
+            }
         }
     }
 }

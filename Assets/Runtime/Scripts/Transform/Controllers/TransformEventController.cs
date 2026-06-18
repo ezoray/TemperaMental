@@ -11,6 +11,10 @@ namespace TemperaMental.Transforms
         [SerializeField] TransformManager transformManager;
         [SerializeField] FrameManager frameManager;
 
+        public void OnClickToggleTransformMode(int transformType)
+        {
+            transformManager.ToggleTransformMode((TransformType)transformType);
+        }
 
         public void OnReset() => transformManager.ResetTransforms();
 
@@ -20,16 +24,16 @@ namespace TemperaMental.Transforms
             transformManager.HandleDirectionChange(emitterGroup, directionValue);
         }
 
-        public void OnClickToggleLatch() => transformManager.ToggleTransformLatch();
+        public void OnClickToggleLatching() => transformManager.ToggleLatching();
 
         public void OnClickToggleWrapping() => transformManager.ToggleWrapping();
 
         public void ActionOnFramesLoaded(List<Frame> frames, bool isAppend) => transformManager.UnlatchTransforms();
 
         // transform rate slider after conversion by UI manager
-        public void ActionOnTransformRateChanged(float rate) => transformManager.SetTransformRate(rate);
+        public void ActionOnTransformRateChanged(float rate) => transformManager.SetTransformRate((int)rate);
 
-        // slider
+        // random slider
         public void ActionOnRandomValueChanged(float randomValue)
         {
             ulong[] emitterGroup = frameManager.GetCurrentFrameEmitters();
@@ -44,16 +48,16 @@ namespace TemperaMental.Transforms
             transformManager.SetBpm(newBpm);
         }
 
-        public void OnClickToggleEmitter(int emitterId)
+        public void OnClickSelectEmitter(int emitterId)
         {
-            transformManager.ToggleEmitter(emitterId);
+            transformManager.SelectEmitter(emitterId);
         }
 
-        public void OnClickSetTransformMode(int transformMode)
+        public void OnClickSetTransformType(int transformType)
         {
-            if (Enum.IsDefined(typeof(TransformMode), transformMode))
+            if (Enum.IsDefined(typeof(TransformType), transformType))
             {
-                transformManager.SetTransformMode((TransformMode)transformMode);
+                transformManager.SetTransformType((TransformType)transformType);
             }
         }
     }

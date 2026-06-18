@@ -12,7 +12,8 @@ namespace TemperaMental.Transforms
 {
     public class TransformManager : MonoBehaviour
     {
-        // transforms are called in this order so place shift first to prevent it interfering with other transforms
+        const float SecondsInMinute = 60f;
+
         [Header("Order: Shift, Random, Flip, Rotate, Swap")]
         [SerializeField] List<TransformBaseService> transformServices;
         [SerializeField] FrameManager frameManager;
@@ -21,39 +22,31 @@ namespace TemperaMental.Transforms
         ShiftTransformService shiftTransformService;
 
         int bpm;
-        int ticksPerBpm;
         float masterTickRate;
         float masterTickTime;
-        int masterTickCount;
 
-        TransformMode transformMode;
+        TransformType currentTransformType;
 
         ulong[] originalGroups;
         ulong[] transformGroups;
 
         PlaybackState playbackState;
 
-        [SerializeField] UnityEvent<TransformMode, TransformDetail> onTransformModeChanged;
-        [SerializeField] UnityEvent<int, bool> onTransformEmitterChanged;
+        [SerializeField] UnityEvent<TransformType, TransformDetail> onTransformChanged;
         [SerializeField] UnityEvent<ulong[]> onEmittersTransformed;
-
-        [SerializeField] UnityEvent<bool> onLatchStateChanged;
-        [SerializeField] UnityEvent<bool> onWrapStateChanged;
         [SerializeField] UnityEvent<TransformDirections, bool> onDirectionLatchStateChanged;
-        [SerializeField] UnityEvent onTransformsReset;
-        [SerializeField] UnityEvent<float> onTransformRateChanged;
-
+        [SerializeField] UnityEvent<TransformActiveEmitters> onTransformsReset;
+        [SerializeField] UnityEvent<int> onTransformRateChanged;
+        [SerializeField] UnityEvent<TransformType, TransformMode> onTransformModeChanged;
 
         private void Awake()
         {
-            randomTransformService = (RandomTransformService)transformServices[(int)TransformMode.Random];
-            shiftTransformService = (ShiftTransformService)transformServices[(int)TransformMode.Shift];
-            transformMode = TransformMode.Shift;
+            randomTransformService = (RandomTransformService)transformServices[(int)TransformType.Random];
+            shiftTransformService = (ShiftTransformService)transformServices[(int)TransformType.Shift];
+            currentTransformType = TransformType.Shift;
 
             originalGroups = new ulong[ConfigRegistry.Grid.EmitterCount];
             transformGroups = new ulong[ConfigRegistry.Grid.EmitterCount];
-
-            ticksPerBpm = ConfigRegistry.Transform.TicksPerBpm;
         }
 
         private void OnEnable()
@@ -68,18 +61,16 @@ namespace TemperaMental.Transforms
         private void Start()
         {
             // fire initial state to subscribers (UI)
-            TransformDetail transformDetail = transformServices[(int)transformMode].GetTransformDetail();
-            onTransformModeChanged?.Invoke(transformMode, transformDetail);
+            TransformDetail transformDetail = transformServices[(int)currentTransformType].GetTransformDetail();
+            onTransformChanged?.Invoke(currentTransformType, transformDetail);
             onTransformRateChanged?.Invoke(transformDetail.Rate);
         }
- 
 
         private void Update()
         {
             if (Time.time >= masterTickTime)
             {
                 masterTickTime = Time.time + masterTickRate;
-                masterTickCount++;
 
                 if (playbackState == PlaybackState.Stopped || playbackState == PlaybackState.Reset)
                 {
@@ -89,8 +80,8 @@ namespace TemperaMental.Transforms
                     foreach (var transformService in transformServices)
                     {
                         if (!transformService.IsLatched || !transformService.TickAndCheck()) continue;
-                        ulong[] result = transformService.DoTransform(transformGroups);
-                        Array.Copy(result, transformGroups, transformGroups.Length);
+                        ulong[] resultGroups = transformService.DoTransform(transformGroups);
+                        Array.Copy(resultGroups, transformGroups, transformGroups.Length);
                     }
 
                     if (EmitterUtils.CheckGroupsDifferent(originalGroups, transformGroups))
@@ -103,61 +94,64 @@ namespace TemperaMental.Transforms
 
         public void HandleDirectionChange(ulong[] emitterGroup, int directionValue)
         {
-            transformServices[(int)transformMode].HandleDirectionChange(emitterGroup, directionValue);
+            transformServices[(int)currentTransformType].HandleDirectionChange(emitterGroup, directionValue);
         }
 
         public void ToggleWrapping()
         {
-            bool isWrapping = shiftTransformService.ToggleWrap();
-
-            onWrapStateChanged?.Invoke(isWrapping);
+            shiftTransformService.ToggleWrap();
         }
 
-        public void ToggleTransformLatch()
+        public void ToggleLatching()
         {
-            bool isLatched = transformServices[(int)transformMode].ToggleLatch(masterTickCount);
-            onLatchStateChanged?.Invoke(isLatched);
+            transformServices[(int)currentTransformType].ToggleLatch();            
         }
 
-        public void SetTransformRate(float rate)
+        public void SetTransformRate(int rate)
         {
-            transformServices[(int)transformMode].SetTransformRate(rate, masterTickCount);
-
+            transformServices[(int)currentTransformType].SetTransformRate(rate);
             onTransformRateChanged?.Invoke(rate);
         }
 
         public void SetBpm(int newBpm)
         {
             bpm = newBpm;
-            masterTickRate = (60f / bpm) / 10f;
+            masterTickRate = SecondsInMinute / bpm;
             masterTickTime = Mathf.Min(masterTickTime, Time.time + masterTickRate);
-            foreach (var transformService in transformServices)
-                transformService.RecalculateTicksPerFire();
         }
 
         public void RandomiseEmitters(ulong[] emitterGroup, int targetCount)
         {
-            ulong[] transformedGroups = randomTransformService.DoRandomTransform(emitterGroup, targetCount);
+            ulong[] transformedGroups = randomTransformService.DoRandomTransform(emitterGroup, targetCount, randomTransformService.TransformMode);
             onEmittersTransformed?.Invoke(transformedGroups);
         }
 
-        public void ToggleEmitter(int emitterId)
+        public void SelectEmitter(int emitterId)
         {
-            bool isActive = transformServices[(int)transformMode].ToggleEmitter(emitterId);
-
-            onTransformEmitterChanged?.Invoke(emitterId, isActive);
+            transformServices[(int)currentTransformType].SelectEmitter(emitterId);
         }
 
-        public void SetTransformMode(TransformMode transformMode)
+        public void ToggleTransformMode(TransformType transformType)
         {
-            if (transformMode != this.transformMode)
+            TransformMode transformMode = transformServices[(int)transformType].ToggleTransformMode();
+            onTransformModeChanged?.Invoke(transformType, transformMode);
+
+            if (transformType == currentTransformType)
             {
-                this.transformMode = transformMode;
+                TransformDetail transformDetail = transformServices[(int)transformType].GetTransformDetail();
+                onTransformChanged?.Invoke(transformType, transformDetail);
+                onTransformRateChanged?.Invoke(transformDetail.Rate);
+            }
+        }
 
-                TransformDetail transformDetail = transformServices[(int)transformMode].GetTransformDetail();
+        public void SetTransformType(TransformType transformType)
+        {
+            if (transformType != currentTransformType)
+            {
+                currentTransformType = transformType;
 
-                onTransformModeChanged?.Invoke(transformMode, transformDetail);
-
+                TransformDetail transformDetail = transformServices[(int)transformType].GetTransformDetail();
+                onTransformChanged?.Invoke(transformType, transformDetail);
                 onTransformRateChanged?.Invoke(transformDetail.Rate);
             }
         }
@@ -176,13 +170,13 @@ namespace TemperaMental.Transforms
         {
             foreach (var transformService in transformServices)
             {
-                transformService.ResetTransform(masterTickCount);
+                transformService.ResetTransform();
             }
 
             LogMan.Log("Transforms Reset");
 
-            onTransformsReset?.Invoke();
-            onTransformRateChanged?.Invoke(1f);
+            onTransformsReset?.Invoke(transformServices[(int)currentTransformType].GetActiveEmitters());
+            onTransformRateChanged?.Invoke(ConfigRegistry.Transform.DefaultRate);
         }
 
         public void UnlatchTransforms()
@@ -191,8 +185,6 @@ namespace TemperaMental.Transforms
             {
                 transformService.ClearLatch();
             }
-
-            onLatchStateChanged?.Invoke(false);
         }
 
         private void ActionOnEmittersTransformed(ulong[] transformedGroups)

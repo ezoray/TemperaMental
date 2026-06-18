@@ -35,6 +35,11 @@ namespace TemperaMental.UI.Core
             alphaValue = uiConfig.DimAlphaValue;
         }
 
+        public void SetLitByColor(Color buttonColor)
+        {
+            buttonImage.color = buttonColor;
+        }
+
         public void SetLit(bool isLit)
         {
             buttonImage.color = isLit ? litColor : unlitColor;

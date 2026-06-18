@@ -2,6 +2,7 @@ using System;
 using TemperaMental.Applications.Config;
 using TemperaMental.Core;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace TemperaMental.Transforms
 {
@@ -9,62 +10,49 @@ namespace TemperaMental.Transforms
     {
         protected TransformDirections allowedDirections;
         protected TransformLatchableDirections latchableDirections;
-        protected TransformDirections currentDirections;
 
+        TransformMode transformMode;
         bool isLatched;
 
-        float defaultRate;
-        float rate;
-        int ticksPerFire;
         int tickCounter;
 
-        protected TransformEmitters activeEmitters;
+        SimpleModeState simpleModeState;
+        IndividualModeState individualModeState;
+        ITransformModeState currentModeState;
 
         protected ulong[] transformedGroups;
 
         public event Action<TransformDirections, bool> OnDirectionLatchStateChanged;
         public event Action<ulong[]> OnEmittersTransformed;
 
-        protected abstract ulong[] DoSingleTransform(ulong[] groups, TransformDirections direction);
+        [SerializeField] UnityEvent<int, TransformDetail> onEmitterSelected;
+        [SerializeField] UnityEvent<bool> onLatchStateChanged;
+        [SerializeField] UnityEvent<int> onTransformRateChanged;
 
+        protected abstract ulong[] DoSingleTransform(ulong[] groups, TransformDirections direction);
+        public abstract ulong[] DoTransform(ulong[] groups);
 
         protected virtual void Awake()
         {
-            activeEmitters = TransformEmitters.All;
-
             transformedGroups = new ulong[ConfigRegistry.Grid.EmitterCount];
 
-            defaultRate = rate = ConfigRegistry.Transform.DefaultRate;
-            ticksPerFire = ConfigRegistry.Transform.TicksPerBpm;
-        }
+            simpleModeState = new SimpleModeState(ConfigRegistry.Transform.DefaultRate);
+            individualModeState = new IndividualModeState(ConfigRegistry.Transform.DefaultRate);
 
-        public virtual ulong[] DoTransform(ulong[] groups)
-        {
-            ulong[] result = groups;
-
-            for (int i = 0; i < 4; i++)
-            {
-                TransformDirections direction =
-                    (TransformDirections)(1 << i);
-
-                if ((currentDirections & direction) != 0)
-                {
-                    result = DoSingleTransform(result, direction);
-                }
-            }
-
-            return result;
+            // Start in simple mode
+            currentModeState = simpleModeState;
         }
 
         public TransformDetail GetTransformDetail()
         {
             return new TransformDetail(
-                activeEmitters,
+                transformMode,
+                currentModeState.GetEmitter(),
                 isLatched,
                 allowedDirections,
                 latchableDirections,
-                currentDirections,
-                rate);
+                currentModeState.GetDirections(),
+                currentModeState.GetRate());
         }
 
         public void HandleDirectionChange(ulong[] emitterGroup, int directionValue)
@@ -75,104 +63,113 @@ namespace TemperaMental.Transforms
                 return;
 
             TransformLatchableDirections latchableDirection = (TransformLatchableDirections)(1 << directionValue);
-
             bool canLatch = (latchableDirections & latchableDirection) != 0;
 
-            // Non-latched or non-latchable direction:
+            // non-latched or non-latchable direction:
             // perform immediate transform
             if (!isLatched || !canLatch)
             {
                 ulong[] result = DoSingleTransform(emitterGroup, direction);
-
                 OnEmittersTransformed?.Invoke(result);
-
                 return;
             }
 
-            // Toggle off existing latched direction
-            if ((currentDirections & direction) != 0)
+            TransformDirections activeDirections = currentModeState.GetDirections();
+
+            // toggle off existing latched direction
+            if ((activeDirections & direction) != 0)
             {
-                currentDirections &= ~direction;
-
+                activeDirections &= ~direction;
+                currentModeState.SetDirections(activeDirections);
                 OnDirectionLatchStateChanged?.Invoke(direction, false);
-
                 return;
             }
 
-            // Remove opposing direction
+            // remove opposing direction
             TransformDirections opposing = (TransformDirections)(1 << (directionValue ^ 1));
 
-            if ((currentDirections & opposing) != 0)
+            if ((activeDirections & opposing) != 0)
             {
-                currentDirections &= ~opposing;
-
+                activeDirections &= ~opposing;
+                currentModeState.SetDirections(activeDirections);
                 OnDirectionLatchStateChanged?.Invoke(opposing, false);
             }
 
-            // Enable new direction
-            currentDirections |= direction;
-
+            // enable new direction
+            activeDirections |= direction;
+            currentModeState.SetDirections(activeDirections);
             OnDirectionLatchStateChanged?.Invoke(direction, true);
         }
 
-        public void SetTransformRate(float rate, int masterTickCount)
+        public void SetTransformRate(int rate)
         {
-            this.rate = rate;
-            RecalculateTicksPerFire();
-            tickCounter = masterTickCount % ticksPerFire;
+            currentModeState.SetRate(rate);
         }
 
         public bool TickAndCheck()
         {
             tickCounter++;
-
-            if (tickCounter < ticksPerFire) return false;
-
-            tickCounter = 0;
-            return true;
+            return currentModeState.ShouldFire(tickCounter);
         }
 
-        public void RecalculateTicksPerFire()
+        public TransformActiveEmitters GetActiveEmitters()
         {
-            ticksPerFire = Mathf.Max(1, Mathf.RoundToInt(10f / rate));
+            return currentModeState.GetEmitter();
         }
 
-        public bool ToggleEmitter(int emitterId)
+        public void SelectEmitter(int emitterId)
         {
-            TransformEmitters emitter = (TransformEmitters)(1 << emitterId);
-
-            activeEmitters ^= emitter;
-
-            return (activeEmitters & emitter) != 0;
+            currentModeState.SetEmitter(emitterId);
+            onEmitterSelected?.Invoke(emitterId, GetTransformDetail());
         }
 
-        public bool ToggleLatch(int masterTickCount)
+        public void ToggleLatch()
         {
             isLatched = !isLatched;
 
             if (!isLatched)
-                currentDirections = TransformDirections.None;
+                currentModeState.SetDirections(TransformDirections.None);
 
-            tickCounter = masterTickCount % ticksPerFire;
-
-            return isLatched;
-        }
-
-        public virtual void ResetTransform(int masterTickCount)
-        {
-            ClearLatch();
-            activeEmitters = TransformEmitters.All;
-
-            SetTransformRate(defaultRate, masterTickCount);
+            onLatchStateChanged?.Invoke(isLatched);
         }
 
         public void ClearLatch()
         {
             isLatched = false;
-            currentDirections = TransformDirections.None;
+
+            onLatchStateChanged?.Invoke(isLatched);
+        }
+
+        public virtual void ResetTransform()
+        {
+            isLatched = false;
+
+            simpleModeState.Reset();
+            individualModeState.Reset();
+
             tickCounter = 0;
         }
 
-        public bool IsLatched { get => isLatched; }
+        public TransformMode ToggleTransformMode()
+        {
+            transformMode = transformMode == TransformMode.Simple
+                ? TransformMode.Individual
+                : TransformMode.Simple;
+
+            currentModeState = transformMode == TransformMode.Simple
+                ? simpleModeState
+                : individualModeState;
+
+            return transformMode;
+        }
+
+        public bool IsLatched => isLatched;
+        public TransformMode TransformMode => transformMode;
+
+        protected TransformActiveEmitters ActiveEmitters => currentModeState.GetActiveEmitters();
+        protected bool ShouldEmitterFire(int emitterId) => individualModeState.ShouldEmitterFire(emitterId, tickCounter);
+        protected TransformDirections GetEmitterDirections(int emitterId) => individualModeState.GetDirections(emitterId);
+        protected TransformDirections GetDirections() => currentModeState.GetDirections();
+        protected int IndividualEmitter => individualModeState.SelectedEmitter;
     }
 }

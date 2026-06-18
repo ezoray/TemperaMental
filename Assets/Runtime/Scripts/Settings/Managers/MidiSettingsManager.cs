@@ -1,5 +1,4 @@
 using TemperaMental.Applications.Config;
-using TemperaMental.Core;
 using TemperaMental.Logs;
 using UnityEngine;
 using UnityEngine.Events;
@@ -25,18 +24,11 @@ namespace TemperaMental.Settings
             onMidiChannelChanged?.Invoke(midiChannel);
         }
 
-        public void CycleMidiChannel(int direction)
+        public void CycleMidiChannel(int directionValue)
         {
-            midiChannel = Mathf.Clamp(midiChannel + direction, 1, midiChannelCount);
+            midiChannel = Mathf.Clamp(midiChannel + directionValue, 1, midiChannelCount);
 
-            onMidiChannelChanged?.Invoke(midiChannel);
-        }
-
-        public void SetMidiChannel()
-        {
             SaveChannel();
-
-            LogMan.LogTemp("Output MIDI Channel: " + midiChannel);
 
             onMidiChannelChanged?.Invoke(midiChannel);
         }

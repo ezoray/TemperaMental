@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace TemperaMental.UI.Display.MainView
 {
-    public class MainViewManager : MonoBehaviour
+    public class MainViewUIManager : MonoBehaviour
     {
         [SerializeField] TextMeshProUGUI bpmText;
         [SerializeField] TextMeshProUGUI transformText;
@@ -37,12 +37,14 @@ namespace TemperaMental.UI.Display.MainView
             }
         }
 
-        public void ActionOnTransformRateChanged(float rate)
+        public void ActionOnTransformChanged(TransformDetail transformDetail)
         {
-            if(transformRates.TryGetValue(rate, out var label))
-            {
-                transformText.text = label;
-            }
+            SetRateTextLabel(transformDetail.Rate);
+        }
+
+        public void ActionOnTransformRateChanged(int rate)
+        {
+            SetRateTextLabel(rate);
         }
 
         public void ActionOnRemoveEmitter(EmitterDetail emitterDetail)
@@ -95,13 +97,6 @@ namespace TemperaMental.UI.Display.MainView
             tempMessageCoroutine = null;
         }
 
-        private void SetMessageAlpha(float alpha)
-        {
-            Color color = logText.color;
-            color.a = alpha;
-            logText.color = color;
-        }
-
         public void ActionOnFrameChanged(FrameDetail frameDetail)
         {
             frameText.text = $"{frameDetail.FrameNumber} / {frameDetail.FrameTotal}";
@@ -112,6 +107,21 @@ namespace TemperaMental.UI.Display.MainView
         public void ActionOnBpmChanged(int bpm)
         {
             bpmText.text = bpm.ToString();
+        }
+
+        private void SetRateTextLabel(int rate)
+        {
+            if (transformRates.TryGetValue(rate, out var rateLabel))
+            {
+                transformText.text = rateLabel;
+            }
+        }
+
+        private void SetMessageAlpha(float alpha)
+        {
+            Color color = logText.color;
+            color.a = alpha;
+            logText.color = color;
         }
 
         private void OnDisable()

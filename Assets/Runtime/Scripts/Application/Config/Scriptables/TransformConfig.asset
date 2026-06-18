@@ -12,14 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9ad4a25f655c440d3b948184e4350ac3, type: 3}
   m_Name: TransformConfig
   m_EditorClassIdentifier: Assembly-CSharp::TemperaMental.Applications.Config.TransformConfig
+  DefaultRate: 1
+  SimpleMode: Simple
+  IndividualMode: Individual
   RatePairs:
-  - Value: 0.0625
+  - Value: 0
+    Label: Off
+  - Value: 16
     Label: 16 Beats
-  - Value: 0.125
+  - Value: 8
     Label: 8 Beats
-  - Value: 0.25
+  - Value: 4
     Label: 4 Beats
-  - Value: 0.5
+  - Value: 2
     Label: 2 Beats
   - Value: 1
-    Label: 1 Beat
+    Label: Per Beat

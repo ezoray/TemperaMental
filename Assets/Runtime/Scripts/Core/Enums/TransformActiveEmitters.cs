@@ -3,7 +3,7 @@ using System;
 namespace TemperaMental.Core
 {
     [Flags]
-    public enum TransformEmitters
+    public enum TransformActiveEmitters
     {
         None = 0,
         Blue = 1,

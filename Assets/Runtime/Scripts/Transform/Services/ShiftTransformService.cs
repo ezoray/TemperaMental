@@ -1,6 +1,8 @@
 using System;
 using TemperaMental.Applications.Config;
 using TemperaMental.Core;
+using UnityEngine;
+using UnityEngine.Events;
 
 namespace TemperaMental.Transforms
 {
@@ -10,6 +12,8 @@ namespace TemperaMental.Transforms
         int gridHeight;
 
         bool isWrapping;
+
+        [SerializeField] UnityEvent<bool> onWrapStateChanged;
 
         protected override void Awake()
         {
@@ -22,26 +26,53 @@ namespace TemperaMental.Transforms
             latchableDirections = TransformLatchableDirections.Shift;
         }
 
-        public override void ResetTransform(int masterTickCount)
+        public override void ResetTransform()
         {
-            base.ResetTransform(masterTickCount);
+            base.ResetTransform();
             isWrapping = false;
         }
 
-        public bool ToggleWrap()
+        public void ToggleWrap()
         {
             isWrapping = !isWrapping;
-            return isWrapping;
+
+            onWrapStateChanged?.Invoke(isWrapping);
         }
 
         public override ulong[] DoTransform(ulong[] groups)
         {
-            if (currentDirections == TransformDirections.None)
-                return groups;
+            if (TransformMode == TransformMode.Simple)
+            {
+                TransformDirections directions = GetDirections();
 
-            return DoSingleTransform(groups, currentDirections);
+                if (directions == TransformDirections.None)
+                    return groups;
+
+                return DoSingleTransform(groups, directions);
+            }
+            else
+            {
+                ulong[] result = groups;
+
+                // each emitter shifts independently with its own direction and rate
+                for (int i = 0; i < 4; i++)
+                {
+                    if (!ShouldEmitterFire(i))
+                        continue;
+
+                    TransformDirections direction = GetEmitterDirections(i);
+
+                    if (direction == TransformDirections.None)
+                        continue;
+
+                    result = DoSingleTransformForEmitter(result, direction, i);
+                }
+
+                return result;
+            }
         }
 
+        // simple mode — shifts all active emitters with the same direction
         protected override ulong[] DoSingleTransform(ulong[] groups, TransformDirections direction)
         {
             bool hasHorizontal =
@@ -62,22 +93,22 @@ namespace TemperaMental.Transforms
 
             ulong inactiveOccupied = 0;
 
-            // Build occupied mask from inactive emitters
+            // build occupied mask from inactive emitters
             for (int i = 0; i < groupCount; i++)
             {
-                TransformEmitters emitterFlag = (TransformEmitters)(1 << i);
+                TransformActiveEmitters emitterFlag = (TransformActiveEmitters)(1 << i);
 
-                if ((activeEmitters & emitterFlag) == 0)
+                if ((ActiveEmitters & emitterFlag) == 0)
                     inactiveOccupied |= groups[i];
             }
 
-            // Transform active emitters
+            // transform active emitters
             for (int i = 0; i < groupCount; i++)
             {
-                TransformEmitters emitterFlag = (TransformEmitters)(1 << i);
+                TransformActiveEmitters emitterFlag = (TransformActiveEmitters)(1 << i);
 
-                // Pass inactive emitters through untouched
-                if ((activeEmitters & emitterFlag) == 0)
+                // pass inactive emitters through untouched
+                if ((ActiveEmitters & emitterFlag) == 0)
                 {
                     transformedGroups[i] = groups[i];
                     continue;
@@ -91,16 +122,16 @@ namespace TemperaMental.Transforms
                 if (hasVertical)
                     mask = ShiftBitmask(mask, verticalDirection, isWrapping);
 
-                // Prevent overlap with inactive emitters
+                // prevent overlap with inactive emitters
                 transformedGroups[i] = mask & ~inactiveOccupied;
             }
 
-            // Last-writer-wins collision resolution between active emitters
+            // last-writer-wins collision resolution between active emitters
             for (int i = 0; i < transformedGroups.Length; i++)
             {
-                TransformEmitters emitterFlagI = (TransformEmitters)(1 << i);
+                TransformActiveEmitters emitterFlagI = (TransformActiveEmitters)(1 << i);
 
-                if ((activeEmitters & emitterFlagI) == 0)
+                if ((ActiveEmitters & emitterFlagI) == 0)
                     continue;
 
                 ulong movedInto = transformedGroups[i] & ~groups[i];
@@ -110,14 +141,60 @@ namespace TemperaMental.Transforms
                     if (i == j)
                         continue;
 
-                    TransformEmitters emitterFlagJ = (TransformEmitters)(1 << j);
+                    TransformActiveEmitters emitterFlagJ = (TransformActiveEmitters)(1 << j);
 
-                    if ((activeEmitters & emitterFlagJ) == 0)
+                    if ((ActiveEmitters & emitterFlagJ) == 0)
                         continue;
 
                     transformedGroups[j] &= ~movedInto;
                 }
             }
+
+            return transformedGroups;
+        }
+
+        // individual mode — shifts only the specified emitter, leaving all others untouched
+        private ulong[] DoSingleTransformForEmitter(ulong[] groups, TransformDirections direction, int emitterId)
+        {
+            bool hasHorizontal =
+                (direction & TransformDirections.Left) != 0 ||
+                (direction & TransformDirections.Right) != 0;
+
+            bool hasVertical =
+                (direction & TransformDirections.Up) != 0 ||
+                (direction & TransformDirections.Down) != 0;
+
+            TransformDirections horizontalDirection =
+                direction & (TransformDirections.Left | TransformDirections.Right);
+
+            TransformDirections verticalDirection =
+                direction & (TransformDirections.Up | TransformDirections.Down);
+
+            int groupCount = groups.Length;
+
+            // build occupied mask from all emitters except the one being shifted
+            ulong othersOccupied = 0;
+
+            for (int i = 0; i < groupCount; i++)
+            {
+                if (i != emitterId)
+                    othersOccupied |= groups[i];
+            }
+
+            // copy all emitters unchanged first
+            Array.Copy(groups, transformedGroups, groupCount);
+
+            // Shift only the target emitter
+            ulong mask = groups[emitterId];
+
+            if (hasHorizontal)
+                mask = ShiftBitmask(mask, horizontalDirection, isWrapping);
+
+            if (hasVertical)
+                mask = ShiftBitmask(mask, verticalDirection, isWrapping);
+
+            // prevent overlap with all other emitters
+            transformedGroups[emitterId] = mask & ~othersOccupied;
 
             return transformedGroups;
         }
@@ -134,7 +211,7 @@ namespace TemperaMental.Transforms
             };
         }
 
-        // Move emitters to lower x (subtract one column)
+        // move emitters to lower x (subtract one column)
         private ulong ShiftLeft(ulong mask, bool wrap)
         {
             ulong lost = mask & ColumnMask(0);
@@ -146,7 +223,7 @@ namespace TemperaMental.Transforms
             return shifted;
         }
 
-        // Move emitters to higher x (add one column)
+        // move emitters to higher x (add one column)
         private ulong ShiftRight(ulong mask, bool wrap)
         {
             ulong lost = mask & ColumnMask(gridWidth - 1);
@@ -158,7 +235,7 @@ namespace TemperaMental.Transforms
             return shifted;
         }
 
-        // Move emitters to higher y (decrease index within each column)
+        // move emitters to higher y (decrease index within each column)
         private ulong ShiftUp(ulong mask, bool wrap)
         {
             ulong result = 0;
@@ -166,9 +243,7 @@ namespace TemperaMental.Transforms
             for (int x = 0; x < gridWidth; x++)
             {
                 int shift = x * gridHeight;
-
                 ulong col = (mask & ColumnMask(x)) >> shift;
-
                 ulong lost = col & 1UL;
                 ulong shifted = col >> 1;
 
@@ -181,7 +256,7 @@ namespace TemperaMental.Transforms
             return result;
         }
 
-        // Move emitters to lower y (increase index within each column)
+        // move emitters to lower y (increase index within each column)
         private ulong ShiftDown(ulong mask, bool wrap)
         {
             ulong result = 0;
@@ -190,9 +265,7 @@ namespace TemperaMental.Transforms
             for (int x = 0; x < gridWidth; x++)
             {
                 int shift = x * gridHeight;
-
                 ulong col = (mask & ColumnMask(x)) >> shift;
-
                 ulong lost = (col >> (gridHeight - 1)) & 1UL;
                 ulong shifted = (col << 1) & colBits;
 

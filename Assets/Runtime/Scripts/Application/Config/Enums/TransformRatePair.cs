@@ -3,10 +3,10 @@ namespace TemperaMental.Applications.Config
     [System.Serializable]
     public struct TransformRatePair
     {
-        public float Value;
+        public int Value;
         public string Label;
 
-        public TransformRatePair(float value, string label)
+        public TransformRatePair(int value, string label)
         {
             Value = value;
             Label = label;

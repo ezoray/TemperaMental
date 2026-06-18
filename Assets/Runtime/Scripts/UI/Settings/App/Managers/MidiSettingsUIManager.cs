@@ -1,7 +1,7 @@
 using TMPro;
 using UnityEngine;
 
-namespace TemperaMental.UI.Settings
+namespace TemperaMental.UI.Settings.App
 {
     public class MidiSettingsUIManager : MonoBehaviour
     {

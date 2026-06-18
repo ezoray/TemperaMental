@@ -1,29 +1,31 @@
-using TemperaMental.Core;
 using UnityEngine;
-using UnityEngine.Events;
 
 namespace TemperaMental.UI.Display.Core
 {
     public class DisplayUIManager : MonoBehaviour
     {
-        [SerializeField] GameObject[] displayViews;
+        [SerializeField] GameObject mainView;
+        GameObject currentView;
 
-        int currentViewIndex;
-
-        [SerializeField] UnityEvent<DisplayViewType> onSettingsViewClosed;
-
-
-        public void OnClickSettings()
+        private void Awake()
         {
-            int previousViewIndex = currentViewIndex;
-            displayViews[previousViewIndex].SetActive(false);
+            currentView = mainView;
+        }
 
-            currentViewIndex = (currentViewIndex + 1) % displayViews.Length;
+        public void ActionOnViewClosed()
+        {
+            currentView.SetActive(false);
 
-            displayViews[currentViewIndex].SetActive(true);
+            currentView = mainView;
+            currentView.SetActive(true);
+        }    
 
-            if (previousViewIndex > 0 && currentViewIndex == 0)
-                onSettingsViewClosed?.Invoke((DisplayViewType)previousViewIndex);
+        public void ActionOnViewChanged(GameObject newView)
+        {
+            currentView.SetActive(false);
+
+            currentView = newView;
+            currentView.SetActive(true);
         }
     }
 }

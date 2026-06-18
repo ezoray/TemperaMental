@@ -20,7 +20,6 @@ namespace TemperaMental.Transforms
         List<int> occupiedPositions;
         List<int> emptyPositions;
 
-
         protected override void Awake()
         {
             base.Awake();
@@ -41,10 +40,42 @@ namespace TemperaMental.Transforms
             latchableDirections = TransformLatchableDirections.Random;
         }
 
-        public override void ResetTransform(int masterTickCount)
+        public override void ResetTransform()
         {
-            base.ResetTransform(masterTickCount);
+            base.ResetTransform();
             targetOffset = 1;
+        }
+
+        public override ulong[] DoTransform(ulong[] groups)
+        {
+            if (TransformMode == TransformMode.Simple)
+            {
+                TransformDirections directions = GetDirections();
+
+                if (directions == TransformDirections.None)
+                    return groups;
+
+                return DoSingleTransform(groups, directions);
+            }
+            else
+            {
+                ulong[] result = groups;
+
+                for (int i = 0; i < 4; i++)
+                {
+                    if (!ShouldEmitterFire(i))
+                        continue;
+
+                    TransformDirections direction = GetEmitterDirections(i);
+
+                    if (direction == TransformDirections.None)
+                        continue;
+
+                    result = DoRandomTransform(result, direction, i);
+                }
+
+                return result;
+            }
         }
 
         protected override ulong[] DoSingleTransform(ulong[] groups, TransformDirections direction)
@@ -61,14 +92,25 @@ namespace TemperaMental.Transforms
                 return groups;
             }
 
-            int currentCount = EmitterUtils.GetEmitterCount(groups);
+            // simple mode only — build active emitter ids from active emitters
+            activeEmitterIds.Clear();
 
-            int targetCount =
+            for (int i = 0; i < transformedGroups.Length; i++)
+            {
+                TransformActiveEmitters emitterFlag = (TransformActiveEmitters)(1 << i);
+
+                if ((ActiveEmitters & emitterFlag) != 0)
+                    activeEmitterIds.Add(i);
+            }
+
+            int count = EmitterUtils.GetEmitterCount(groups);
+
+            int target =
                 (direction & TransformDirections.Right) != 0
-                    ? Mathf.Min(currentCount + targetOffset, maxEmitters)
-                    : Mathf.Max(currentCount - targetOffset, 0);
+                    ? Mathf.Min(count + targetOffset, maxEmitters)
+                    : Mathf.Max(count - targetOffset, 0);
 
-            return DoRandomTransform(groups, targetCount);
+            return DoRandomTransform(groups, target, activeEmitterIds);
         }
 
         public void AdjustTargetOffset(int change)
@@ -79,24 +121,52 @@ namespace TemperaMental.Transforms
             LogMan.LogTemp("Random emitters +" + targetOffset);
         }
 
-        public ulong[] DoRandomTransform(ulong[] groups, int targetCount)
+        private ulong[] DoRandomTransform(ulong[] groups, TransformDirections direction, int emitterId)
+        {
+            activeEmitterIds.Clear();
+            activeEmitterIds.Add(emitterId);
+
+            int currentCount = EmitterUtils.GetEmitterCount(groups);
+
+            int targetCount =
+                (direction & TransformDirections.Right) != 0
+                    ? Mathf.Min(currentCount + targetOffset, maxEmitters)
+                    : Mathf.Max(currentCount - targetOffset, 0);
+
+            return DoRandomTransform(groups, targetCount, activeEmitterIds);
+        }
+
+        public ulong[] DoRandomTransform(ulong[] groups, int targetCount, TransformMode mode)
+        {
+            activeEmitterIds.Clear();
+
+            if (mode == TransformMode.Individual)
+            {
+                // scope to selected emitter only
+                activeEmitterIds.Add(IndividualEmitter);
+            }
+            else
+            {
+                // build from active emitters
+                for (int i = 0; i < groups.Length; i++)
+                {
+                    TransformActiveEmitters emitterFlag = (TransformActiveEmitters)(1 << i);
+
+                    if ((ActiveEmitters & emitterFlag) != 0)
+                        activeEmitterIds.Add(i);
+                }
+            }
+
+            return DoRandomTransform(groups, targetCount, activeEmitterIds);
+        }
+
+        private ulong[] DoRandomTransform(ulong[] groups, int targetCount, List<int> emitterIds)
         {
             System.Array.Copy(groups, transformedGroups, groups.Length);
 
             int groupCount = transformedGroups.Length;
 
-            // Collect active emitter ids
-            activeEmitterIds.Clear();
-
-            for (int i = 0; i < groupCount; i++)
-            {
-                TransformEmitters emitterFlag = (TransformEmitters)(1 << i);
-
-                if ((activeEmitters & emitterFlag) != 0)
-                    activeEmitterIds.Add(i);
-            }
-
-            // Total count across all emitters
+            // total count across all emitters
             int currentCount = 0;
 
             for (int i = 0; i < groupCount; i++)
@@ -110,17 +180,12 @@ namespace TemperaMental.Transforms
                 }
             }
 
-            // Collect occupied positions from active emitters only
+            // collect occupied positions from the specified emitters only
             occupiedPositions.Clear();
 
-            for (int i = 0; i < groupCount; i++)
+            foreach (int id in emitterIds)
             {
-                TransformEmitters emitterFlag = (TransformEmitters)(1 << i);
-
-                if ((activeEmitters & emitterFlag) == 0)
-                    continue;
-
-                ulong mask = transformedGroups[i];
+                ulong mask = transformedGroups[id];
 
                 for (int bit = 0; bit < totalBits; bit++)
                 {
@@ -132,13 +197,13 @@ namespace TemperaMental.Transforms
             if (targetCount == currentCount)
                 return transformedGroups;
 
-            if (targetCount > currentCount && activeEmitterIds.Count == 0)
+            if (targetCount > currentCount && emitterIds.Count == 0)
                 return transformedGroups;
 
             if (targetCount < currentCount && occupiedPositions.Count == 0)
                 return transformedGroups;
 
-            // Add emitters
+            // add emitters
             if (targetCount > currentCount)
             {
                 ulong allOccupied = 0;
@@ -167,15 +232,12 @@ namespace TemperaMental.Transforms
 
                     int pos = emptyPositions[i];
 
-                    int emitterId =
-                        activeEmitterIds[
-                            Random.Range(0, activeEmitterIds.Count)
-                        ];
+                    int emitterId = emitterIds[Random.Range(0, emitterIds.Count)];
 
                     transformedGroups[emitterId] |= 1UL << pos;
                 }
             }
-            // Remove emitters
+            // remove emitters
             else if (targetCount < currentCount)
             {
                 int toRemove = Mathf.Min(
@@ -192,15 +254,9 @@ namespace TemperaMental.Transforms
                     int pos = occupiedPositions[i];
                     ulong clearBitMask = ~(1UL << pos);
 
-                    for (int j = 0; j < groupCount; j++)
+                    foreach (int id in emitterIds)
                     {
-                        TransformEmitters emitterFlag =
-                            (TransformEmitters)(1 << j);
-
-                        if ((activeEmitters & emitterFlag) == 0)
-                            continue;
-
-                        transformedGroups[j] &= clearBitMask;
+                        transformedGroups[id] &= clearBitMask;
                     }
                 }
             }

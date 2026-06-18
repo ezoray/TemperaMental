@@ -8,15 +8,9 @@ namespace TemperaMental.Settings
         [SerializeField] MidiSettingsManager settingsManager;
 
 
-        public void ActionOnSettingsViewClosed(DisplayViewType viewType)
+        public void OnClickChannel(int directionValue)
         {
-            settingsManager.SetMidiChannel();
-        }
-
-        public void OnClickChannel(int value)
-        {
-            int direction = value % 2 == 0 ? -1 : 1;
-            settingsManager.CycleMidiChannel(direction);
+            settingsManager.CycleMidiChannel(directionValue);
         }
     }
 }

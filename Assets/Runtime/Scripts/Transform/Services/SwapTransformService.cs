@@ -19,6 +19,17 @@ namespace TemperaMental.Transforms
             latchableDirections = TransformLatchableDirections.Swap;
         }
 
+        public override ulong[] DoTransform(ulong[] groups)
+        {
+            // swap has no meaningful individual mode — always operates in simple mode
+            TransformDirections directions = GetDirections();
+
+            if (directions == TransformDirections.None)
+                return groups;
+
+            return DoSingleTransform(groups, directions);
+        }
+
         protected override ulong[] DoSingleTransform(ulong[] groups, TransformDirections direction)
         {
             Array.Copy(groups, transformedGroups, groups.Length);
@@ -32,9 +43,9 @@ namespace TemperaMental.Transforms
 
                 for (int i = 0; i < groups.Length; i++)
                 {
-                    TransformEmitters emitterFlag = (TransformEmitters)(1 << i);
+                    TransformActiveEmitters emitterFlag = (TransformActiveEmitters)(1 << i);
 
-                    if ((activeEmitters & emitterFlag) != 0)
+                    if ((ActiveEmitters & emitterFlag) != 0)
                         activeEmitterIds.Add(i);
                 }
 
@@ -42,15 +53,11 @@ namespace TemperaMental.Transforms
 
                 if (activeCount > 1)
                 {
-                    // Rotate left
+                    // rotate left
                     if (hasLeft)
                     {
                         int lastIndex = activeCount - 1;
-
-                        ulong last =
-                            transformedGroups[
-                                activeEmitterIds[lastIndex]
-                            ];
+                        ulong last = transformedGroups[activeEmitterIds[lastIndex]];
 
                         for (int i = lastIndex; i > 0; i--)
                         {
@@ -60,15 +67,11 @@ namespace TemperaMental.Transforms
 
                         transformedGroups[activeEmitterIds[0]] = last;
                     }
-                    // Rotate right
+                    // rotate right
                     else
                     {
                         int lastIndex = activeCount - 1;
-
-                        ulong first =
-                            transformedGroups[
-                                activeEmitterIds[0]
-                            ];
+                        ulong first = transformedGroups[activeEmitterIds[0]];
 
                         for (int i = 0; i < lastIndex; i++)
                         {
@@ -87,14 +90,11 @@ namespace TemperaMental.Transforms
                 int a = isUp ? 0 : 1;
                 int b = isUp ? 3 : 2;
 
-                TransformEmitters emitterFlagA =
-                    (TransformEmitters)(1 << a);
+                TransformActiveEmitters emitterFlagA = (TransformActiveEmitters)(1 << a);
+                TransformActiveEmitters emitterFlagB = (TransformActiveEmitters)(1 << b);
 
-                TransformEmitters emitterFlagB =
-                    (TransformEmitters)(1 << b);
-
-                bool aActive = (activeEmitters & emitterFlagA) != 0;
-                bool bActive = (activeEmitters & emitterFlagB) != 0;
+                bool aActive = (ActiveEmitters & emitterFlagA) != 0;
+                bool bActive = (ActiveEmitters & emitterFlagB) != 0;
 
                 if (aActive && bActive)
                 {

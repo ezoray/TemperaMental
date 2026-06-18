@@ -1,6 +1,6 @@
 using System;
 
-namespace TemperaMental.UI.Core
+namespace TemperaMental.UI.State
 {
     [Flags]
     public enum UIStates
