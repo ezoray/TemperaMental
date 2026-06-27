@@ -8,7 +8,7 @@ namespace TemperaMental.UI.Settings.App
         [SerializeField] TextMeshProUGUI midiChannel;
 
 
-        public void ActionOnMidiChannelChanged(int channel)
+        public void ActionOnMidiChannelUpdated(int channel)
         {
             midiChannel.text = channel.ToString();
         }

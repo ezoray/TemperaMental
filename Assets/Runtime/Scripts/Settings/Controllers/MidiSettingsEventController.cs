@@ -1,4 +1,3 @@
-using TemperaMental.Core;
 using UnityEngine;
 
 namespace TemperaMental.Settings
@@ -7,6 +6,10 @@ namespace TemperaMental.Settings
     {
         [SerializeField] MidiSettingsManager settingsManager;
 
+        public void OnChannelSettingsClosed()
+        {
+            settingsManager.SetMidiChannel();
+        }
 
         public void OnClickChannel(int directionValue)
         {

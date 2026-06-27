@@ -11,6 +11,7 @@ namespace TemperaMental.Settings
         int midiChannel;
         int midiChannelCount;
 
+        [SerializeField] UnityEvent<int> onMidiChannelUpdated; // updates UI
         [SerializeField] UnityEvent<int> onMidiChannelChanged;
 
 
@@ -20,6 +21,7 @@ namespace TemperaMental.Settings
 
             midiChannel = PlayerPrefs.GetInt($"{ChannelPrefsKey}", ConfigRegistry.Midi.DefaultMidiChannel);
 
+            onMidiChannelUpdated?.Invoke(midiChannel);
             onMidiChannelChanged?.Invoke(midiChannel);
         }
 
@@ -27,6 +29,11 @@ namespace TemperaMental.Settings
         {
             midiChannel = Mathf.Clamp(midiChannel + directionValue, 1, midiChannelCount);
 
+            onMidiChannelUpdated?.Invoke(midiChannel);
+        }
+
+        public void SetMidiChannel()
+        {
             SaveChannel();
 
             onMidiChannelChanged?.Invoke(midiChannel);
