@@ -7,6 +7,11 @@ namespace TemperaMental.Grid
     {
         [SerializeField] GridManager gridManager;
 
+        public void ActionOnEmitterTwoLaneChanged(int emitterId, bool isSet)
+        {
+            gridManager.SetBackgroundBlockColor(emitterId, isSet);
+        }
+
         public void ActionOnAddEmitter(EmitterDetail emitterDetail)
         {
             gridManager.AddTile(emitterDetail);

@@ -1,5 +1,4 @@
 using TemperaMental.Applications.Config;
-using TemperaMental.Logs;
 using UnityEngine;
 using UnityEngine.Events;
 

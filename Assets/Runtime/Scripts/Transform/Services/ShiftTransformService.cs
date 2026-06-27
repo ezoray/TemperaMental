@@ -1,6 +1,8 @@
 using System;
 using TemperaMental.Applications.Config;
 using TemperaMental.Core;
+using TemperaMental.Settings;
+using TemperaMental.Utils;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -13,6 +15,8 @@ namespace TemperaMental.Transforms
 
         bool isWrapping;
 
+        protected ulong[] tickStartSnapshot;
+
         [SerializeField] UnityEvent<bool> onWrapStateChanged;
 
         protected override void Awake()
@@ -24,6 +28,8 @@ namespace TemperaMental.Transforms
 
             allowedDirections = TransformDirections.Shift;
             latchableDirections = TransformLatchableDirections.Shift;
+
+            tickStartSnapshot = new ulong[ConfigRegistry.Grid.EmitterCount];
         }
 
         public override void ResetTransform()
@@ -48,28 +54,97 @@ namespace TemperaMental.Transforms
                 if (directions == TransformDirections.None)
                     return groups;
 
-                return DoSingleTransform(groups, directions);
+                ulong[] result = DoSingleTransform(groups, directions);
+                EmitterUtils.ReassignLaneBitsAcrossActive(result, EmitterSettingsManager.CurrentTwoLanes);
+                return result;
             }
             else
             {
-                ulong[] result = groups;
+                Array.Copy(groups, tickStartSnapshot, groups.Length);
+                Array.Copy(groups, transformedGroups, groups.Length);
 
-                // each emitter shifts independently with its own direction and rate
-                for (int i = 0; i < 4; i++)
+                bool[] twoLaneActive = EmitterSettingsManager.CurrentTwoLanes;
+
+                // all active 2-Lane territory — positions inside active lanes are always
+                // claimable via reassignment and must never count as "blocked" for an
+                // incoming shifted bit, regardless of what currently occupies them
+                ulong allLaneMask = 0;
+                for (int i = 0; i < transformedGroups.Length; i++)
                 {
-                    if (!ShouldEmitterFire(i))
-                        continue;
-
-                    TransformDirections direction = GetEmitterDirections(i);
-
-                    if (direction == TransformDirections.None)
-                        continue;
-
-                    result = DoSingleTransformForEmitter(result, direction, i);
+                    if (twoLaneActive[i])
+                        allLaneMask |= EmitterUtils.LaneMasks[i];
                 }
 
-                return result;
+                // Phase 1 — clear each firing emitter's own original bits from the
+                // result buffer before any shifting begins. This cleanly separates
+                // "bits about to move" from "bits already received via lane reassignment
+                // from an earlier emitter this same tick," which share the same slot
+                // and cannot be distinguished by bitmask alone once mixed together
+                for (int i = 0; i < 4; i++)
+                {
+                    if (!ShouldEmitterFire(i)) continue;
+                    if (GetEmitterDirections(i) == TransformDirections.None) continue;
+                    transformedGroups[i] &= ~tickStartSnapshot[i];
+                }
+
+                // Phase 2 — shift each firing emitter's original bits and write to
+                // their new positions, including lane reassignment
+                for (int i = 0; i < 4; i++)
+                {
+                    if (!ShouldEmitterFire(i)) continue;
+
+                    TransformDirections direction = GetEmitterDirections(i);
+                    if (direction == TransformDirections.None) continue;
+
+                    ulong ownMask = tickStartSnapshot[i];
+                    if (ownMask == 0) continue;
+
+                    // build othersOccupied from current live result, excluding all active
+                    // 2-Lane territory — those positions are claimable via reassignment
+                    // and must not block incoming bits even if currently occupied
+                    ulong othersOccupied = 0;
+                    for (int j = 0; j < transformedGroups.Length; j++)
+                    {
+                        if (j != i)
+                            othersOccupied |= (transformedGroups[j] & ~allLaneMask);
+                    }
+
+                    bool hasHorizontal =
+                        (direction & TransformDirections.Left) != 0 ||
+                        (direction & TransformDirections.Right) != 0;
+
+                    bool hasVertical =
+                        (direction & TransformDirections.Up) != 0 ||
+                        (direction & TransformDirections.Down) != 0;
+
+                    TransformDirections horizontalDirection =
+                        direction & (TransformDirections.Left | TransformDirections.Right);
+
+                    TransformDirections verticalDirection =
+                        direction & (TransformDirections.Up | TransformDirections.Down);
+
+                    ulong mask = ownMask;
+
+                    if (hasHorizontal)
+                        mask = ShiftBitmask(mask, horizontalDirection, isWrapping);
+
+                    if (hasVertical)
+                        mask = ShiftBitmask(mask, verticalDirection, isWrapping);
+
+                    mask &= ~othersOccupied;
+
+                    EmitterUtils.ReassignLaneBits(transformedGroups, mask, i, twoLaneActive);
+                }
+
+                return transformedGroups;
             }
+        }
+
+        // immediate (unlatched) single-press transform for Individual mode
+        protected override ulong[] DoSingleTransformForSelectedEmitter(ulong[] groups, TransformDirections direction)
+        {
+            int emitterId = IndividualEmitter;
+            return DoSingleTransformForEmitter(groups, groups[emitterId], direction, emitterId);
         }
 
         // simple mode — shifts all active emitters with the same direction
@@ -153,8 +228,11 @@ namespace TemperaMental.Transforms
             return transformedGroups;
         }
 
-        // individual mode — shifts only the specified emitter, leaving all others untouched
-        private ulong[] DoSingleTransformForEmitter(ulong[] groups, TransformDirections direction, int emitterId)
+        // individual mode — shifts only the specified emitter. 'ownMask' is this emitter's
+        // bits as they were at the START of this tick — not read live from groups[emitterId],
+        // since an earlier-firing emitter this same tick may have already reassigned bits
+        // into this slot via 2-Lane entry, and those must not be re-shifted a second time
+        private ulong[] DoSingleTransformForEmitter(ulong[] groups, ulong ownMask, TransformDirections direction, int emitterId)
         {
             bool hasHorizontal =
                 (direction & TransformDirections.Left) != 0 ||
@@ -172,7 +250,6 @@ namespace TemperaMental.Transforms
 
             int groupCount = groups.Length;
 
-            // build occupied mask from all emitters except the one being shifted
             ulong othersOccupied = 0;
 
             for (int i = 0; i < groupCount; i++)
@@ -181,11 +258,14 @@ namespace TemperaMental.Transforms
                     othersOccupied |= groups[i];
             }
 
-            // copy all emitters unchanged first
             Array.Copy(groups, transformedGroups, groupCount);
 
-            // Shift only the target emitter
-            ulong mask = groups[emitterId];
+            // only remove THIS emitter's own original bits from its slot — anything
+            // else currently in the slot (reassigned in by an earlier emitter's turn
+            // this same tick) must survive
+            transformedGroups[emitterId] &= ~ownMask;
+
+            ulong mask = ownMask;
 
             if (hasHorizontal)
                 mask = ShiftBitmask(mask, horizontalDirection, isWrapping);
@@ -193,8 +273,10 @@ namespace TemperaMental.Transforms
             if (hasVertical)
                 mask = ShiftBitmask(mask, verticalDirection, isWrapping);
 
-            // prevent overlap with all other emitters
-            transformedGroups[emitterId] = mask & ~othersOccupied;
+            mask &= ~othersOccupied;
+
+            // reassign any bits that now fall inside a different emitter's 2-Lane territory
+            EmitterUtils.ReassignLaneBits(transformedGroups, mask, emitterId, EmitterSettingsManager.CurrentTwoLanes);
 
             return transformedGroups;
         }

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using TemperaMental.Applications.Config;
 using TemperaMental.Core;
 using TemperaMental.Logs;
+using TemperaMental.Settings;
 using TemperaMental.Utils;
 using UnityEngine;
 
@@ -121,8 +122,30 @@ namespace TemperaMental.Transforms
             LogMan.LogTemp("Random emitters +" + targetOffset);
         }
 
+        // immediate (unlatched) single-press transform for Individual mode — delegates
+        // to the same per-emitter overload already used by the latched Individual path
+        protected override ulong[] DoSingleTransformForSelectedEmitter(ulong[] groups, TransformDirections direction)
+        {
+            return DoRandomTransform(groups, direction, IndividualEmitter);
+        }
+
         private ulong[] DoRandomTransform(ulong[] groups, TransformDirections direction, int emitterId)
         {
+            // Up/Down adjusts the shared density offset and never touches groups directly —
+            // same as Simple mode. This check was previously only present in DoSingleTransform,
+            // meaning Individual mode (latched or unlatched) never handled Up/Down at all.
+            if ((direction & TransformDirections.Up) != 0)
+            {
+                AdjustTargetOffset(1);
+                return groups;
+            }
+
+            if ((direction & TransformDirections.Down) != 0)
+            {
+                AdjustTargetOffset(-1);
+                return groups;
+            }
+
             activeEmitterIds.Clear();
             activeEmitterIds.Add(emitterId);
 
@@ -165,6 +188,7 @@ namespace TemperaMental.Transforms
             System.Array.Copy(groups, transformedGroups, groups.Length);
 
             int groupCount = transformedGroups.Length;
+            bool[] twoLaneActive = EmitterSettingsManager.CurrentTwoLanes;
 
             // total count across all emitters
             int currentCount = 0;
@@ -215,8 +239,21 @@ namespace TemperaMental.Transforms
 
                 for (int bit = 0; bit < totalBits; bit++)
                 {
-                    if ((allOccupied & (1UL << bit)) == 0)
-                        emptyPositions.Add(bit);
+                    if ((allOccupied & (1UL << bit)) != 0)
+                        continue;
+
+                    int bitLaneOwner = EmitterUtils.GetLaneOwner(bit, twoLaneActive);
+
+                    // a position inside a 2-Lane lane is only a valid candidate if its
+                    // owner is part of the scope for this call. Using emitterIds rather
+                    // than ActiveEmitters matters specifically for Individual mode: there,
+                    // ActiveEmitters means "has a latched direction set", NOT "is the
+                    // emitter selected for this random call" — a selected-but-unlatched
+                    // emitter would otherwise have its own lane wrongly excluded
+                    if (bitLaneOwner != -1 && !emitterIds.Contains(bitLaneOwner))
+                        continue;
+
+                    emptyPositions.Add(bit);
                 }
 
                 int toAdd = Mathf.Min(
@@ -232,7 +269,12 @@ namespace TemperaMental.Transforms
 
                     int pos = emptyPositions[i];
 
-                    int emitterId = emitterIds[Random.Range(0, emitterIds.Count)];
+                    // a position inside an active 2-Lane lane is always claimed by that
+                    // lane's owner, regardless of which emitter was scoped for this call
+                    int laneOwner = EmitterUtils.GetLaneOwner(pos, twoLaneActive);
+                    int emitterId = laneOwner != -1
+                        ? laneOwner
+                        : emitterIds[Random.Range(0, emitterIds.Count)];
 
                     transformedGroups[emitterId] |= 1UL << pos;
                 }

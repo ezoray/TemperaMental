@@ -216,16 +216,12 @@ namespace TemperaMental.Frames
 
         public void AddEmitter(Vector2Int cellPosition)
         {
-            if (!currentFrame.CheckSameEmitterAtPosition(cellPosition, currentEmitterId))
-            {
-                currentFrame.AddEmitter(cellPosition, currentEmitterId);
+            int actualEmitterId = currentFrame.AddEmitter(cellPosition, currentEmitterId);
 
-                int emitterCount = EmitterUtils.GetEmitterCount(currentFrame.GetEmitterGroups());
-                EmitterDetail emitterDetail = new EmitterDetail(cellPosition, currentEmitterId, emitterCount);
-
-                onAddEmitter?.Invoke(emitterDetail);
-            }
-        } 
+            int emitterCount = EmitterUtils.GetEmitterCount(currentFrame.GetEmitterGroups());
+            EmitterDetail emitterDetail = new EmitterDetail(cellPosition, actualEmitterId, emitterCount);
+            onAddEmitter?.Invoke(emitterDetail);
+        }
 
         public IReadOnlyList<Frame> GetFramesFromCurrentPosition()
         {

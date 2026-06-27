@@ -96,7 +96,6 @@ namespace TemperaMental.Midi.Transforms
             }
 
             // set marker at end of last frame/quarter note to force playback to play to the end before looping
-            // todo there is still slight drift (can't see an easy way to fix)
             manager.Objects.Add(new TimedEvent(new MarkerEvent(seqEndMarker), sourceFrames.Count * ticksPerFrame));
         }
 
@@ -195,7 +194,7 @@ namespace TemperaMental.Midi.Transforms
                 }
                 else if (controlNumber == placeCC)
                 {
-                    currentFrame.AddEmitter(EmitterUtils.IndexToPosition((byte)cc.ControlValue), currentEmitterId);
+                    currentFrame.AddEmitter(EmitterUtils.IndexToPosition((byte)cc.ControlValue), currentEmitterId, enforceTwoLane: false);
                 }
             }
 

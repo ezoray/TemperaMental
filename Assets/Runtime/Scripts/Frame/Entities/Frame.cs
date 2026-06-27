@@ -1,5 +1,6 @@
 using System;
 using TemperaMental.Applications.Config;
+using TemperaMental.Settings;
 using TemperaMental.Utils;
 using UnityEngine;
 
@@ -38,11 +39,19 @@ namespace TemperaMental.Frames
             return emitterGroups;
         }
 
-        public void AddEmitter(Vector2Int position, int emitterId)
+        public int AddEmitter(Vector2Int position, int emitterId, bool enforceTwoLane = true)
         {
             int pos = EmitterUtils.PositionToIndex(position);
 
-            // evict any other emitter at this position
+            if (enforceTwoLane)
+            {
+                int laneOwner = EmitterUtils.GetLaneOwner(pos, EmitterSettingsManager.CurrentTwoLanes);
+                if (laneOwner != -1)
+                {
+                    emitterId = laneOwner;
+                }
+            }
+
             for (int i = 0; i < EmitterCount; i++)
             {
                 if (i == emitterId) continue;
@@ -50,6 +59,8 @@ namespace TemperaMental.Frames
             }
 
             emitterGroups[emitterId] |= 1UL << pos;
+
+            return emitterId;
         }
 
         public bool TryRemoveEmitter(Vector2Int position, out int emitterId)

@@ -14,3 +14,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Tempera.Mental.Applications.Config.GridConfig
   GridWidth: 8
   GridHeight: 8
+  DefaultBgTileColor: {r: 0.4, g: 0.4, b: 0.4, a: 1}
+  BgTileBlue: {r: 0.35, g: 0.4, b: 0.55, a: 1}
+  BgTileRed: {r: 0.45, g: 0.35, b: 0.35, a: 1}
+  BgTileYellow: {r: 0.45, g: 0.45, b: 0.35, a: 1}
+  BgTileGreen: {r: 0.35, g: 0.45, b: 0.35, a: 1}
+  EmitterBlue: {r: 0.0047169924, g: 0.5269495, b: 1, a: 1}
+  EmitterRed: {r: 1, g: 0, b: 0, a: 1}
+  EmitterYellow: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  EmitterGreen: {r: 0, g: 1, b: 0, a: 1}
+  BlueEmitterId: 0
+  RedEmitterId: 1
+  YellowEmitterId: 2
+  GreenEmitterId: 3
+  EmitterCount: 4
+  DefaultEmitterId: 0
+  MaxEmitters: 64

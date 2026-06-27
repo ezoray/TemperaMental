@@ -7,16 +7,10 @@ namespace TemperaMental.Settings
     {
         [SerializeField] EmitterSettingsManager settingsManager;
 
-        public void ActionOnSettingsViewClosed(DisplayViewType viewType)
-        {
-            settingsManager.SetEmitterChannels(viewType);
-        }
 
-        public void OnClickChannel(int value)
+        public void OnClickTwoLane(int emitterId)
         {
-            int emitterId = value / 2;
-            int direction = value % 2 == 0 ? -1 : 1;
-            settingsManager.CycleChannel(emitterId, direction);
+            settingsManager.ToggleTwoLane(emitterId);
         }
     }
 }

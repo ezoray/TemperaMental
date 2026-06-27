@@ -32,6 +32,14 @@ namespace TemperaMental.Transforms
         protected abstract ulong[] DoSingleTransform(ulong[] groups, TransformDirections direction);
         public abstract ulong[] DoTransform(ulong[] groups);
 
+        // immediate (unlatched) single-press transform for Individual mode — applies
+        // 'direction' to the currently selected emitter only (IndividualEmitter) and
+        // returns the result. Mirrors DoSingleTransform's role for Simple mode, since
+        // Individual mode's per-emitter direction state is only populated via latching
+        // and is otherwise empty for a one-shot unlatched press, leaving ActiveEmitters
+        // empty and DoSingleTransform's active-emitter loop with nothing to process.
+        protected abstract ulong[] DoSingleTransformForSelectedEmitter(ulong[] groups, TransformDirections direction);
+
         protected virtual void Awake()
         {
             transformedGroups = new ulong[ConfigRegistry.Grid.EmitterCount];
@@ -69,7 +77,10 @@ namespace TemperaMental.Transforms
             // perform immediate transform
             if (!isLatched || !canLatch)
             {
-                ulong[] result = DoSingleTransform(emitterGroup, direction);
+                ulong[] result = transformMode == TransformMode.Individual
+                    ? DoSingleTransformForSelectedEmitter(emitterGroup, direction)
+                    : DoSingleTransform(emitterGroup, direction);
+
                 OnEmittersTransformed?.Invoke(result);
                 return;
             }
@@ -120,7 +131,9 @@ namespace TemperaMental.Transforms
         public void SelectEmitter(int emitterId)
         {
             currentModeState.SetEmitter(emitterId);
+
             onEmitterSelected?.Invoke(emitterId, GetTransformDetail());
+            onTransformRateChanged?.Invoke(currentModeState.GetRate());
         }
 
         public void ToggleLatch()
@@ -136,6 +149,7 @@ namespace TemperaMental.Transforms
         public void ClearLatch()
         {
             isLatched = false;
+            currentModeState.SetDirections(TransformDirections.None);
 
             onLatchStateChanged?.Invoke(isLatched);
         }

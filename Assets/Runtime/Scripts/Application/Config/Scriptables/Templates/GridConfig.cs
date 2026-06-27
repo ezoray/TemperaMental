@@ -8,6 +8,12 @@ namespace TemperaMental.Applications.Config
         public int GridWidth = 8;
         public int GridHeight = 8;
 
+        public Color DefaultBgTileColor = new Color(0.4f, 0.4f, 0.4f, 1f);
+        public Color BgTileBlue = new Color(0.35f, 0.4f, 0.45f, 1f);
+        public Color BgTileRed = new Color(0.45f, 0.35f, 0.35f, 1f);
+        public Color BgTileYellow = new Color(0.45f, 0.45f, 0.35f, 1f);
+        public Color BgTileGreen = new Color(0.35f, 0.45f, 0.35f, 1f);
+
         public Color EmitterBlue = new Color(0f, 0.6f, 1f, 1f);  // lightened for dark background
         public Color EmitterRed = Color.red;
         public Color EmitterYellow = Color.yellow;

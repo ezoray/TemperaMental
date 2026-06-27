@@ -1,3 +1,4 @@
+using System;
 using TemperaMental.Applications.Config;
 using TemperaMental.Core;
 using UnityEngine;
@@ -11,14 +12,15 @@ namespace TemperaMental.Grid
 
         BoundsInt gridBounds;
 
+
         private void Awake()
         {
              gridBounds = new BoundsInt(0, 0, 0, ConfigRegistry.Grid.GridWidth, ConfigRegistry.Grid.GridHeight, 1);
         }
 
-        private void Start()
+        public void SetBackgroundBlockColor(int blockId, bool isSet)
         {
-            baseTilemapManager.FillBackground(gridBounds);
+            baseTilemapManager.SetTileBlockColor(blockId, isSet);
         }
 
         public bool TryGetCellPositionInGrid(Vector3 worldPoint, out Vector3Int cellPosition)

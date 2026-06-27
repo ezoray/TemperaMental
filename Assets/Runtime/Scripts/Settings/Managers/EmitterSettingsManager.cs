@@ -1,7 +1,4 @@
-using System.Collections.Generic;
 using TemperaMental.Applications.Config;
-using TemperaMental.Core;
-using TemperaMental.Logs;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -9,56 +6,22 @@ namespace TemperaMental.Settings
 {
     public class EmitterSettingsManager : MonoBehaviour
     {
-        const string ChannelPrefsKey = "EmitterMidiChannel_";
+        bool[] twoLanes;
 
-        List<int> emitterMidiChannels;
-        int midiChannelCount = 16;
-
-        [SerializeField] UnityEvent<int, int> onEmitterMidiChannelChanged;
-        [SerializeField] UnityEvent<List<int>> onEmitterMidiChannelsChanged;
+        [SerializeField] UnityEvent<int, bool> onEmitterTwoLaneChanged;
 
         private void Awake()
         {
-            midiChannelCount = ConfigRegistry.Midi.MidiChannelCount;
-
-            emitterMidiChannels = new List<int>();
-
-            for (int i = 0; i < ConfigRegistry.Grid.EmitterCount; i++)
-            {
-                int channel = PlayerPrefs.GetInt($"{ChannelPrefsKey}{i}", ConfigRegistry.Midi.DefaultMidiChannel);
-
-                emitterMidiChannels.Add(channel);
-
-                onEmitterMidiChannelChanged?.Invoke(i, channel);
-            }
+            twoLanes = new bool[ConfigRegistry.Grid.EmitterCount];
+            CurrentTwoLanes = twoLanes;
         }
 
-        private void SaveChannels()
+        public void ToggleTwoLane(int emitterId)
         {
-            for (int i = 0; i < emitterMidiChannels.Count; i++)
-            {
-                PlayerPrefs.SetInt($"{ChannelPrefsKey}{i}", emitterMidiChannels[i]);
-            }
-
-            PlayerPrefs.Save();
+            twoLanes[emitterId] = !twoLanes[emitterId];
+            onEmitterTwoLaneChanged?.Invoke(emitterId, twoLanes[emitterId]);
         }
 
-        public void CycleChannel(int emitterId, int direction)
-        {
-            int midiChannel = Mathf.Clamp(emitterMidiChannels[emitterId] + direction, 1, midiChannelCount);
-
-            emitterMidiChannels[emitterId] = midiChannel;
-
-            onEmitterMidiChannelChanged?.Invoke(emitterId, midiChannel);
-        }
-
-        public void SetEmitterChannels(DisplayViewType viewType)
-        {
-            LogMan.Log("SendEmitterChannels: " + viewType);
-
-            SaveChannels();
-
-            onEmitterMidiChannelsChanged?.Invoke(emitterMidiChannels);
-        }
+        public static bool[] CurrentTwoLanes { get; private set; }
     }
 }
