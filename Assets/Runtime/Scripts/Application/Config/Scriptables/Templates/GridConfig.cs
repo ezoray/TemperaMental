@@ -28,5 +28,7 @@ namespace TemperaMental.Applications.Config
         public int DefaultEmitterId = 0;
 
         public int MaxEmitters = 64;
+
+        public int ColumnsPerLane = 2;
     }
 }

@@ -19,14 +19,20 @@ namespace TemperaMental.Applications.Config
 
         public int DefaultBpm = 128;
         public int MinBpm = 10;
-        public int MaxBpm = 1000;
+   
 
         // tick resolution and interval between ticks
         public short TicksPerFrame = 120; // used only when creating midifiles
         public float EventIntervalMS = 0.0001f; // 0.1ms
 
+        // midi view settings
         public int DefaultMidiChannel = 1;
         public int MidiChannelCount = 16;
+        public int MaxBpm = 1000;
+        public int MinimumMaxBpm = 200;
+
+        public string MidiChannelPrefsKey = "MidiChannel";
+        public string MaxBpmPrefsKey = "MaxBpm";
 
         // cc numbers for emitters
         public int ActivateCC = 10;

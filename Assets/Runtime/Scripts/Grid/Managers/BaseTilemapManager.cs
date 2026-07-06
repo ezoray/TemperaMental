@@ -7,14 +7,13 @@ namespace TemperaMental.Grid
 {
     public class BaseTilemapManager : MonoBehaviour
     {
-        const int ColumnsPerLane = 2;
-
         [SerializeField] Tilemap baseTilemap;
         [SerializeField] TileBase tile;
 
         int gridWith, gridHeight;
         BoundsInt gridBounds;
 
+        int columnsPerLane;
         Color defaultColor;
         Dictionary<int, Color> columnColours;
 
@@ -23,6 +22,8 @@ namespace TemperaMental.Grid
         {
             gridWith = ConfigRegistry.Grid.GridWidth;
             gridHeight = ConfigRegistry.Grid.GridHeight;
+
+            columnsPerLane = ConfigRegistry.Grid.ColumnsPerLane;
 
             defaultColor = ConfigRegistry.Grid.DefaultBgTileColor;
             columnColours = new Dictionary<int, Color>
@@ -44,9 +45,9 @@ namespace TemperaMental.Grid
         public void SetTileBlockColor(int blockId, bool isSet)
         {
             Color tileColor = isSet ? columnColours[blockId] : defaultColor;
-            int startColumn = blockId * ColumnsPerLane;
+            int startColumn = blockId * columnsPerLane;
 
-            for (int col = startColumn; col < startColumn + ColumnsPerLane; col++)
+            for (int col = startColumn; col < startColumn + columnsPerLane; col++)
                 for (int row = 0; row < gridHeight; row++)
                 {
                     var pos = new Vector3Int(col, row, 0);

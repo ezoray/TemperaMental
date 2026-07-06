@@ -6,14 +6,19 @@ namespace TemperaMental.Settings
     {
         [SerializeField] MidiSettingsManager settingsManager;
 
-        public void OnChannelSettingsClosed()
+        public void OnMidiSettingsClosed()
         {
-            settingsManager.SetMidiChannel();
+            settingsManager.SaveMidiSettings();
         }
 
-        public void OnClickChannel(int directionValue)
+        public void OnClickMaxBpm(int directionValue)
         {
-            settingsManager.CycleMidiChannel(directionValue);
+            settingsManager.UpdateMaxBpm(directionValue);
+        }
+
+        public void OnClickMidiChannel(int directionValue)
+        {
+            settingsManager.UpdateMidiChannel(directionValue);
         }
     }
 }

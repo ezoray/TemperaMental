@@ -24,6 +24,10 @@ namespace TemperaMental.Applications.Config
         public string OnText = "ON";
         public string OffText = "OFF";
 
+        // button text
+        public string Play = "Play";
+        public string Pause = "Pause";
+
         // device dropdown placeholders
         public string NoDevicesText = "Connect Midi Device";
         public string SelectDeviceText = "Select Midi Device";

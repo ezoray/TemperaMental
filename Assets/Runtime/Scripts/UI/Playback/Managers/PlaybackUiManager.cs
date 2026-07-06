@@ -13,8 +13,14 @@ namespace TemperaMental.UI.Playbacks
         [SerializeField] Image loopButtonImage;
         [SerializeField] Image reverseButtonImage;
 
-        const string Play = "Play";
-        const string Pause = "Pause";
+        [Header("Order: Play, Stop")]
+        [SerializeField] Button[] controlButtons;
+        [SerializeField] TextMeshProUGUI playText;
+
+        [SerializeField] Slider bpmSlider;
+
+        string play;
+        string pause;
 
         Color defaultOffColor;
         Color playOnColor;
@@ -24,15 +30,13 @@ namespace TemperaMental.UI.Playbacks
 
         int minBpm;
         int maxBpm;
-
-        [Header("Order: Play, Stop")]
-        [SerializeField] Button[] controlButtons;
-        [SerializeField] TextMeshProUGUI playText;
-
-        [SerializeField] Slider bpmSlider;
+        
 
         private void Awake()
         {
+            play = ConfigRegistry.UI.Play;
+            pause = ConfigRegistry.UI.Pause;
+
             defaultOffColor = ConfigRegistry.UI.DefaultColor;
             playOnColor = ConfigRegistry.UI.GreenColor;
             pauseOnColor = ConfigRegistry.UI.OrangeColor;
@@ -40,10 +44,8 @@ namespace TemperaMental.UI.Playbacks
             reverseOnColor = ConfigRegistry.UI.PurpleColor;
 
             minBpm = ConfigRegistry.Midi.MinBpm;
-            maxBpm = ConfigRegistry.Midi.MaxBpm;
 
             bpmSlider.minValue = minBpm;
-            bpmSlider.maxValue = maxBpm;            
         }
 
         public void OnClickIncrementBpm()
@@ -64,6 +66,13 @@ namespace TemperaMental.UI.Playbacks
             {
                 bpmSlider.value = newBpm;
             }
+        }
+
+        public void ActionOnMaxBpmChanged(int maxBpm)
+        {
+            this.maxBpm = maxBpm;
+
+            bpmSlider.maxValue = maxBpm;
         }
 
         public void ActionReverseStateChanged(bool isOn)
@@ -88,25 +97,25 @@ namespace TemperaMental.UI.Playbacks
             switch (playbackState)
             {
                 case PlaybackState.Reset:
-                    playText.text = Play;
+                    playText.text = play;
                     playPauseButtonImage.color = defaultOffColor;
                     ApplyTransportState(PlaybackUIStates.Reset);
                     break;
 
                 case PlaybackState.Playing:
-                    playText.text = Pause;
+                    playText.text = pause;
                     playPauseButtonImage.color = playOnColor;
                     ApplyTransportState(PlaybackUIStates.Playing);
                     break;
 
                 case PlaybackState.Paused:
-                    playText.text = Play;
+                    playText.text = play;
                     playPauseButtonImage.color = pauseOnColor;
                     ApplyTransportState(PlaybackUIStates.Paused);
                     break;
 
                 case PlaybackState.Stopped:
-                    playText.text = Play;
+                    playText.text = play;
                     playPauseButtonImage.color = defaultOffColor;
                     ApplyTransportState(PlaybackUIStates.Stopped);
                     break;
