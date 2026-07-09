@@ -131,9 +131,9 @@ namespace TemperaMental.Transforms
             transformServices[(int)currentTransformType].SelectEmitter(emitterId);
         }
 
-        public void ToggleTransformMode(TransformType transformType)
+        public void ChangeTransformMode(TransformType transformType)
         {
-            TransformMode transformMode = transformServices[(int)transformType].ToggleTransformMode();
+            TransformMode transformMode = transformServices[(int)transformType].ChangeTransformMode();
             onTransformModeChanged?.Invoke(transformType, transformMode);
 
             if (transformType == currentTransformType)

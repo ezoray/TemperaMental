@@ -1,3 +1,4 @@
+using TemperaMental.Core;
 using UnityEngine;
 
 namespace TemperaMental.UI.Display.Core
@@ -14,10 +15,7 @@ namespace TemperaMental.UI.Display.Core
 
         public void ActionOnViewClosed()
         {
-            currentView.SetActive(false);
-
-            currentView = mainView;
-            currentView.SetActive(true);
+            SetMainViewActive();
         }    
 
         public void ActionOnViewChanged(GameObject newView)
@@ -26,6 +24,27 @@ namespace TemperaMental.UI.Display.Core
 
             currentView = newView;
             currentView.SetActive(true);
+        }
+
+        public void ActionOnRecordingStateChanged(bool isRecording)
+        {
+            SetMainViewActive();
+        }
+
+        public void ActionOnPlaybackStateChanged(PlaybackState playbackState)
+        {
+            SetMainViewActive();
+        }
+
+        private void SetMainViewActive()
+        {
+            if (currentView != mainView)
+            {
+                currentView.SetActive(false);
+
+                currentView = mainView;
+                currentView.SetActive(true);
+            }
         }
     }
 }

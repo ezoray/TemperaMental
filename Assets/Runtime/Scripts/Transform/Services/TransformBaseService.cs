@@ -164,7 +164,7 @@ namespace TemperaMental.Transforms
             tickCounter = 0;
         }
 
-        public TransformMode ToggleTransformMode()
+        public TransformMode ChangeTransformMode()
         {
             transformMode = transformMode == TransformMode.Simple
                 ? TransformMode.Individual
