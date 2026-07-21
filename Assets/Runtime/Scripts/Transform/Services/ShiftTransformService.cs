@@ -54,9 +54,10 @@ namespace TemperaMental.Transforms
                 if (directions == TransformDirections.None)
                     return groups;
 
-                ulong[] result = DoSingleTransform(groups, directions);
-                EmitterUtils.ReassignLaneBitsAcrossActive(result, EmitterSettingsManager.CurrentTwoLanes);
-                return result;
+                // DoSingleTransform now applies its own lane reassignment pass internally,
+                // so both this latched/ticked path and the manual immediate-press path
+                // (called directly from HandleDirectionChange) get consistent 2-Lane behaviour
+                return DoSingleTransform(groups, directions);
             }
             else
             {
@@ -147,7 +148,10 @@ namespace TemperaMental.Transforms
             return DoSingleTransformForEmitter(groups, groups[emitterId], direction, emitterId);
         }
 
-        // simple mode — shifts all active emitters with the same direction
+        // simple mode — shifts all active emitters with the same direction.
+        // Called both from DoTransform's Simple branch (latched/ticked path) and
+        // directly from HandleDirectionChange's immediate path (manual single press),
+        // so the 2-Lane reassignment pass lives here rather than in either caller
         protected override ulong[] DoSingleTransform(ulong[] groups, TransformDirections direction)
         {
             bool hasHorizontal =
@@ -224,6 +228,12 @@ namespace TemperaMental.Transforms
                     transformedGroups[j] &= ~movedInto;
                 }
             }
+
+            // reassign any stray bits that ended up inside another emitter's active
+            // 2-Lane territory back to that lane owner's slot. Applied here (rather
+            // than by the caller) so both the latched/ticked path and the manual
+            // immediate-press path get consistent 2-Lane behaviour
+            EmitterUtils.ReassignLaneBitsAcrossActive(transformedGroups, EmitterSettingsManager.CurrentTwoLanes);
 
             return transformedGroups;
         }

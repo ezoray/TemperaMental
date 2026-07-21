@@ -21,9 +21,14 @@ MonoBehaviour:
   SaveTitle: Save Midi File
   DefaultBpm: 128
   MinBpm: 10
-  MaxBpm: 1000
   TicksPerFrame: 120
   EventIntervalMS: 0.0002
+  DefaultMidiChannel: 1
+  MidiChannelCount: 16
+  MaxBpm: 1000
+  MinimumMaxBpm: 200
+  MidiChannelPrefsKey: MidiChannel
+  MaxBpmPrefsKey: MaxBpm
   ActivateCC: 10
   PlaceCC: 11
   RemoveCC: 12

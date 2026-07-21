@@ -16,7 +16,7 @@ namespace TemperaMental.Midi.Core
 
             if (newBpm > maxBpm)
             {
-                LogMan.Log($"File BPM {newBpm} exceeds maximum, setting to {maxBpm}");
+                LogMan.LogTemp($"File BPM {newBpm} exceeds maximum, setting to {maxBpm}");
                 newBpm = maxBpm;
             }
 

@@ -23,7 +23,9 @@ MonoBehaviour:
   ColorDimFactor: 0.6
   OnText: ON
   OffText: OFF
+  Play: Play
+  Pause: Pause
   NoDevicesText: Connect Midi Device
   SelectDeviceText: Select Midi Device
-  TempMessageDuration: 2
+  TempMessageDuration: 4
   TempMessageFadeDuration: 0.5
