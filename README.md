@@ -1,6 +1,6 @@
 <h1 align="center">TemperaMental</h1>
 <p align="center">
-  <img align="center" width="382" height="538" alt="TemperaMental" src="https://github.com/user-attachments/assets/bba24a6a-6a08-4c5e-8ec2-ed385dff7274" />
+  <img align="center" width="382" height="538" alt="TemperaMental" src="https://github.com/user-attachments/assets/9b616d81-b09b-4d57-bb34-2c90920f2f57" />
 </p>
 
 ## Overview
