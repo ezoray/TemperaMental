@@ -13,6 +13,9 @@ namespace TemperaMental.Frames
 
         readonly ulong[] emitterGroups;
 
+        // read-only copy for other threads, rebuilt only after the frame changes
+        ulong[] snapshot;
+
         public Frame()
         {
             emitterGroups = new ulong[EmitterCount];
@@ -31,12 +34,24 @@ namespace TemperaMental.Frames
         public void SetEmitterGroups(ulong[] groups)
         {
             Array.Copy(groups, emitterGroups, emitterGroups.Length);
+            snapshot = null;
         }
 
         // return reference to emitter array for direct access to up-to-date values
         public ulong[] GetEmitterGroups()
         {
             return emitterGroups;
+        }
+
+        // copy that is never modified after it's returned, safe to hand to the clock thread
+        public ulong[] GetSnapshot()
+        {
+            if (snapshot == null)
+            {
+                snapshot = (ulong[])emitterGroups.Clone();
+            }
+
+            return snapshot;
         }
 
         public int AddEmitter(Vector2Int position, int emitterId, bool enforceTwoLane = true)
@@ -59,6 +74,7 @@ namespace TemperaMental.Frames
             }
 
             emitterGroups[emitterId] |= 1UL << pos;
+            snapshot = null;
 
             return emitterId;
         }
@@ -73,6 +89,7 @@ namespace TemperaMental.Frames
                 {
                     emitterGroups[i] &= ~(1UL << index);
                     emitterId = i;
+                    snapshot = null;
                     return true;
                 }
             }
@@ -91,6 +108,8 @@ namespace TemperaMental.Frames
             {
                 emitterGroups[i] = 0;
             }
+
+            snapshot = null;
         }
     }
 }

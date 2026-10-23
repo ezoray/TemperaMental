@@ -1,35 +1,39 @@
-using System.Collections.Generic;
-using System.Diagnostics;
 using TemperaMental.Core;
 using TemperaMental.Frames;
 using TemperaMental.Logs;
+using TemperaMental.Midi.Clock;
 using TemperaMental.Midi.Core;
+using TemperaMental.Midi.Output;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
 
 namespace TemperaMental.Midi.Playbacks
 {
+    // Sequencer: plays one frame per beat of the ClockEngine.
+    // Play, resume and seek restart the clock so the chosen frame is sent straight away.
+    // HandleBeat runs on the clock thread. State shared with the main thread is guarded by playbackStateLock,
+    // and UI notifications are raised from Update using volatile flags.
     public class FrameSequenceManager : MonoBehaviour
     {
         [SerializeField] FrameManager frameManager;
-        [SerializeField] PlaybackManager playbackManager;
+        [SerializeField, FormerlySerializedAs("playbackManager")] MidiOutputScheduler outputScheduler;
         [SerializeField] MidiImmediateManager immediateManager;
+        [SerializeField] ClockEngine clockEngine;
 
-        IReadOnlyList<Frame> frames;
         volatile bool isNewPlayFrame;
         volatile bool isPlaybackFinished;
-        volatile int seekFrame;
-        bool isLooped;
-        bool isReversed;
+        volatile bool isPlaybackStateChanged;
+        volatile bool isLooped;
+        volatile bool isReversed;
 
         int anchorFrame;
         volatile int playFrame;
-        int bpm;
-        long frameDurationTicks;
+
+        // epoch of the clock restart that began the current playback; beats from other epochs are ignored
+        long playEpoch = -1;
 
         volatile PlaybackState playbackState;
-        volatile TransientState transientState;
-        volatile bool isPlaybackStateChanged;
 
         readonly object playbackStateLock = new object();
 
@@ -46,7 +50,7 @@ namespace TemperaMental.Midi.Playbacks
 
         private void OnEnable()
         {
-            playbackManager.OnFramePlaybackCompleted += ActionOnFramePlaybackCompleted;
+            clockEngine.OnBeat += HandleBeat;
         }
 
         private void Start()
@@ -54,7 +58,6 @@ namespace TemperaMental.Midi.Playbacks
             onLoopStateChanged?.Invoke(isLooped);
             onReverseStateChanged?.Invoke(isReversed);
             onPlaybackStateChanged?.Invoke(playbackState);
-            frames = frameManager.GetFrames();
         }
 
         private void Update()
@@ -65,11 +68,11 @@ namespace TemperaMental.Midi.Playbacks
                 onPlaybackFrameChanged?.Invoke(playFrame);
             }
 
-            if(isPlaybackStateChanged)
+            if (isPlaybackStateChanged)
             {
                 LogMan.Log($"Playback {playbackState}");
 
-                isPlaybackStateChanged = false;            
+                isPlaybackStateChanged = false;
                 onPlaybackStateChanged?.Invoke(playbackState);
             }
 
@@ -87,24 +90,18 @@ namespace TemperaMental.Midi.Playbacks
                 switch (playbackState)
                 {
                     case PlaybackState.Playing:
-                        PausePlayback();
+                        SetPlaybackState(PlaybackState.Paused);
                         break;
 
                     case PlaybackState.Paused:
-                        ResumePlayback();
+                        StartPlayback();
                         break;
 
                     case PlaybackState.Reset:
                     case PlaybackState.Stopped:
-                        if (playbackManager.isPlaybackActive) return;
-                        SetPlaybackState(PlaybackState.Playing);
                         SetAnchorFrame(initialFrame);
                         SetPlayFrame(initialFrame);
-                        PlayFrame();
-                        break;
-
-                    default:
-                        // no-op
+                        StartPlayback();
                         break;
                 }
             }
@@ -117,15 +114,10 @@ namespace TemperaMental.Midi.Playbacks
                 switch (playbackState)
                 {
                     case PlaybackState.Playing:
-                        transientState = TransientState.Stopping;
-                        playbackManager.CancelFrame();
+                        SetPlaybackState(PlaybackState.Stopped);
                         break;
 
                     case PlaybackState.Paused:
-                        SetPlayFrame(anchorFrame);
-                        SetPlaybackState(PlaybackState.Reset);
-                        break;
-
                     case PlaybackState.Stopped:
                         SetPlayFrame(anchorFrame);
                         SetPlaybackState(PlaybackState.Reset);
@@ -138,10 +130,6 @@ namespace TemperaMental.Midi.Playbacks
                             SetPlaybackState(PlaybackState.Reset);
                         }
                         break;
-
-                    default:
-                        // no-op
-                        break;
                 }
             }
         }
@@ -153,9 +141,9 @@ namespace TemperaMental.Midi.Playbacks
                 switch (playbackState)
                 {
                     case PlaybackState.Playing:
-                        SetSeekFrame(newSeekFrame);
-                        transientState = TransientState.Seeking;
-                        playbackManager.CancelFrame();
+                        // restart the clock so the new frame plays immediately for a full beat
+                        SetPlayFrame(newSeekFrame);
+                        playEpoch = clockEngine.Restart();
                         break;
 
                     case PlaybackState.Paused:
@@ -164,19 +152,18 @@ namespace TemperaMental.Midi.Playbacks
                         SetAnchorFrame(newSeekFrame);
                         SetPlayFrame(newSeekFrame);
                         break;
-
-                    default:
-                        // no-op
-                        break;
                 }
             }
         }
 
         public void ToggleReverse()
         {
-            isReversed = !isReversed;
+            lock (playbackStateLock)
+            {
+                isReversed = !isReversed;
 
-            SetAnchorFrame(playFrame);
+                SetAnchorFrame(playFrame);
+            }
 
             onReverseStateChanged?.Invoke(isReversed);
         }
@@ -188,61 +175,50 @@ namespace TemperaMental.Midi.Playbacks
             onLoopStateChanged?.Invoke(isLooped);
         }
 
-        public void SetBpm(int newBpm)
+        // clock thread
+        private void HandleBeat(ClockBeat beat)
         {
-            bpm = newBpm;
-            frameDurationTicks = (long)(60.0 / bpm * Stopwatch.Frequency);
-            playbackManager.NotifyDurationChanged(frameDurationTicks);
-        }
-
-        private void PlayFrame()
-        {
-            bool isSent = playbackManager.PlayFrame(frames[playFrame -1].GetEmitterGroups(), frameDurationTicks, true);
-
-            if (!isSent)
+            lock (playbackStateLock)
             {
-                // failure for the sequencer to send due to already sending a frame shouldn't happen unless
-                // there's a collision with an immediate frame which 'may' be possible
-                // we need an exit plan otherwise the app gets stuck in limbo state waiting for a playback callback that never arrives
-                transientState = TransientState.Stopping;
-                ActionOnFramePlaybackCompleted();
+                if (playbackState != PlaybackState.Playing || beat.Epoch != playEpoch) return;
+
+                // beat 0 is the restart that started (or resumed) playback: play the current frame
+                if (beat.Beat == 0)
+                {
+                    PlayCurrentFrame();
+                }
+                else
+                {
+                    AdvancePlayback();
+                }
             }
         }
 
-        private void SetSeekFrame(int frame)
+        private void StartPlayback()
         {
-            seekFrame = Mathf.Clamp(frame, 1, frames.Count);
+            SetPlaybackState(PlaybackState.Playing);
+            playEpoch = clockEngine.Restart();
         }
+
+        private void PlayCurrentFrame()
+        {
+            ulong[][] sequence = frameManager.PublishedSequence;
+            int index = Mathf.Clamp(playFrame, 1, sequence.Length) - 1;
+
+            outputScheduler.EnqueueFrame(sequence[index]);
+        }
+
+        private int FrameCount => frameManager.PublishedSequence.Length;
 
         private void SetAnchorFrame(int frame)
         {
-            anchorFrame = Mathf.Clamp(frame, 1, frames.Count);
+            anchorFrame = Mathf.Clamp(frame, 1, FrameCount);
         }
 
         private void SetPlayFrame(int frame)
         {
-            playFrame = Mathf.Clamp(frame, 1, frames.Count);
+            playFrame = Mathf.Clamp(frame, 1, FrameCount);
             isNewPlayFrame = true;
-        }
-
-        private void PausePlayback()
-        {
-            lock (playbackStateLock)
-            {
-                if (playbackState != PlaybackState.Playing) return;
-
-                transientState = TransientState.Pausing;
-                playbackManager.CancelFrame();
-            }
-        }
-
-        private void ResumePlayback()
-        {
-            if (playbackState != PlaybackState.Paused) return;
-            if (playbackManager.isPlaybackActive) return;
-
-            SetPlaybackState(PlaybackState.Playing);
-            PlayFrame();
         }
 
         private void SetPlaybackState(PlaybackState state)
@@ -256,41 +232,12 @@ namespace TemperaMental.Midi.Playbacks
             }
         }
 
-        private void ActionOnFramePlaybackCompleted()
-        {
-            lock (playbackStateLock)
-            {
-                switch (transientState)
-                {
-                    case TransientState.Pausing:
-                        transientState = TransientState.None;
-                        SetPlaybackState(PlaybackState.Paused);
-                        break;
-
-                    case TransientState.Stopping:
-                        transientState = TransientState.None;
-                        SetPlaybackState(PlaybackState.Stopped);
-                        break;
-
-                    case TransientState.Seeking:
-                        transientState = TransientState.None;
-                        SetPlayFrame(seekFrame);
-                        SetPlaybackState(PlaybackState.Playing);
-                        PlayFrame();
-                        break;
-
-                    case TransientState.None:
-                        AdvancePlayback();
-                        break;
-                }
-            }
-        }
-
         private void AdvancePlayback()
         {
+            int frameCount = FrameCount;
             int nextFrame = playFrame + (isReversed ? -1 : 1);
 
-            bool reachedEnd = isReversed ? nextFrame < 1 : nextFrame > frames.Count;
+            bool reachedEnd = isReversed ? nextFrame < 1 : nextFrame > frameCount;
 
             if (reachedEnd)
             {
@@ -298,7 +245,7 @@ namespace TemperaMental.Midi.Playbacks
                 {
                     // check anchor frame isn't the same as final frame, prevents looping over single frame
                     // no emitter data would be sent anyway and static playback could be confusing
-                    if (frames.Count == 1 || (isReversed ? anchorFrame == 1 : anchorFrame == frames.Count))
+                    if (frameCount == 1 || (isReversed ? anchorFrame == 1 : anchorFrame == frameCount))
                     {
                         SetPlaybackState(PlaybackState.Reset);
                         isPlaybackFinished = true;
@@ -318,12 +265,12 @@ namespace TemperaMental.Midi.Playbacks
                 SetPlayFrame(nextFrame);
             }
 
-            PlayFrame();
+            PlayCurrentFrame();
         }
 
         private void OnDisable()
         {
-            playbackManager.OnFramePlaybackCompleted -= ActionOnFramePlaybackCompleted;
+            clockEngine.OnBeat -= HandleBeat;
         }
     }
 }

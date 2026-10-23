@@ -23,7 +23,11 @@ namespace TemperaMental.Applications.Config
 
         // tick resolution and interval between ticks
         public short TicksPerFrame = 120; // used only when creating midifiles
-        public float EventIntervalMS = 0.0001f; // 0.1ms
+        public float EventIntervalMS = 0.0001f; // in seconds despite the name: gap between sent messages
+
+        // internal clock
+        public int TicksPerBeat = 96; // transport resolution, 4 ticks per MIDI clock pulse (24 PPQN)
+        public float ClockSpinThresholdMs = 2f; // the clock thread busy-waits for this last part of each wait
 
         // midi view settings
         public int DefaultMidiChannel = 1;

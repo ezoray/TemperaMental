@@ -1,69 +1,47 @@
 using TemperaMental.Core;
-using TemperaMental.Logs;
-using TemperaMental.Midi.Playbacks;
+using TemperaMental.Midi.Output;
+using TemperaMental.Utils;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace TemperaMental.Midi.Core
 {
+    // sends edits made outside the sequencer (drawing, frame changes, colour selection) to the output scheduler
     public class MidiImmediateManager : MonoBehaviour
     {
-        [SerializeField] PlaybackManager playbackManager;
+        [SerializeField, FormerlySerializedAs("playbackManager")] MidiOutputScheduler outputScheduler;
 
         volatile PlaybackState playbackState;
-        ulong[] pendingGroups;
-        bool hasPending;
 
         private bool SequencerRunning => playbackState == PlaybackState.Playing;
 
-        private void Update()
-        {
-            if (hasPending && !playbackManager.isPlaybackActive && !SequencerRunning)
-            {
-                hasPending = false;
-                playbackManager.PlayFrame(pendingGroups);
-                pendingGroups = null;
-            }
-        }
-         
         public void AddEmitter(EmitterDetail emitterDetail)
         {
-            playbackManager.AddEmitter(emitterDetail);
+            outputScheduler.EnqueueAddEmitter(emitterDetail.EmitterId, EmitterUtils.PositionToIndex(emitterDetail.Position));
         }
 
         public void RemoveEmitter(EmitterDetail emitterDetail)
         {
-            playbackManager.RemoveEmitter(emitterDetail);
+            outputScheduler.EnqueueRemoveEmitter(EmitterUtils.PositionToIndex(emitterDetail.Position));
         }
 
         public void SetEmitterType(int emitterId)
         {
-            playbackManager.SetEmitterType(emitterId);
+            outputScheduler.EnqueueSelectEmitter(emitterId);
         }
 
-
+        // called from the sequencer, possibly on the clock thread
         public void SetPlaybackState(PlaybackState state)
         {
             playbackState = state;
-            if (SequencerRunning)
-            {
-                hasPending = false;
-                pendingGroups = null;
-            }
         }
 
         public void SendFrame(ulong[] emitterGroups)
         {
+            // the sequencer owns the output while it plays
             if (SequencerRunning) return;
 
-            if (!playbackManager.PlayFrame(emitterGroups))
-            {
-                pendingGroups = emitterGroups;
-                hasPending = true;
-            }
-            else
-            {
-                hasPending = false;
-            }
+            outputScheduler.EnqueueFrame(emitterGroups);
         }
     }
 }

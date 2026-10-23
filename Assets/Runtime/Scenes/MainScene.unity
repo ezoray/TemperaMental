@@ -267,7 +267,7 @@ GameObject:
   - component: {fileID: 41537460}
   - component: {fileID: 41537461}
   m_Layer: 0
-  m_Name: PlaybackEventController
+  m_Name: MidiOutputEventController
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -286,7 +286,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1799877661}
+  m_Father: {fileID: 342393026}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &41537461
 MonoBehaviour:
@@ -300,7 +300,52 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b1377ff8f66fd43fe8b41da4ec1c7b54, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TemperaMental.Midi.Playbacks.FrameMidiPlayerEventService
-  playbackManager: {fileID: 773543396}
+  outputScheduler: {fileID: 773543396}
+--- !u!1 &43463738
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 43463740}
+  - component: {fileID: 43463739}
+  m_Layer: 0
+  m_Name: ClockEngine
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &43463739
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 43463738}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 12e26698b273242a7abbcc3ea6e6b257, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TemperaMental.Midi.Clock.ClockEngine
+  outputScheduler: {fileID: 773543396}
+--- !u!4 &43463740
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 43463738}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 342393026}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &43681583
 GameObject:
   m_ObjectHideFlags: 0
@@ -548,7 +593,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1362657596}
-        m_TargetAssemblyTypeName: Tempera.Mental.Frames.FrameEventController, Assembly-CSharp
+        m_TargetAssemblyTypeName: TemperaMental.Frames.FrameEventController, Assembly-CSharp
         m_MethodName: OnMouseLeftClick
         m_Mode: 0
         m_Arguments:
@@ -563,7 +608,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1362657596}
-        m_TargetAssemblyTypeName: Tempera.Mental.Frames.FrameEventController, Assembly-CSharp
+        m_TargetAssemblyTypeName: TemperaMental.Frames.FrameEventController, Assembly-CSharp
         m_MethodName: OnMouseRightClick
         m_Mode: 0
         m_Arguments:
@@ -995,7 +1040,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: Tempera.Mental.Frames.FrameEventController, Assembly-CSharp
+      value: TemperaMental.Frames.FrameEventController, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
@@ -1157,7 +1202,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: TemperaMental.Midi.IO.FileEventController, Assembly-CSharp
+      value: TemperaMental.Midi.IO.MidiFileEventController, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
@@ -1563,7 +1608,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4101060469761601702, guid: 8f84a6d1f41244324a958063cb8070b0, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: TemperaMental.Emitters.EmitterTransformEventController, Assembly-CSharp
+      value: TemperaMental.Transforms.TransformEventController, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 4101060469761601702, guid: 8f84a6d1f41244324a958063cb8070b0, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_IntArgument
@@ -1852,7 +1897,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: TemperaMental.Midi.Playbacks.FrameSequencerEventController, Assembly-CSharp
+      value: TemperaMental.Midi.Playbacks.FrameSequenceEventController, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_TargetAssemblyTypeName
@@ -3734,6 +3779,10 @@ Transform:
   - {fileID: 1587327798}
   - {fileID: 1949886330}
   - {fileID: 688550773}
+  - {fileID: 773543395}
+  - {fileID: 41537460}
+  - {fileID: 2090767557}
+  - {fileID: 43463740}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &368916157
@@ -3770,7 +3819,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: Tempera.Mental.Frames.FrameEventController, Assembly-CSharp
+      value: TemperaMental.Frames.FrameEventController, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
@@ -4297,6 +4346,7 @@ MonoBehaviour:
   - {fileID: 1510786651}
   - {fileID: 591833614}
   frameManager: {fileID: 1457006301}
+  clockEngine: {fileID: 43463739}
   onTransformChanged:
     m_PersistentCalls:
       m_Calls:
@@ -4332,7 +4382,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 940783813}
-        m_TargetAssemblyTypeName: TemperaMental.UI.Emitters.EmitterTransformUIManager,
+        m_TargetAssemblyTypeName: TemperaMental.UI.Transforms.TransformUIManager,
           Assembly-CSharp
         m_MethodName: ActionOnDirectionLatchStateChanged
         m_Mode: 0
@@ -4364,7 +4414,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 597592033}
-        m_TargetAssemblyTypeName: TemperaMental.UI.Display.DisplayUIManager, Assembly-CSharp
+        m_TargetAssemblyTypeName: TemperaMental.UI.Display.MainView.MainViewUIManager,
+          Assembly-CSharp
         m_MethodName: ActionOnTransformRateChanged
         m_Mode: 0
         m_Arguments:
@@ -4379,7 +4430,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1056799565}
-        m_TargetAssemblyTypeName: TemperaMental.UI.Transforms.TransformModeSettingsUIManager,
+        m_TargetAssemblyTypeName: TemperaMental.UI.Settings.Transforms.TransformModeSettingsUIManager,
           Assembly-CSharp
         m_MethodName: ActionOnTransformModeChanged
         m_Mode: 0
@@ -5343,7 +5394,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: TemperaMental.Midi.Playbacks.FrameSequencerEventController, Assembly-CSharp
+      value: TemperaMental.Midi.Playbacks.FrameSequenceEventController, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
@@ -7604,7 +7655,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: Tempera.Mental.Frames.FrameEventController, Assembly-CSharp
+      value: TemperaMental.Frames.FrameEventController, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
@@ -7762,8 +7813,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TemperaMental.Midi.Core.FrameSequencer
   frameManager: {fileID: 1457006301}
-  playbackManager: {fileID: 773543396}
+  outputScheduler: {fileID: 773543396}
   immediateManager: {fileID: 1131015721}
+  clockEngine: {fileID: 43463739}
   onPlaybackFrameChanged:
     m_PersistentCalls:
       m_Calls:
@@ -7783,7 +7835,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 114619602}
-        m_TargetAssemblyTypeName: TemperaMental.UI.Core.UIManager, Assembly-CSharp
+        m_TargetAssemblyTypeName: TemperaMental.UI.State.UIStateManager, Assembly-CSharp
         m_MethodName: ActionOnPlaybackStateChanged
         m_Mode: 0
         m_Arguments:
@@ -7819,7 +7871,7 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
       - m_Target: {fileID: 507064014}
-        m_TargetAssemblyTypeName: TemperaMental.Emitters.EmitterTransformEventController,
+        m_TargetAssemblyTypeName: TemperaMental.Transforms.TransformEventController,
           Assembly-CSharp
         m_MethodName: ActionOnPlaybackStateChanged
         m_Mode: 0
@@ -7923,7 +7975,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: TemperaMental.Midi.Playbacks.FrameSequencerEventController, Assembly-CSharp
+      value: TemperaMental.Midi.Playbacks.FrameSequenceEventController, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
@@ -8317,7 +8369,7 @@ GameObject:
   - component: {fileID: 773543395}
   - component: {fileID: 773543396}
   m_Layer: 0
-  m_Name: PlaybackManager
+  m_Name: MidiOutputScheduler
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8336,7 +8388,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1799877661}
+  m_Father: {fileID: 342393026}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &773543396
 MonoBehaviour:
@@ -8350,7 +8402,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5aaf06063110543d4becbce324afd9ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FrameMidiPlayer
-  isPlaybackActive: 0
   onPlaybackReadyStateChanged:
     m_PersistentCalls:
       m_Calls:
@@ -8638,7 +8689,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4101060469761601702, guid: 8f84a6d1f41244324a958063cb8070b0, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: TemperaMental.Emitters.EmitterTransformEventController, Assembly-CSharp
+      value: TemperaMental.Transforms.TransformEventController, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 4101060469761601702, guid: 8f84a6d1f41244324a958063cb8070b0, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
@@ -8996,7 +9047,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 806095546}
-        m_TargetAssemblyTypeName: Tempera.Mental.UI.Devices.DeviceUiManager, Assembly-CSharp
+        m_TargetAssemblyTypeName: TemperaMental.UI.Devices.DeviceUIManager, Assembly-CSharp
         m_MethodName: OnDropdownValueChanged
         m_Mode: 0
         m_Arguments:
@@ -9857,7 +9908,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: TemperaMental.Midi.IO.FileEventController, Assembly-CSharp
+      value: TemperaMental.Midi.IO.MidiFileEventController, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
@@ -10859,7 +10910,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 597592033}
-        m_TargetAssemblyTypeName: TemperaMental.UI.Display.DisplayUIManager, Assembly-CSharp
+        m_TargetAssemblyTypeName: TemperaMental.UI.Display.MainView.MainViewUIManager,
+          Assembly-CSharp
         m_MethodName: ActionOnLogMessage
         m_Mode: 0
         m_Arguments:
@@ -10874,7 +10926,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 597592033}
-        m_TargetAssemblyTypeName: TemperaMental.UI.Display.DisplayUIManager, Assembly-CSharp
+        m_TargetAssemblyTypeName: TemperaMental.UI.Display.MainView.MainViewUIManager,
+          Assembly-CSharp
         m_MethodName: ActionOnTempMessage
         m_Mode: 0
         m_Arguments:
@@ -12134,7 +12187,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 806095546}
-        m_TargetAssemblyTypeName: Tempera.Mental.UI.Devices.DeviceUiManager, Assembly-CSharp
+        m_TargetAssemblyTypeName: TemperaMental.UI.Devices.DeviceUIManager, Assembly-CSharp
         m_MethodName: ActionOnDevicesUpdated
         m_Mode: 0
         m_Arguments:
@@ -12149,7 +12202,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 41537461}
-        m_TargetAssemblyTypeName: TemperaMental.Midi.Playbacks.FrameMidiPlayerEventService,
+        m_TargetAssemblyTypeName: TemperaMental.Midi.Output.MidiOutputEventController,
           Assembly-CSharp
         m_MethodName: ActionOnDeviceChanged
         m_Mode: 0
@@ -12165,7 +12218,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 41537461}
-        m_TargetAssemblyTypeName: TemperaMental.Midi.Playbacks.FrameMidiPlayerEventService,
+        m_TargetAssemblyTypeName: TemperaMental.Midi.Output.MidiOutputEventController,
           Assembly-CSharp
         m_MethodName: ActionOnCurrentDeviceRemoved
         m_Mode: 1
@@ -12221,7 +12274,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f2394129acd024937a448a9b6c0bf29b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Tempera.Mental.Midi.Core.MidiImmediateService
-  playbackManager: {fileID: 773543396}
+  outputScheduler: {fileID: 773543396}
 --- !u!1 &1135178754
 GameObject:
   m_ObjectHideFlags: 0
@@ -12715,7 +12768,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: TemperaMental.UI.Frames.FrameUiManager, Assembly-CSharp
+      value: TemperaMental.UI.Frames.FrameUIManager, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
@@ -13350,21 +13403,9 @@ MonoBehaviour:
   onBpmChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1855239583}
-        m_TargetAssemblyTypeName: TemperaMental.Midi.Playbacks.FrameSequencerEventController,
-          Assembly-CSharp
-        m_MethodName: ActionOnBpmChanged
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
       - m_Target: {fileID: 597592033}
-        m_TargetAssemblyTypeName: TemperaMental.UI.Display.DisplayUIManager, Assembly-CSharp
+        m_TargetAssemblyTypeName: TemperaMental.UI.Display.MainView.MainViewUIManager,
+          Assembly-CSharp
         m_MethodName: ActionOnBpmChanged
         m_Mode: 0
         m_Arguments:
@@ -13376,7 +13417,7 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
       - m_Target: {fileID: 1244920275}
-        m_TargetAssemblyTypeName: TemperaMental.UI.Playbacks.PlaybackUiManager, Assembly-CSharp
+        m_TargetAssemblyTypeName: TemperaMental.UI.Playbacks.PlaybackUIManager, Assembly-CSharp
         m_MethodName: ActionOnBpmChanged
         m_Mode: 0
         m_Arguments:
@@ -13387,14 +13428,14 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 507064014}
-        m_TargetAssemblyTypeName: TemperaMental.Emitters.EmitterTransformEventController,
+      - m_Target: {fileID: 2090767556}
+        m_TargetAssemblyTypeName: TemperaMental.Midi.Clock.ClockEventController,
           Assembly-CSharp
         m_MethodName: ActionOnBpmChanged
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_ObjectArgumentAssemblyTypeName: 
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
@@ -13657,7 +13698,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4101060469761601702, guid: 8f84a6d1f41244324a958063cb8070b0, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: TemperaMental.Emitters.EmitterTransformEventController, Assembly-CSharp
+      value: TemperaMental.Transforms.TransformEventController, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 4101060469761601702, guid: 8f84a6d1f41244324a958063cb8070b0, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_IntArgument
@@ -14309,7 +14350,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: TemperaMental.Midi.IO.FileEventController, Assembly-CSharp
+      value: TemperaMental.Midi.IO.MidiFileEventController, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
@@ -14498,7 +14539,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: TemperaMental.Midi.Playbacks.FrameSequencerEventController, Assembly-CSharp
+      value: TemperaMental.Midi.Playbacks.FrameSequenceEventController, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_IntArgument
@@ -14676,7 +14717,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4101060469761601702, guid: 8f84a6d1f41244324a958063cb8070b0, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: TemperaMental.Emitters.EmitterTransformEventController, Assembly-CSharp
+      value: TemperaMental.Transforms.TransformEventController, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 4101060469761601702, guid: 8f84a6d1f41244324a958063cb8070b0, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_IntArgument
@@ -15524,7 +15565,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1362657596}
-        m_TargetAssemblyTypeName: Tempera.Mental.Frames.FrameEventController, Assembly-CSharp
+        m_TargetAssemblyTypeName: TemperaMental.Frames.FrameEventController, Assembly-CSharp
         m_MethodName: ActionOnSelectedFrameChanged
         m_Mode: 0
         m_Arguments:
@@ -15536,7 +15577,7 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
       - m_Target: {fileID: 1855239583}
-        m_TargetAssemblyTypeName: TemperaMental.Midi.Playbacks.FrameSequencerEventController,
+        m_TargetAssemblyTypeName: TemperaMental.Midi.Playbacks.FrameSequenceEventController,
           Assembly-CSharp
         m_MethodName: ActionOnSelectedFrameChanged
         m_Mode: 0
@@ -16741,7 +16782,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: Tempera.Mental.Frames.FrameEventController, Assembly-CSharp
+      value: TemperaMental.Frames.FrameEventController, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
@@ -17732,7 +17773,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 41537461}
-        m_TargetAssemblyTypeName: TemperaMental.Midi.Playbacks.PlaybackManagerEventController,
+        m_TargetAssemblyTypeName: TemperaMental.Midi.Output.MidiOutputEventController,
           Assembly-CSharp
         m_MethodName: ActionOnMidiChannelChanged
         m_Mode: 0
@@ -17835,7 +17876,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1899363811}
-        m_TargetAssemblyTypeName: TemperaMental.Midi.Core.MidiEventController, Assembly-CSharp
+        m_TargetAssemblyTypeName: TemperaMental.Midi.Core.MidiImmediateEventController,
+          Assembly-CSharp
         m_MethodName: ActionOnEmitterTypeChanged
         m_Mode: 0
         m_Arguments:
@@ -17847,7 +17889,7 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
       - m_Target: {fileID: 849915434}
-        m_TargetAssemblyTypeName: TemperaMental.UI.Frames.FrameUiManager, Assembly-CSharp
+        m_TargetAssemblyTypeName: TemperaMental.UI.Frames.FrameUIManager, Assembly-CSharp
         m_MethodName: ActionOnEmitterChanged
         m_Mode: 0
         m_Arguments:
@@ -17874,7 +17916,8 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
       - m_Target: {fileID: 1899363811}
-        m_TargetAssemblyTypeName: TemperaMental.Midi.Core.MidiEventController, Assembly-CSharp
+        m_TargetAssemblyTypeName: TemperaMental.Midi.Core.MidiImmediateEventController,
+          Assembly-CSharp
         m_MethodName: ActionOnAddEmitter
         m_Mode: 0
         m_Arguments:
@@ -17886,7 +17929,8 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
       - m_Target: {fileID: 597592033}
-        m_TargetAssemblyTypeName: TemperaMental.UI.Display.DisplayUIManager, Assembly-CSharp
+        m_TargetAssemblyTypeName: TemperaMental.UI.Display.MainView.MainViewUIManager,
+          Assembly-CSharp
         m_MethodName: ActionOnAddEmitter
         m_Mode: 0
         m_Arguments:
@@ -17926,7 +17970,8 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
       - m_Target: {fileID: 1899363811}
-        m_TargetAssemblyTypeName: TemperaMental.Midi.Core.MidiEventController, Assembly-CSharp
+        m_TargetAssemblyTypeName: TemperaMental.Midi.Core.MidiImmediateEventController,
+          Assembly-CSharp
         m_MethodName: ActionOnRemoveEmitter
         m_Mode: 0
         m_Arguments:
@@ -17938,7 +17983,8 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
       - m_Target: {fileID: 597592033}
-        m_TargetAssemblyTypeName: TemperaMental.UI.Display.DisplayUIManager, Assembly-CSharp
+        m_TargetAssemblyTypeName: TemperaMental.UI.Display.MainView.MainViewUIManager,
+          Assembly-CSharp
         m_MethodName: ActionOnRemoveEmitter
         m_Mode: 0
         m_Arguments:
@@ -17978,7 +18024,7 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
       - m_Target: {fileID: 849915434}
-        m_TargetAssemblyTypeName: TemperaMental.UI.Frames.FrameUiManager, Assembly-CSharp
+        m_TargetAssemblyTypeName: TemperaMental.UI.Frames.FrameUIManager, Assembly-CSharp
         m_MethodName: ActionOnFrameChanged
         m_Mode: 0
         m_Arguments:
@@ -17990,7 +18036,8 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
       - m_Target: {fileID: 597592033}
-        m_TargetAssemblyTypeName: TemperaMental.UI.Display.DisplayUIManager, Assembly-CSharp
+        m_TargetAssemblyTypeName: TemperaMental.UI.Display.MainView.MainViewUIManager,
+          Assembly-CSharp
         m_MethodName: ActionOnFrameChanged
         m_Mode: 0
         m_Arguments:
@@ -18002,7 +18049,8 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
       - m_Target: {fileID: 1899363811}
-        m_TargetAssemblyTypeName: TemperaMental.Midi.Core.MidiEventController, Assembly-CSharp
+        m_TargetAssemblyTypeName: TemperaMental.Midi.Core.MidiImmediateEventController,
+          Assembly-CSharp
         m_MethodName: ActionOnFrameChanged
         m_Mode: 0
         m_Arguments:
@@ -18992,10 +19040,10 @@ Camera:
   m_LensShift: {x: 0, y: 0}
   m_NormalizedViewPortRect:
     serializedVersion: 2
-    x: 0
+    x: 2.0402777
     y: 0
-    width: 1
-    height: 1
+    width: 0.075
+    height: 0.075
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 60
@@ -22523,8 +22571,6 @@ Transform:
   m_Children:
   - {fileID: 1855239584}
   - {fileID: 723133474}
-  - {fileID: 41537460}
-  - {fileID: 773543395}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1814786750
@@ -22606,7 +22652,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: Tempera.Mental.Frames.FrameEventController, Assembly-CSharp
+      value: TemperaMental.Frames.FrameEventController, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
@@ -23938,7 +23984,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: TemperaMental.Emitters.EmitterTransformEventController, Assembly-CSharp
+      value: TemperaMental.Transforms.TransformEventController, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
@@ -25670,7 +25716,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: Tempera.Mental.Frames.FrameEventController, Assembly-CSharp
+      value: TemperaMental.Frames.FrameEventController, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
@@ -26653,6 +26699,51 @@ Transform:
   - {fileID: 1457006300}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2090767555
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2090767557}
+  - component: {fileID: 2090767556}
+  m_Layer: 0
+  m_Name: ClockEventController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2090767556
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2090767555}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a57f24adc89804b43a6f77ad6f9a6431, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TemperaMental.Midi.Clock.ClockEventController
+  clockEngine: {fileID: 43463739}
+--- !u!4 &2090767557
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2090767555}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 342393026}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &2101572531
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -27285,7 +27376,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: Tempera.Mental.Frames.FrameEventController, Assembly-CSharp
+      value: TemperaMental.Frames.FrameEventController, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 7418040803222182, guid: 1e5ed4b5c963f4526be7d057c1c6d91c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName

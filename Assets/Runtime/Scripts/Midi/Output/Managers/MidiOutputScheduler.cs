@@ -1,0 +1,296 @@
+using System;
+using System.Collections.Concurrent;
+using System.Diagnostics;
+using System.Threading;
+using Melanchall.DryWetMidi.Common;
+using Melanchall.DryWetMidi.Core;
+using Melanchall.DryWetMidi.Multimedia;
+using TemperaMental.Applications.Config;
+using UnityEngine;
+using UnityEngine.Events;
+
+namespace TemperaMental.Midi.Output
+{
+    // The single path for all MIDI sent to the output device.
+    // Any thread can queue commands; only the clock thread (ClockEngine) sends them, spaced EventIntervalMS apart.
+    // Frames are sent as a diff against what the device currently shows, and back-to-back frame commands are
+    // collapsed so only the newest one is sent.
+    public class MidiOutputScheduler : MonoBehaviour
+    {
+        // 4 emitter selects + 64 cells is the largest frame diff
+        const int MaxBurstEvents = 68;
+
+        enum CommandType
+        {
+            Frame,
+            AddEmitter,
+            RemoveEmitter,
+            SelectEmitter,
+            ResetDevice
+        }
+
+        readonly struct OutputCommand
+        {
+            public readonly CommandType Type;
+            public readonly ulong[] Groups;
+            public readonly byte EmitterId;
+            public readonly byte CellIndex;
+
+            public OutputCommand(CommandType type, ulong[] groups = null, byte emitterId = 0, byte cellIndex = 0)
+            {
+                Type = type;
+                Groups = groups;
+                EmitterId = emitterId;
+                CellIndex = cellIndex;
+            }
+        }
+
+        int activateCC;
+        int placeCC;
+        int removeCC;
+        byte clearEmittersValue;
+        int emitterCount;
+        int gridSize;
+        long intervalTicks;
+
+        volatile OutputDevice outputDevice;
+        volatile byte midiChannel;
+        volatile EventWaitHandle wakeHandle;
+
+        readonly ConcurrentQueue<OutputCommand> commands = new ConcurrentQueue<OutputCommand>();
+
+        // owned by the clock thread
+        ulong[] deviceGroups;
+        ControlChangeEvent[] burst;
+        int burstCount;
+        int burstIndex;
+        long nextSendTime;
+
+        [SerializeField] UnityEvent<bool> onPlaybackReadyStateChanged;
+
+        private void Awake()
+        {
+            activateCC = ConfigRegistry.Midi.ActivateCC;
+            placeCC = ConfigRegistry.Midi.PlaceCC;
+            removeCC = ConfigRegistry.Midi.RemoveCC;
+            clearEmittersValue = ConfigRegistry.Midi.ClearEmittersValue;
+            emitterCount = ConfigRegistry.Grid.EmitterCount;
+            gridSize = ConfigRegistry.Grid.GridWidth * ConfigRegistry.Grid.GridHeight;
+            intervalTicks = (long)(Stopwatch.Frequency * ConfigRegistry.Midi.EventIntervalMS);
+
+            midiChannel = (byte)(ConfigRegistry.Midi.DefaultMidiChannel - 1);
+
+            deviceGroups = new ulong[emitterCount];
+
+            burst = new ControlChangeEvent[MaxBurstEvents];
+            for (int i = 0; i < burst.Length; i++)
+            {
+                burst[i] = new ControlChangeEvent((SevenBitNumber)0, (SevenBitNumber)0);
+            }
+        }
+
+        // the clock engine passes its wake signal so queued commands are sent without waiting for the next beat
+        public void SetWakeHandle(EventWaitHandle handle)
+        {
+            wakeHandle = handle;
+        }
+
+        public void SetMidiChannel(int channel)
+        {
+            midiChannel = (byte)(channel - 1);
+        }
+
+        public void SetOutputDevice(OutputDevice device)
+        {
+            outputDevice = device;
+            Enqueue(new OutputCommand(CommandType.ResetDevice));
+
+            onPlaybackReadyStateChanged?.Invoke(true);
+        }
+
+        public void ClearOutputDevice()
+        {
+            outputDevice = null;
+
+            while (commands.TryDequeue(out _)) { }
+
+            onPlaybackReadyStateChanged?.Invoke(false);
+        }
+
+        // the groups are copied, so callers can pass live arrays
+        public void EnqueueFrame(ulong[] emitterGroups)
+        {
+            Enqueue(new OutputCommand(CommandType.Frame, (ulong[])emitterGroups.Clone()));
+        }
+
+        public void EnqueueAddEmitter(int emitterId, int cellIndex)
+        {
+            Enqueue(new OutputCommand(CommandType.AddEmitter, emitterId: (byte)emitterId, cellIndex: (byte)cellIndex));
+        }
+
+        public void EnqueueRemoveEmitter(int cellIndex)
+        {
+            Enqueue(new OutputCommand(CommandType.RemoveEmitter, cellIndex: (byte)cellIndex));
+        }
+
+        public void EnqueueSelectEmitter(int emitterId)
+        {
+            Enqueue(new OutputCommand(CommandType.SelectEmitter, emitterId: (byte)emitterId));
+        }
+
+        private void Enqueue(OutputCommand command)
+        {
+            commands.Enqueue(command);
+            wakeHandle?.Set();
+        }
+
+        // --- clock thread only below ---
+
+        public bool HasWork => burstIndex < burstCount || !commands.IsEmpty;
+
+        public long NextSendTime => nextSendTime;
+
+        // sends the next due message; returns false if nothing was sent
+        public bool TrySendNext(long now)
+        {
+            if (burstIndex >= burstCount && !BuildNextBurst()) return false;
+
+            if (now < nextSendTime) return false;
+
+            Send(burst[burstIndex++]);
+            nextSendTime = now + intervalTicks;
+
+            return true;
+        }
+
+        private void Send(ControlChangeEvent controlChange)
+        {
+            OutputDevice device = outputDevice;
+
+            if (device == null) return;
+
+            try
+            {
+                device.SendEvent(controlChange);
+            }
+            catch (ObjectDisposedException)
+            {
+                // only drop the device we failed on, not one selected in the meantime
+                Interlocked.CompareExchange(ref outputDevice, null, device);
+            }
+            catch (MidiDeviceException)
+            {
+                Interlocked.CompareExchange(ref outputDevice, null, device);
+            }
+        }
+
+        private bool BuildNextBurst()
+        {
+            burstCount = 0;
+            burstIndex = 0;
+
+            while (burstCount == 0 && commands.TryDequeue(out OutputCommand command))
+            {
+                switch (command.Type)
+                {
+                    case CommandType.Frame:
+                        // a newer frame is already waiting, so skip straight to it
+                        if (commands.TryPeek(out OutputCommand next) && next.Type == CommandType.Frame) continue;
+                        BuildFrameDiff(command.Groups);
+                        break;
+
+                    case CommandType.AddEmitter:
+                        BuildAddEmitter(command.EmitterId, command.CellIndex);
+                        break;
+
+                    case CommandType.RemoveEmitter:
+                        BuildRemoveEmitter(command.CellIndex);
+                        break;
+
+                    case CommandType.SelectEmitter:
+                        AddToBurst(activateCC, command.EmitterId);
+                        break;
+
+                    case CommandType.ResetDevice:
+                        BuildResetDevice();
+                        break;
+                }
+            }
+
+            return burstCount > 0;
+        }
+
+        private void BuildFrameDiff(ulong[] emitterGroups)
+        {
+            // a cell taken over by another emitter is simply placed; removing it first is unnecessary
+            ulong allAdds = 0;
+            for (int emitterId = 0; emitterId < emitterCount; emitterId++)
+                allAdds |= emitterGroups[emitterId] & ~deviceGroups[emitterId];
+
+            for (byte emitterId = 0; emitterId < emitterCount; emitterId++)
+            {
+                ulong current = emitterGroups[emitterId];
+                ulong previous = deviceGroups[emitterId];
+
+                ulong toRemove = (previous & ~current) & ~allAdds;
+                ulong toAdd = current & ~previous;
+
+                if (toRemove == 0 && toAdd == 0) continue;
+
+                AddToBurst(activateCC, emitterId);
+
+                for (byte pos = 0; pos < gridSize; pos++)
+                {
+                    if ((toRemove & (1UL << pos)) != 0)
+                        AddToBurst(removeCC, pos);
+                    else if ((toAdd & (1UL << pos)) != 0)
+                        AddToBurst(placeCC, pos);
+                }
+            }
+
+            Array.Copy(emitterGroups, deviceGroups, emitterCount);
+        }
+
+        private void BuildAddEmitter(byte emitterId, byte cellIndex)
+        {
+            ulong bit = 1UL << cellIndex;
+
+            for (int i = 0; i < emitterCount; i++)
+                deviceGroups[i] &= ~bit;
+
+            deviceGroups[emitterId] |= bit;
+
+            AddToBurst(activateCC, emitterId);
+            AddToBurst(placeCC, cellIndex);
+        }
+
+        private void BuildRemoveEmitter(byte cellIndex)
+        {
+            ulong bit = 1UL << cellIndex;
+
+            for (int i = 0; i < emitterCount; i++)
+                deviceGroups[i] &= ~bit;
+
+            AddToBurst(removeCC, cellIndex);
+        }
+
+        private void BuildResetDevice()
+        {
+            for (byte i = 0; i < emitterCount; i++)
+            {
+                deviceGroups[i] = 0;
+
+                AddToBurst(activateCC, i);
+                AddToBurst(removeCC, clearEmittersValue);
+            }
+        }
+
+        private void AddToBurst(int cc, byte value)
+        {
+            ControlChangeEvent controlChange = burst[burstCount++];
+            controlChange.ControlNumber = (SevenBitNumber)cc;
+            controlChange.ControlValue = (SevenBitNumber)value;
+            controlChange.Channel = (FourBitNumber)midiChannel;
+        }
+    }
+}

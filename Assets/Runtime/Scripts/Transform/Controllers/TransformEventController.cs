@@ -43,11 +43,6 @@ namespace TemperaMental.Transforms
 
         public void ActionOnPlaybackStateChanged(PlaybackState playbackState) => transformManager.SetPlaybackState(playbackState);
 
-        public void ActionOnBpmChanged(int newBpm)
-        {
-            transformManager.SetBpm(newBpm);
-        }
-
         public void OnClickSelectEmitter(int emitterId)
         {
             transformManager.SelectEmitter(emitterId);

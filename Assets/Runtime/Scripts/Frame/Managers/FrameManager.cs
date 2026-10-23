@@ -11,6 +11,10 @@ namespace TemperaMental.Frames
     public class FrameManager : MonoBehaviour
     {
         readonly List<Frame> frames = new List<Frame>();
+
+        // immutable copy of every frame's emitters, replaced after each change, read by the sequencer on the clock thread
+        volatile ulong[][] publishedSequence = new ulong[0][];
+
         Frame currentFrame;
         int currentFrameIndex;
         int currentEmitterId;
@@ -209,6 +213,8 @@ namespace TemperaMental.Frames
         {
             if (currentFrame.TryRemoveEmitter(position, out int emitterId))
             {
+                PublishSequence();
+
                 int emitterCount = EmitterUtils.GetEmitterCount(currentFrame.GetEmitterGroups());
                 onRemoveEmitter?.Invoke(new EmitterDetail(position, emitterId, emitterCount));
             }
@@ -217,6 +223,7 @@ namespace TemperaMental.Frames
         public void AddEmitter(Vector2Int cellPosition)
         {
             int actualEmitterId = currentFrame.AddEmitter(cellPosition, currentEmitterId);
+            PublishSequence();
 
             int emitterCount = EmitterUtils.GetEmitterCount(currentFrame.GetEmitterGroups());
             EmitterDetail emitterDetail = new EmitterDetail(cellPosition, actualEmitterId, emitterCount);
@@ -285,8 +292,25 @@ namespace TemperaMental.Frames
             SetCurrentFrame(index);
         }
 
+        public ulong[][] PublishedSequence => publishedSequence;
+
+        private void PublishSequence()
+        {
+            var sequence = new ulong[frames.Count][];
+
+            for (int i = 0; i < sequence.Length; i++)
+            {
+                sequence[i] = frames[i].GetSnapshot();
+            }
+
+            publishedSequence = sequence;
+        }
+
         private void NotifyFrameChanged()
         {
+            // every structural or content change ends here, apart from single emitter edits
+            PublishSequence();
+
             onFrameChanged?.Invoke(GetFrameDetail(currentFrame));
         }
     }

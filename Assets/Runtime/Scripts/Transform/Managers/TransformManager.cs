@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using TemperaMental.Applications.Config;
 using TemperaMental.Core;
 using TemperaMental.Frames;
 using TemperaMental.Logs;
+using TemperaMental.Midi.Clock;
 using TemperaMental.Utils;
 using UnityEngine;
 using UnityEngine.Events;
@@ -12,18 +14,17 @@ namespace TemperaMental.Transforms
 {
     public class TransformManager : MonoBehaviour
     {
-        const float SecondsInMinute = 60f;
-
         [Header("Order: Shift, Random, Flip, Rotate, Swap")]
         [SerializeField] List<TransformBaseService> transformServices;
         [SerializeField] FrameManager frameManager;
+        [SerializeField] ClockEngine clockEngine;
 
         RandomTransformService randomTransformService;
         ShiftTransformService shiftTransformService;
 
-        int bpm;
-        float masterTickRate;
-        float masterTickTime;
+        // beats raised by the clock thread, processed on the main thread in Update.
+        // transforms use UnityEngine.Random and UnityEvents, so they can't run on the clock thread
+        int pendingBeats;
 
         TransformType currentTransformType;
 
@@ -56,6 +57,8 @@ namespace TemperaMental.Transforms
                 transformService.OnDirectionLatchStateChanged += ActionOnServiceDirectionLatchChanged;
                 transformService.OnEmittersTransformed += ActionOnEmittersTransformed;
             }
+
+            clockEngine.OnBeat += ActionOnClockBeat;
         }
 
         private void Start()
@@ -68,27 +71,37 @@ namespace TemperaMental.Transforms
 
         private void Update()
         {
-            if (Time.time >= masterTickTime)
+            int beats = Interlocked.Exchange(ref pendingBeats, 0);
+
+            for (int i = 0; i < beats; i++)
             {
-                masterTickTime = Time.time + masterTickRate;
+                TickTransforms();
+            }
+        }
 
-                if (playbackState == PlaybackState.Stopped || playbackState == PlaybackState.Reset)
-                {
-                    originalGroups = frameManager.GetCurrentFrameEmitters();
-                    Array.Copy(originalGroups, transformGroups, originalGroups.Length);
+        // clock thread
+        private void ActionOnClockBeat(ClockBeat beat)
+        {
+            Interlocked.Increment(ref pendingBeats);
+        }
 
-                    foreach (var transformService in transformServices)
-                    {
-                        if (!transformService.IsLatched || !transformService.TickAndCheck()) continue;
-                        ulong[] resultGroups = transformService.DoTransform(transformGroups);
-                        Array.Copy(resultGroups, transformGroups, transformGroups.Length);
-                    }
+        private void TickTransforms()
+        {
+            if (playbackState != PlaybackState.Stopped && playbackState != PlaybackState.Reset) return;
 
-                    if (EmitterUtils.CheckGroupsDifferent(originalGroups, transformGroups))
-                    {
-                        onEmittersTransformed?.Invoke(transformGroups);
-                    }
-                }
+            originalGroups = frameManager.GetCurrentFrameEmitters();
+            Array.Copy(originalGroups, transformGroups, originalGroups.Length);
+
+            foreach (var transformService in transformServices)
+            {
+                if (!transformService.IsLatched || !transformService.TickAndCheck()) continue;
+                ulong[] resultGroups = transformService.DoTransform(transformGroups);
+                Array.Copy(resultGroups, transformGroups, transformGroups.Length);
+            }
+
+            if (EmitterUtils.CheckGroupsDifferent(originalGroups, transformGroups))
+            {
+                onEmittersTransformed?.Invoke(transformGroups);
             }
         }
 
@@ -111,13 +124,6 @@ namespace TemperaMental.Transforms
         {
             transformServices[(int)currentTransformType].SetTransformRate(rate);
             onTransformRateChanged?.Invoke(rate);
-        }
-
-        public void SetBpm(int newBpm)
-        {
-            bpm = newBpm;
-            masterTickRate = SecondsInMinute / bpm;
-            masterTickTime = Mathf.Min(masterTickTime, Time.time + masterTickRate);
         }
 
         public void RandomiseEmitters(ulong[] emitterGroup, int targetCount)
@@ -209,6 +215,8 @@ namespace TemperaMental.Transforms
                 transformService.OnDirectionLatchStateChanged -= ActionOnServiceDirectionLatchChanged;
                 transformService.OnEmittersTransformed -= ActionOnEmittersTransformed;
             }
+
+            clockEngine.OnBeat -= ActionOnClockBeat;
         }
     }
 }

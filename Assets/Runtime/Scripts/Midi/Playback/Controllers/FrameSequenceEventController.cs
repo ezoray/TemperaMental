@@ -19,8 +19,6 @@ namespace TemperaMental.Midi.Playbacks
         // frame slider
         public void ActionOnSelectedFrameChanged(float selectedFrame) => sequenceManager.SeekToFrame(Mathf.RoundToInt(selectedFrame));
 
-        public void ActionOnBpmChanged(int newBpm) => sequenceManager.SetBpm(newBpm);
-
         public void OnClickToggleReverse() => sequenceManager.ToggleReverse();
 
         public void OnClickChangeLoopState() => sequenceManager.ToggleLooping();
