@@ -85,3 +85,5 @@ crashlytics-build.properties
 /[Aa]ssets/TextMesh Pro
 /[Aa]ssets/Melanchall
 /[Aa]ssets/StandaloneFileBrowser
+# Mono crash dumps written to the project root when the Editor crashes
+mono_crash.*
