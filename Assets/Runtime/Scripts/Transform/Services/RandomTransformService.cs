@@ -21,6 +21,10 @@ namespace TemperaMental.Transforms
         List<int> occupiedPositions;
         List<int> emptyPositions;
 
+        // System.Random rather than UnityEngine.Random: latched transforms run on the clock thread.
+        // calls are serialised by TransformManager's lock
+        readonly System.Random random = new System.Random();
+
         protected override void Awake()
         {
             base.Awake();
@@ -262,7 +266,7 @@ namespace TemperaMental.Transforms
 
                 for (int i = 0; i < toAdd; i++)
                 {
-                    int randomIndex = Random.Range(i, emptyPositions.Count);
+                    int randomIndex = random.Next(i, emptyPositions.Count);
 
                     (emptyPositions[i], emptyPositions[randomIndex]) =
                         (emptyPositions[randomIndex], emptyPositions[i]);
@@ -274,7 +278,7 @@ namespace TemperaMental.Transforms
                     int laneOwner = EmitterUtils.GetLaneOwner(pos, twoLaneActive);
                     int emitterId = laneOwner != -1
                         ? laneOwner
-                        : emitterIds[Random.Range(0, emitterIds.Count)];
+                        : emitterIds[random.Next(0, emitterIds.Count)];
 
                     transformedGroups[emitterId] |= 1UL << pos;
                 }
@@ -288,7 +292,7 @@ namespace TemperaMental.Transforms
 
                 for (int i = 0; i < toRemove; i++)
                 {
-                    int randomIndex = Random.Range(i, occupiedPositions.Count);
+                    int randomIndex = random.Next(i, occupiedPositions.Count);
 
                     (occupiedPositions[i], occupiedPositions[randomIndex]) =
                         (occupiedPositions[randomIndex], occupiedPositions[i]);

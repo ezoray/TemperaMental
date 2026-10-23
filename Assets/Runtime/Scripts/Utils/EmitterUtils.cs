@@ -4,6 +4,10 @@ namespace TemperaMental.Utils
 {
     public static class EmitterUtils
     {
+        // Tempera Control-channel notes: each track (column) starts an octave higher, row 0 is the top cell
+        const int NotesPerTrack = 12;
+
+        static int gridWidth;
         static int gridHeight;
         static int cellsPerLane;
         public static readonly ulong[] LaneMasks =
@@ -15,8 +19,31 @@ namespace TemperaMental.Utils
         };
         public static void Initialise()
         {
+            gridWidth = ConfigRegistry.Grid.GridWidth;
             gridHeight = ConfigRegistry.Grid.GridHeight;
             cellsPerLane = gridHeight * 2;
+        }
+
+        // cell index (as used by CC 11/12) to the Tempera's Control-channel note
+        public static int IndexToControlNote(int index)
+        {
+            return (index / gridHeight) * NotesPerTrack + (index % gridHeight);
+        }
+
+        // Tempera Control-channel note to cell index; false for notes that aren't grid cells
+        public static bool TryControlNoteToIndex(int note, out int index)
+        {
+            int track = note / NotesPerTrack;
+            int row = note % NotesPerTrack;
+
+            if (note < 0 || track >= gridWidth || row >= gridHeight)
+            {
+                index = -1;
+                return false;
+            }
+
+            index = track * gridHeight + row;
+            return true;
         }
         // After Simple-mode collision resolution, reassigns any emitter's bits that fall
         // inside another emitter's active 2-Lane territory to that lane owner.

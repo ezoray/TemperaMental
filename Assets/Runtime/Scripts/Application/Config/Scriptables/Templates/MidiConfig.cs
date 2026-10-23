@@ -27,7 +27,13 @@ namespace TemperaMental.Applications.Config
 
         // internal clock
         public int TicksPerBeat = 96; // transport resolution, 4 ticks per MIDI clock pulse (24 PPQN)
+        public int PulsesPerBeat = 24; // MIDI clock rate
         public float ClockSpinThresholdMs = 2f; // the clock thread busy-waits for this last part of each wait
+
+        // clock settings view
+        public bool DefaultSendStartStop = true;
+        public string ClockModePrefsKey = "ClockMode";
+        public string SendStartStopPrefsKey = "ClockSendStartStop";
 
         // midi view settings
         public int DefaultMidiChannel = 1;
@@ -37,6 +43,22 @@ namespace TemperaMental.Applications.Config
 
         public string MidiChannelPrefsKey = "MidiChannel";
         public string MaxBpmPrefsKey = "MaxBpm";
+
+        // last chosen devices, reselected at start-up and when they reconnect
+        public string OutputDevicePrefsKey = "MidiOutputDevice";
+        public string InputDevicePrefsKey = "MidiInputDevice";
+
+        // midi monitor: logs everything received and sent, to a file in Application.persistentDataPath
+        public bool MonitorEnabled = true;
+        public bool MonitorToConsole = true;
+        public bool MonitorToStatusLine = true;
+        public string MonitorFileName = "midi-monitor.log";
+        public float MonitorClockTimeout = 0.5f; // seconds without a clock pulse before clock counts as stopped
+        public int MonitorClockReportBeats = 4; // how often to report the clock's tempo while it runs
+
+        // Tempera Control-channel notes (placement notes are 0–91: track * 12 + row)
+        public int ControlSelectFirstNote = 96; // 96–99 select emitter 1–4
+        public int ControlArmFirstNote = 100; // 100–107 arm tracks 1–8
 
         // cc numbers for emitters
         public int ActivateCC = 10;

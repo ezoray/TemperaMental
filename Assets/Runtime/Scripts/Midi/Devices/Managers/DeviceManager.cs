@@ -1,6 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using Melanchall.DryWetMidi.Multimedia;
 using TemperaMental.Applications.Config;
@@ -10,57 +10,64 @@ using UnityEngine.Events;
 
 namespace TemperaMental.Midi.Devices
 {
-    // poll for midi device changes in Windows only, use callbacks in macOS
+    // Finds MIDI devices and opens the chosen output (emitter CCs, clock out) and input (Tempera notes, clock in).
+    // Device changes are polled under Windows, which has no callbacks, and reported by DevicesWatcher elsewhere.
+    // The last chosen devices are remembered, selected at start-up and selected again when they reconnect.
+    // Initial and reconnect selection go through the dropdowns (onInitial...Found), the same path as a user's choice.
     public class DeviceManager : MonoBehaviour
     {
         string primaryDevice;
-        string currentDeviceName;
+        float pollingInterval;
+        string outputPrefsKey;
+        string inputPrefsKey;
 
-        List<string> connectedDevices;
-        OutputDevice currentDevice;
+        List<string> connectedOutputs = new List<string>();
+        List<string> connectedInputs = new List<string>();
+
+        OutputDevice currentOutput;
+        string currentOutputName;
+
+        InputDevice currentInput;
+        string currentInputName;
 
         bool isInitialSync = true;
         volatile bool isDeviceChange;
-        float pollingInterval; 
 
         bool isWatcherSubscribed;
 
+        [Header("Output")]
         [SerializeField] UnityEvent<string> onInitialDeviceFound;
         [SerializeField] UnityEvent<List<string>, string> onDevicesUpdated;
         [SerializeField] UnityEvent<OutputDevice> onDeviceSelected;
         [SerializeField] UnityEvent onCurrentDeviceRemoved;
 
+        [Header("Input")]
+        [SerializeField] UnityEvent<string> onInitialInputDeviceFound;
+        [SerializeField] UnityEvent<List<string>, string> onInputDevicesUpdated;
+        [SerializeField] UnityEvent<InputDevice> onInputDeviceSelected;
+        [SerializeField] UnityEvent onInputDeviceClosed;
+
         private void Awake()
         {
-            connectedDevices = new List<string>();
-
             primaryDevice = ConfigRegistry.Midi.PrimaryDevice;
             pollingInterval = ConfigRegistry.Midi.PollingInterval;
+            outputPrefsKey = ConfigRegistry.Midi.OutputDevicePrefsKey;
+            inputPrefsKey = ConfigRegistry.Midi.InputDevicePrefsKey;
         }
 
         private void OnEnable()
         {
 #if !UNITY_STANDALONE_WIN
-            if (DevicesWatcher.Instance != null && !isWatcherSubscribed)
-            {
-                DevicesWatcher.Instance.DeviceAdded += OnDeviceChange;
-                DevicesWatcher.Instance.DeviceRemoved += OnDeviceChange;
-                isWatcherSubscribed = true;
-            }
+            SubscribeWatcher();
 #endif
         }
 
         private void Start()
         {
 #if UNITY_STANDALONE_WIN
-    StartCoroutine(PollDevices());
+            StartCoroutine(PollDevices());
 #else
-            if (DevicesWatcher.Instance != null && !isWatcherSubscribed)
-            {
-                DevicesWatcher.Instance.DeviceAdded += OnDeviceChange;
-                DevicesWatcher.Instance.DeviceRemoved += OnDeviceChange;
-                isWatcherSubscribed = true;
-            }
+            SubscribeWatcher();
 #endif
             SyncDeviceList();
         }
@@ -75,53 +82,154 @@ namespace TemperaMental.Midi.Devices
 
         private void SyncDeviceList()
         {
-            List<string> hardware = GetHardwareDeviceNames();
-            List<string> removed = connectedDevices.Except(hardware).ToList();
-            List<string> added = hardware.Except(connectedDevices).ToList();
+            List<string> outputs = GetOutputNames();
+            List<string> inputs = GetInputNames();
 
-            foreach (string name in removed)
-            {
+            List<string> removedOutputs = connectedOutputs.Except(outputs).ToList();
+            List<string> addedOutputs = outputs.Except(connectedOutputs).ToList();
+            List<string> removedInputs = connectedInputs.Except(inputs).ToList();
+            List<string> addedInputs = inputs.Except(connectedInputs).ToList();
+
+            // most devices have an input and an output with the same name, so report each name once
+            foreach (string name in removedOutputs.Union(removedInputs))
                 LogMan.Log($"Device disconnected: {name}");
-                if (currentDevice != null && currentDeviceName == name)
-                {
-                    try
-                    {
-                        currentDevice.Dispose();
-                    }
-                    catch (Exception ex)
-                    {
-                        LogMan.LogWarning($"Error disposing device {name}: {ex.Message}");
-                    }
-                    finally
-                    {
-                        currentDevice = null;
-                        currentDeviceName = null;
-                    }
 
-                    onCurrentDeviceRemoved?.Invoke();
-                }
-            }
-
-            foreach (string name in added)
-            {
+            foreach (string name in addedOutputs.Union(addedInputs))
                 LogMan.Log($"Device connected: {name}");
+
+            if (currentOutputName != null && removedOutputs.Contains(currentOutputName))
+            {
+                CloseOutput();
+                onCurrentDeviceRemoved?.Invoke();
             }
 
-            connectedDevices = hardware;
+            if (currentInputName != null && removedInputs.Contains(currentInputName))
+            {
+                CloseInput();
+            }
 
-            onDevicesUpdated?.Invoke(connectedDevices, currentDeviceName);
+            connectedOutputs = outputs;
+            connectedInputs = inputs;
+
+            onDevicesUpdated?.Invoke(connectedOutputs, currentOutputName);
+            onInputDevicesUpdated?.Invoke(connectedInputs, currentInputName);
 
             if (isInitialSync)
             {
                 isInitialSync = false;
                 HandleInitialSelection();
             }
+            else
+            {
+                ReselectReconnected(addedOutputs, addedInputs);
+            }
         }
 
-        private List<string> GetHardwareDeviceNames()
+        private void HandleInitialSelection()
+        {
+            if (connectedOutputs.Count == 0)
+            {
+                LogMan.Log("No MIDI devices detected");
+            }
+            else
+            {
+                string savedOutput = PlayerPrefs.GetString(outputPrefsKey, "");
+
+                string targetOutput = connectedOutputs.Contains(savedOutput) ? savedOutput
+                    : connectedOutputs.Contains(primaryDevice) ? primaryDevice
+                    : connectedOutputs[0];
+
+                onInitialDeviceFound?.Invoke(targetOutput);
+            }
+
+            // inputs are only opened automatically when they were chosen before or are the primary device
+            string savedInput = PlayerPrefs.GetString(inputPrefsKey, "");
+
+            string targetInput = connectedInputs.Contains(savedInput) ? savedInput
+                : connectedInputs.Contains(primaryDevice) ? primaryDevice
+                : null;
+
+            if (targetInput != null)
+            {
+                onInitialInputDeviceFound?.Invoke(targetInput);
+            }
+        }
+
+        private void ReselectReconnected(List<string> addedOutputs, List<string> addedInputs)
+        {
+            string savedOutput = PlayerPrefs.GetString(outputPrefsKey, "");
+
+            if (currentOutput == null && addedOutputs.Contains(savedOutput))
+            {
+                onInitialDeviceFound?.Invoke(savedOutput);
+            }
+
+            string savedInput = PlayerPrefs.GetString(inputPrefsKey, "");
+
+            if (currentInput == null && addedInputs.Contains(savedInput))
+            {
+                onInitialInputDeviceFound?.Invoke(savedInput);
+            }
+        }
+
+        public void SetOutputDevice(string deviceName)
+        {
+            try
+            {
+                CloseOutput();
+
+                currentOutput = OutputDevice.GetByName(deviceName);
+                currentOutput.PrepareForEventsSending();
+                currentOutputName = deviceName;
+
+                PlayerPrefs.SetString(outputPrefsKey, deviceName);
+                PlayerPrefs.Save();
+
+                onDeviceSelected?.Invoke(currentOutput);
+                LogMan.Log($"Output '{deviceName}' selected");
+            }
+            catch (Exception ex)
+            {
+                LogMan.LogError($"Failed to open output {deviceName}: {ex.Message}");
+
+                currentOutput = null;
+                currentOutputName = null;
+
+                connectedOutputs.Remove(deviceName);
+                onDevicesUpdated?.Invoke(connectedOutputs, currentOutputName);
+            }
+        }
+
+        public void SetInputDevice(string deviceName)
+        {
+            try
+            {
+                CloseInput();
+
+                currentInput = InputDevice.GetByName(deviceName);
+                currentInputName = deviceName;
+
+                PlayerPrefs.SetString(inputPrefsKey, deviceName);
+                PlayerPrefs.Save();
+
+                onInputDeviceSelected?.Invoke(currentInput);
+                LogMan.Log($"Input '{deviceName}' selected");
+            }
+            catch (Exception ex)
+            {
+                LogMan.LogError($"Failed to open input {deviceName}: {ex.Message}");
+
+                currentInput = null;
+                currentInputName = null;
+
+                connectedInputs.Remove(deviceName);
+                onInputDevicesUpdated?.Invoke(connectedInputs, currentInputName);
+            }
+        }
+
+        private List<string> GetOutputNames()
         {
             var names = new List<string>();
-
             IEnumerable<OutputDevice> devices;
 
             try
@@ -130,7 +238,7 @@ namespace TemperaMental.Midi.Devices
             }
             catch (Exception ex)
             {
-                LogMan.LogWarning($"Failed to enumerate MIDI devices: {ex.Message}");
+                LogMan.LogWarning($"Failed to enumerate MIDI outputs: {ex.Message}");
                 return names;
             }
 
@@ -142,7 +250,7 @@ namespace TemperaMental.Midi.Devices
                 }
                 catch (Exception ex)
                 {
-                    LogMan.LogWarning($"Skipped unreadable device during enumeration: {ex.Message}");
+                    LogMan.LogWarning($"Skipped unreadable output during enumeration: {ex.Message}");
                 }
                 finally
                 {
@@ -153,59 +261,111 @@ namespace TemperaMental.Midi.Devices
             return names;
         }
 
-        private void HandleInitialSelection()
+        private List<string> GetInputNames()
         {
-            if (connectedDevices.Count == 0)
-            {
-                LogMan.Log("No MIDI devices detected");
-                return;
-            }
+            var names = new List<string>();
+            IEnumerable<InputDevice> devices;
 
-            string targetDevice = connectedDevices.Contains(primaryDevice) ? primaryDevice : connectedDevices[0];
-
-            onInitialDeviceFound?.Invoke(targetDevice);
-        }
-
-        public void SetOutputDevice(string deviceName)
-        {
             try
             {
-                if (currentDevice != null)
-                {
-                    currentDevice.Dispose();
-                    currentDevice = null;
-                    currentDeviceName = null;
-                }
-
-                currentDevice = OutputDevice.GetByName(deviceName);
-                currentDevice.PrepareForEventsSending();
-                currentDeviceName = deviceName;
-
-                onDeviceSelected?.Invoke(currentDevice);
-                LogMan.Log($"Device '{deviceName}' selected");
+                devices = InputDevice.GetAll();
             }
             catch (Exception ex)
             {
-                LogMan.LogError($"Failed to open device {deviceName}: {ex.Message}");
-
-                connectedDevices.Remove(deviceName);
-                onDevicesUpdated?.Invoke(connectedDevices, currentDeviceName);
+                LogMan.LogWarning($"Failed to enumerate MIDI inputs: {ex.Message}");
+                return names;
             }
+
+            foreach (var device in devices)
+            {
+                try
+                {
+                    names.Add(device.Name);
+                }
+                catch (Exception ex)
+                {
+                    LogMan.LogWarning($"Skipped unreadable input during enumeration: {ex.Message}");
+                }
+                finally
+                {
+                    device.Dispose();
+                }
+            }
+
+            return names;
+        }
+
+        private void CloseOutput()
+        {
+            if (currentOutput == null) return;
+
+            try
+            {
+                currentOutput.Dispose();
+            }
+            catch (Exception ex)
+            {
+                LogMan.LogWarning($"Error closing output {currentOutputName}: {ex.Message}");
+            }
+            finally
+            {
+                currentOutput = null;
+                currentOutputName = null;
+            }
+        }
+
+        // listeners stop using the input before it is disposed
+        private void CloseInput()
+        {
+            if (currentInput == null) return;
+
+            onInputDeviceClosed?.Invoke();
+
+            try
+            {
+                currentInput.Dispose();
+            }
+            catch (Exception ex)
+            {
+                LogMan.LogWarning($"Error closing input {currentInputName}: {ex.Message}");
+            }
+            finally
+            {
+                currentInput = null;
+                currentInputName = null;
+            }
+        }
+
+        private void SubscribeWatcher()
+        {
+#if !UNITY_STANDALONE_WIN
+            if (DevicesWatcher.Instance != null && !isWatcherSubscribed)
+            {
+                DevicesWatcher.Instance.DeviceAdded += OnDeviceChange;
+                DevicesWatcher.Instance.DeviceRemoved += OnDeviceChange;
+                isWatcherSubscribed = true;
+            }
+#endif
         }
 
 #if UNITY_STANDALONE_WIN
         private IEnumerator PollDevices()
         {
             var wait = new WaitForSeconds(pollingInterval);
-            List<string> previousDevices = new List<string>();
+            List<string> previousOutputs = new List<string>();
+            List<string> previousInputs = new List<string>();
 
             while (true)
             {
                 yield return wait;
-                List<string> current = GetHardwareDeviceNames();
-                if (!current.SequenceEqual(previousDevices))
+
+                List<string> outputs = GetOutputNames();
+                List<string> inputs = GetInputNames();
+
+                if (!outputs.SequenceEqual(previousOutputs) || !inputs.SequenceEqual(previousInputs))
                 {
-                    previousDevices = current;
+                    previousOutputs = outputs;
+                    previousInputs = inputs;
                     isDeviceChange = true;
                 }
             }
@@ -217,24 +377,6 @@ namespace TemperaMental.Midi.Devices
         }
 #endif
 
-        private void DisposeCurrentDevice()
-        {
-            if (currentDevice == null) return;
-            try
-            {
-                currentDevice.Dispose();
-            }
-            catch (Exception ex)
-            {
-                LogMan.LogWarning($"Error disposing device: {ex.Message}");
-            }
-            finally
-            {
-                currentDevice = null;
-                currentDeviceName = null;
-            }
-        }
-
         private void OnDisable()
         {
 #if !UNITY_STANDALONE_WIN
@@ -245,12 +387,14 @@ namespace TemperaMental.Midi.Devices
                 isWatcherSubscribed = false;
             }
 #endif
-            DisposeCurrentDevice();
+            CloseInput();
+            CloseOutput();
         }
 
         private void OnDestroy()
         {
-            DisposeCurrentDevice();
+            CloseInput();
+            CloseOutput();
         }
     }
 }

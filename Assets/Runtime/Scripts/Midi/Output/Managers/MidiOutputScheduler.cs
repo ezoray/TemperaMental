@@ -6,6 +6,7 @@ using Melanchall.DryWetMidi.Common;
 using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Multimedia;
 using TemperaMental.Applications.Config;
+using TemperaMental.Midi.Core;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -53,8 +54,10 @@ namespace TemperaMental.Midi.Output
         int gridSize;
         long intervalTicks;
 
-        volatile OutputDevice outputDevice;
+        // any IOutputDevice, so tests can capture what would be sent without a real MIDI port
+        volatile IOutputDevice outputDevice;
         volatile byte midiChannel;
+        volatile bool isMidiChannelSet;
         volatile EventWaitHandle wakeHandle;
 
         readonly ConcurrentQueue<OutputCommand> commands = new ConcurrentQueue<OutputCommand>();
@@ -65,6 +68,15 @@ namespace TemperaMental.Midi.Output
         int burstCount;
         int burstIndex;
         long nextSendTime;
+
+        // realtime messages carry no data, so single instances are reused
+        readonly TimingClockEvent timingClockEvent = new TimingClockEvent();
+        readonly StartEvent startEvent = new StartEvent();
+        readonly ContinueEvent continueEvent = new ContinueEvent();
+        readonly StopEvent stopEvent = new StopEvent();
+
+        // called on the clock thread after every message sent (used by the MIDI monitor)
+        public event Action<MidiMessageData> MessageSent;
 
         [SerializeField] UnityEvent<bool> onPlaybackReadyStateChanged;
 
@@ -78,7 +90,9 @@ namespace TemperaMental.Midi.Output
             gridSize = ConfigRegistry.Grid.GridWidth * ConfigRegistry.Grid.GridHeight;
             intervalTicks = (long)(Stopwatch.Frequency * ConfigRegistry.Midi.EventIntervalMS);
 
-            midiChannel = (byte)(ConfigRegistry.Midi.DefaultMidiChannel - 1);
+            // the saved channel may already have been set by MidiSettingsManager, whose Awake can run first
+            if (!isMidiChannelSet)
+                midiChannel = (byte)(ConfigRegistry.Midi.DefaultMidiChannel - 1);
 
             deviceGroups = new ulong[emitterCount];
 
@@ -98,9 +112,10 @@ namespace TemperaMental.Midi.Output
         public void SetMidiChannel(int channel)
         {
             midiChannel = (byte)(channel - 1);
+            isMidiChannelSet = true;
         }
 
-        public void SetOutputDevice(OutputDevice device)
+        public void SetOutputDevice(IOutputDevice device)
         {
             outputDevice = device;
             Enqueue(new OutputCommand(CommandType.ResetDevice));
@@ -157,21 +172,48 @@ namespace TemperaMental.Midi.Output
 
             if (now < nextSendTime) return false;
 
-            Send(burst[burstIndex++]);
+            ControlChangeEvent controlChange = burst[burstIndex++];
+
+            if (Send(controlChange))
+            {
+                MessageSent?.Invoke(new MidiMessageData(Stopwatch.GetTimestamp(), MidiMessageKind.ControlChange,
+                    controlChange.Channel, controlChange.ControlNumber, controlChange.ControlValue));
+            }
+
             nextSendTime = now + intervalTicks;
 
             return true;
         }
 
-        private void Send(ControlChangeEvent controlChange)
+        // sends a clock or transport message straight away, ahead of any queued CCs.
+        // only TimingClock, Start, Continue and Stop are supported
+        public void SendRealtime(MidiMessageKind kind)
         {
-            OutputDevice device = outputDevice;
+            MidiEvent realtimeEvent = kind switch
+            {
+                MidiMessageKind.TimingClock => timingClockEvent,
+                MidiMessageKind.Start => startEvent,
+                MidiMessageKind.Continue => continueEvent,
+                MidiMessageKind.Stop => stopEvent,
+                _ => null
+            };
 
-            if (device == null) return;
+            if (realtimeEvent != null && Send(realtimeEvent))
+            {
+                MessageSent?.Invoke(new MidiMessageData(Stopwatch.GetTimestamp(), kind));
+            }
+        }
+
+        private bool Send(MidiEvent midiEvent)
+        {
+            IOutputDevice device = outputDevice;
+
+            if (device == null) return false;
 
             try
             {
-                device.SendEvent(controlChange);
+                device.SendEvent(midiEvent);
+                return true;
             }
             catch (ObjectDisposedException)
             {
@@ -182,6 +224,8 @@ namespace TemperaMental.Midi.Output
             {
                 Interlocked.CompareExchange(ref outputDevice, null, device);
             }
+
+            return false;
         }
 
         private bool BuildNextBurst()

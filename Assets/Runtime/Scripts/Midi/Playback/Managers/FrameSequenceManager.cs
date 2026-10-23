@@ -91,17 +91,18 @@ namespace TemperaMental.Midi.Playbacks
                 {
                     case PlaybackState.Playing:
                         SetPlaybackState(PlaybackState.Paused);
+                        clockEngine.SendTransport(ClockTransport.Stop);
                         break;
 
                     case PlaybackState.Paused:
-                        StartPlayback();
+                        StartPlayback(ClockTransport.Continue);
                         break;
 
                     case PlaybackState.Reset:
                     case PlaybackState.Stopped:
                         SetAnchorFrame(initialFrame);
                         SetPlayFrame(initialFrame);
-                        StartPlayback();
+                        StartPlayback(ClockTransport.Start);
                         break;
                 }
             }
@@ -115,6 +116,7 @@ namespace TemperaMental.Midi.Playbacks
                 {
                     case PlaybackState.Playing:
                         SetPlaybackState(PlaybackState.Stopped);
+                        clockEngine.SendTransport(ClockTransport.Stop);
                         break;
 
                     case PlaybackState.Paused:
@@ -141,9 +143,10 @@ namespace TemperaMental.Midi.Playbacks
                 switch (playbackState)
                 {
                     case PlaybackState.Playing:
-                        // restart the clock so the new frame plays immediately for a full beat
+                        // restart the clock so the new frame plays immediately for a full beat;
+                        // Start realigns the receiving device's beat with the restart
                         SetPlayFrame(newSeekFrame);
-                        playEpoch = clockEngine.Restart();
+                        playEpoch = clockEngine.Restart(ClockTransport.Start);
                         break;
 
                     case PlaybackState.Paused:
@@ -194,11 +197,21 @@ namespace TemperaMental.Midi.Playbacks
             }
         }
 
-        private void StartPlayback()
+        private void StartPlayback(ClockTransport transport)
         {
             SetPlaybackState(PlaybackState.Playing);
-            playEpoch = clockEngine.Restart();
+            playEpoch = clockEngine.Restart(transport);
         }
+
+        private void FinishPlayback()
+        {
+            SetPlaybackState(PlaybackState.Reset);
+            clockEngine.SendTransport(ClockTransport.Stop);
+            isPlaybackFinished = true;
+        }
+
+        // read on the clock thread by the transform manager, so it's always current
+        public PlaybackState State => playbackState;
 
         private void PlayCurrentFrame()
         {
@@ -247,16 +260,14 @@ namespace TemperaMental.Midi.Playbacks
                     // no emitter data would be sent anyway and static playback could be confusing
                     if (frameCount == 1 || (isReversed ? anchorFrame == 1 : anchorFrame == frameCount))
                     {
-                        SetPlaybackState(PlaybackState.Reset);
-                        isPlaybackFinished = true;
+                        FinishPlayback();
                         return;
                     }
                     SetPlayFrame(anchorFrame);
                 }
                 else
                 {
-                    SetPlaybackState(PlaybackState.Reset);
-                    isPlaybackFinished = true;
+                    FinishPlayback();
                     return;
                 }
             }

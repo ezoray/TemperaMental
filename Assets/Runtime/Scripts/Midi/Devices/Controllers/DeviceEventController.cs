@@ -7,9 +7,16 @@ namespace TemperaMental.Midi.Devices
         [SerializeField] DeviceManager deviceManager;
 
 
+        // output dropdown
         public void ActionOnDeviceSelected(string deviceName)
         {
             deviceManager.SetOutputDevice(deviceName);
+        }
+
+        // input dropdown
+        public void ActionOnInputDeviceSelected(string deviceName)
+        {
+            deviceManager.SetInputDevice(deviceName);
         }
     }
 }

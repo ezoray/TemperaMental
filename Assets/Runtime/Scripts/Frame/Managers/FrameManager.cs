@@ -15,6 +15,10 @@ namespace TemperaMental.Frames
         // immutable copy of every frame's emitters, replaced after each change, read by the sequencer on the clock thread
         volatile ulong[][] publishedSequence = new ulong[0][];
 
+        // immutable copy of the current frame's emitters, read by the transforms on the clock thread.
+        // a new array is published whenever the current frame changes, so a reference check detects changes
+        volatile ulong[] publishedCurrentGroups;
+
         Frame currentFrame;
         int currentFrameIndex;
         int currentEmitterId;
@@ -294,6 +298,8 @@ namespace TemperaMental.Frames
 
         public ulong[][] PublishedSequence => publishedSequence;
 
+        public ulong[] PublishedCurrentGroups => publishedCurrentGroups;
+
         private void PublishSequence()
         {
             var sequence = new ulong[frames.Count][];
@@ -304,6 +310,11 @@ namespace TemperaMental.Frames
             }
 
             publishedSequence = sequence;
+
+            if (currentFrame != null)
+            {
+                publishedCurrentGroups = currentFrame.GetSnapshot();
+            }
         }
 
         private void NotifyFrameChanged()
