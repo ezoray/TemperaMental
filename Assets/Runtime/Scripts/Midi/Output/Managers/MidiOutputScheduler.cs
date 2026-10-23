@@ -6,6 +6,7 @@ using Melanchall.DryWetMidi.Common;
 using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Multimedia;
 using TemperaMental.Applications.Config;
+using TemperaMental.Midi.Clock;
 using TemperaMental.Midi.Core;
 using UnityEngine;
 using UnityEngine.Events;
@@ -56,6 +57,11 @@ namespace TemperaMental.Midi.Output
 
         // any IOutputDevice, so tests can capture what would be sent without a real MIDI port
         volatile IOutputDevice outputDevice;
+
+        // clock and transport messages go to the Out device, a separate Clock to device, or nowhere
+        volatile IOutputDevice clockOutputDevice;
+        volatile int clockDestination;
+
         volatile byte midiChannel;
         volatile bool isMidiChannelSet;
         volatile EventWaitHandle wakeHandle;
@@ -121,6 +127,12 @@ namespace TemperaMental.Midi.Output
             Enqueue(new OutputCommand(CommandType.ResetDevice));
 
             onPlaybackReadyStateChanged?.Invoke(true);
+        }
+
+        public void SetClockDestination(ClockDestination destination, IOutputDevice separateDevice)
+        {
+            clockOutputDevice = destination == ClockDestination.Separate ? separateDevice : null;
+            clockDestination = (int)destination;
         }
 
         public void ClearOutputDevice()
@@ -198,7 +210,16 @@ namespace TemperaMental.Midi.Output
                 _ => null
             };
 
-            if (realtimeEvent != null && Send(realtimeEvent))
+            if (realtimeEvent == null) return;
+
+            bool isSent = clockDestination switch
+            {
+                (int)ClockDestination.SameAsOut => Send(realtimeEvent),
+                (int)ClockDestination.Separate => SendToClockOutput(realtimeEvent),
+                _ => false
+            };
+
+            if (isSent)
             {
                 MessageSent?.Invoke(new MidiMessageData(Stopwatch.GetTimestamp(), kind));
             }
@@ -223,6 +244,29 @@ namespace TemperaMental.Midi.Output
             catch (MidiDeviceException)
             {
                 Interlocked.CompareExchange(ref outputDevice, null, device);
+            }
+
+            return false;
+        }
+
+        private bool SendToClockOutput(MidiEvent midiEvent)
+        {
+            IOutputDevice device = clockOutputDevice;
+
+            if (device == null) return false;
+
+            try
+            {
+                device.SendEvent(midiEvent);
+                return true;
+            }
+            catch (ObjectDisposedException)
+            {
+                Interlocked.CompareExchange(ref clockOutputDevice, null, device);
+            }
+            catch (MidiDeviceException)
+            {
+                Interlocked.CompareExchange(ref clockOutputDevice, null, device);
             }
 
             return false;

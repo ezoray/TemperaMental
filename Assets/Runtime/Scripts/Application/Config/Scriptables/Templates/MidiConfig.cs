@@ -30,10 +30,18 @@ namespace TemperaMental.Applications.Config
         public int PulsesPerBeat = 24; // MIDI clock rate
         public float ClockSpinThresholdMs = 2f; // the clock thread busy-waits for this last part of each wait
 
-        // clock settings view
+        // clock settings views
         public bool DefaultSendStartStop = true;
         public string ClockModePrefsKey = "ClockMode";
         public string SendStartStopPrefsKey = "ClockSendStartStop";
+        public string ClockFromPrefsKey = "ClockFromDevice"; // empty: same as In
+        public string ClockToPrefsKey = "ClockToDevice"; // empty: same as Out
+        public string ClockToNoneValue = "<none>";
+
+        // following external clock
+        public float ExternalClockTimeout = 0.5f; // seconds without a pulse before the clock counts as lost
+        public int TempoMeasurePulses = 24; // pulses averaged for the measured tempo
+        public float TempoDisplayHysteresis = 0.6f; // BPM change needed before the displayed tempo updates
 
         // midi view settings
         public int DefaultMidiChannel = 1;

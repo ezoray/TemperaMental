@@ -18,5 +18,10 @@ namespace TemperaMental.Midi.Devices
         {
             deviceManager.SetInputDevice(deviceName);
         }
+
+        // clock devices view: "" means same as In / Out
+        public void ActionOnClockFromChanged(string choice) => deviceManager.SetClockInput(choice);
+
+        public void ActionOnClockToChanged(string choice) => deviceManager.SetClockOutput(choice);
     }
 }

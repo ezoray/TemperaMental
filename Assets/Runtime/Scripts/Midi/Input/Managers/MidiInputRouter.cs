@@ -28,6 +28,8 @@ namespace TemperaMental.Midi.Input
 
         public void SetInputDevice(InputDevice device)
         {
+            if (device == inputDevice) return;
+
             ClearInputDevice();
 
             try

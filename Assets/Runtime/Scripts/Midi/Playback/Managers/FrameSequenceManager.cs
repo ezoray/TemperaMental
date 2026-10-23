@@ -51,6 +51,7 @@ namespace TemperaMental.Midi.Playbacks
         private void OnEnable()
         {
             clockEngine.OnBeat += HandleBeat;
+            clockEngine.OnExternalTransport += HandleExternalTransport;
         }
 
         private void Start()
@@ -197,6 +198,51 @@ namespace TemperaMental.Midi.Playbacks
             }
         }
 
+        // clock thread: transport from the clock source while following external clock.
+        // Start plays from the current frame (or restarts from the anchor if already playing), Stop pauses,
+        // Continue resumes, Song Position moves to the frame for that beat. The clock is already running,
+        // so nothing here restarts it; the epoch says which beats belong to this playback
+        private void HandleExternalTransport(ClockTransport transport, long epoch, int songBeat)
+        {
+            lock (playbackStateLock)
+            {
+                switch (transport)
+                {
+                    case ClockTransport.Start:
+                        int startFrame = playbackState == PlaybackState.Playing ? anchorFrame : frameManager.GetCurrentFrameNumber();
+                        SetAnchorFrame(startFrame);
+                        SetPlayFrame(startFrame);
+                        SetPlaybackState(PlaybackState.Playing);
+                        playEpoch = epoch;
+                        break;
+
+                    case ClockTransport.Continue:
+                        // carries on from the sequencer's position: where it paused, or where a Song Position put it
+                        if (playbackState != PlaybackState.Playing && playbackState != PlaybackState.Paused)
+                        {
+                            SetAnchorFrame(playFrame);
+                        }
+
+                        SetPlaybackState(PlaybackState.Playing);
+                        playEpoch = epoch;
+                        break;
+
+                    case ClockTransport.Stop:
+                        if (playbackState == PlaybackState.Playing)
+                            SetPlaybackState(PlaybackState.Paused);
+                        break;
+
+                    case ClockTransport.SongPosition:
+                        if (playbackState != PlaybackState.Playing)
+                            SetAnchorFrame(songBeat + 1);
+
+                        SetPlayFrame(songBeat + 1);
+                        playEpoch = epoch;
+                        break;
+                }
+            }
+        }
+
         private void StartPlayback(ClockTransport transport)
         {
             SetPlaybackState(PlaybackState.Playing);
@@ -282,6 +328,7 @@ namespace TemperaMental.Midi.Playbacks
         private void OnDisable()
         {
             clockEngine.OnBeat -= HandleBeat;
+            clockEngine.OnExternalTransport -= HandleExternalTransport;
         }
     }
 }

@@ -32,6 +32,11 @@ namespace TemperaMental.Applications.Config
         public string NoDevicesText = "Connect Midi Device";
         public string SelectDeviceText = "Select Midi Device";
 
+        // clock devices view
+        public string SameAsInText = "Same as In";
+        public string SameAsOutText = "Same as Out";
+        public string NoneText = "None";
+
         // fading log message
         public float TempMessageDuration = 2f;
         public float TempMessageFadeDuration = 0.5f;

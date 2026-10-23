@@ -12,6 +12,11 @@ namespace TemperaMental.Settings
         // 0 from the Off button, 1 from the On button
         public void OnClickSendStartStop(int value) => settingsManager.SetSendStartStop(value != 0);
 
+        // -1 or +1 from the < and > buttons on the clock devices view
+        public void OnClickClockFrom(int directionValue) => settingsManager.StepClockFrom(directionValue);
+
+        public void OnClickClockTo(int directionValue) => settingsManager.StepClockTo(directionValue);
+
         public void OnClockSettingsClosed() => settingsManager.SaveClockSettings();
     }
 }

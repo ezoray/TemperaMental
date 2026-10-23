@@ -48,8 +48,16 @@ namespace TemperaMental.UI.Playbacks
             bpmSlider.minValue = minBpm;
         }
 
+        // while following external clock the tempo comes from the clock source, so the BPM controls are locked
+        public void ActionOnClockModeChanged(ClockMode clockMode)
+        {
+            bpmSlider.interactable = clockMode != ClockMode.Receive;
+        }
+
         public void OnClickIncrementBpm()
         {
+            if (!bpmSlider.interactable) return;
+
             int newBpm = Mathf.RoundToInt(bpmSlider.value) + 1;
 
             if (newBpm <= maxBpm)
@@ -60,6 +68,8 @@ namespace TemperaMental.UI.Playbacks
 
         public void OnClickDecrementBpm()
         {
+            if (!bpmSlider.interactable) return;
+
             int newBpm = Mathf.RoundToInt(bpmSlider.value) - 1;
 
             if (newBpm >= minBpm)

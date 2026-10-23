@@ -25,5 +25,8 @@ namespace TemperaMental.Midi.Core
 
         // slider
         public void ActionOnBpmValueChanged(float bpm) => tempoManager.SetBpm(Mathf.RoundToInt(bpm));
+
+        // tempo measured while following external clock
+        public void ActionOnExternalTempoChanged(int bpm) => tempoManager.SetBpm(bpm);
     }
 }

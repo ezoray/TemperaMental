@@ -22,19 +22,27 @@ namespace TemperaMental.Midi.Input
     public class MidiMonitor : MonoBehaviour
     {
         [SerializeField] MidiInputRouter inputRouter;
+        [SerializeField] MidiInputRouter clockInputRouter;
         [SerializeField] MidiOutputScheduler outputScheduler;
         [SerializeField] ClockEngine clockEngine;
 
+        // IN: the In device, CLK: a separate Clock from device, OUT: everything the app sends
+        enum Source { In, ClockIn, Out }
+
         readonly struct Entry
         {
-            public readonly bool IsInput;
+            public readonly Source Source;
             public readonly MidiMessageData Message;
 
-            public Entry(bool isInput, MidiMessageData message)
+            public Entry(Source source, MidiMessageData message)
             {
-                IsInput = isInput;
+                Source = source;
                 Message = message;
             }
+
+            public bool IsInput => Source != Source.Out;
+
+            public string Direction => Source == Source.In ? "IN " : Source == Source.ClockIn ? "CLK" : "OUT";
         }
 
         class ClockStats
@@ -65,6 +73,7 @@ namespace TemperaMental.Midi.Input
         readonly List<Entry> batch = new List<Entry>();
         readonly StringBuilder lines = new StringBuilder();
         readonly ClockStats inClock = new ClockStats();
+        readonly ClockStats clockInClock = new ClockStats();
         readonly ClockStats outClock = new ClockStats();
 
         StreamWriter writer;
@@ -122,6 +131,7 @@ namespace TemperaMental.Midi.Input
             OpenLog();
 
             inputRouter.MessageReceived += OnMessageReceived;
+            clockInputRouter.MessageReceived += OnClockInputReceived;
             outputScheduler.MessageSent += OnMessageSent;
         }
 
@@ -154,13 +164,19 @@ namespace TemperaMental.Midi.Input
         // driver thread
         private void OnMessageReceived(MidiMessageData message)
         {
-            entries.Enqueue(new Entry(true, message));
+            entries.Enqueue(new Entry(Source.In, message));
+        }
+
+        // driver thread
+        private void OnClockInputReceived(MidiMessageData message)
+        {
+            entries.Enqueue(new Entry(Source.ClockIn, message));
         }
 
         // clock thread
         private void OnMessageSent(MidiMessageData message)
         {
-            entries.Enqueue(new Entry(false, message));
+            entries.Enqueue(new Entry(Source.Out, message));
         }
 
         private void Update()
@@ -182,6 +198,7 @@ namespace TemperaMental.Midi.Input
 
             long now = Stopwatch.GetTimestamp();
             CheckClockTimeout(inClock, "IN ", now);
+            CheckClockTimeout(clockInClock, "CLK", now);
             CheckClockTimeout(outClock, "OUT", now);
 
             Flush();
@@ -190,12 +207,13 @@ namespace TemperaMental.Midi.Input
         private void Process(Entry entry)
         {
             MidiMessageData message = entry.Message;
-            string direction = entry.IsInput ? "IN " : "OUT";
+            string direction = entry.Direction;
 
             switch (message.Kind)
             {
                 case MidiMessageKind.TimingClock:
-                    OnPulse(entry.IsInput ? inClock : outClock, direction, message.Timestamp, entry.IsInput);
+                    ClockStats stats = entry.Source == Source.In ? inClock : entry.Source == Source.ClockIn ? clockInClock : outClock;
+                    OnPulse(stats, direction, message.Timestamp, entry.IsInput);
                     return;
 
                 case MidiMessageKind.ActiveSensing:
@@ -212,7 +230,7 @@ namespace TemperaMental.Midi.Input
 
             if (entry.IsInput)
             {
-                lastStatusMessage = "IN " + description;
+                lastStatusMessage = direction + " " + description;
             }
         }
 
@@ -226,7 +244,7 @@ namespace TemperaMental.Midi.Input
 
                 AddLine(timestamp, direction, "Clock started");
 
-                if (isInput) lastStatusMessage = "IN clock started";
+                if (isInput) lastStatusMessage = direction + " clock started";
             }
             else
             {
@@ -282,7 +300,7 @@ namespace TemperaMental.Midi.Input
             AddLine(stats.LastPulse, direction,
                 $"Clock stopped after {stats.PulseCount} pulses ({stats.PulseCount / (double)pulsesPerBeat:F1} beats)");
 
-            if (direction == "IN ") lastStatusMessage = "IN clock stopped";
+            if (direction != "OUT") lastStatusMessage = direction + " clock stopped";
         }
 
         private string Describe(MidiMessageData message)
@@ -414,6 +432,7 @@ namespace TemperaMental.Midi.Input
         private void OnDisable()
         {
             if (inputRouter != null) inputRouter.MessageReceived -= OnMessageReceived;
+            if (clockInputRouter != null) clockInputRouter.MessageReceived -= OnClockInputReceived;
             if (outputScheduler != null) outputScheduler.MessageSent -= OnMessageSent;
 
             Flush();

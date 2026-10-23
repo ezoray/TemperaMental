@@ -5,6 +5,7 @@ using System.Linq;
 using Melanchall.DryWetMidi.Multimedia;
 using TemperaMental.Applications.Config;
 using TemperaMental.Logs;
+using TemperaMental.Midi.Clock;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -30,6 +31,16 @@ namespace TemperaMental.Midi.Devices
         InputDevice currentInput;
         string currentInputName;
 
+        // Clock from / Clock to: "" means the same device as In / Out, ClockToNone means no clock out
+        string clockInputChoice = "";
+        string clockOutputChoice = "";
+        string clockToNone;
+
+        InputDevice clockInput;
+        string clockInputName;
+        OutputDevice clockOutput;
+        string clockOutputName;
+
         bool isInitialSync = true;
         volatile bool isDeviceChange;
 
@@ -47,13 +58,20 @@ namespace TemperaMental.Midi.Devices
         [SerializeField] UnityEvent<InputDevice> onInputDeviceSelected;
         [SerializeField] UnityEvent onInputDeviceClosed;
 
+        [Header("Clock")]
+        [SerializeField] UnityEvent<ClockRouting> onClockRoutingChanged = new UnityEvent<ClockRouting>();
+
         private void Awake()
         {
             primaryDevice = ConfigRegistry.Midi.PrimaryDevice;
             pollingInterval = ConfigRegistry.Midi.PollingInterval;
             outputPrefsKey = ConfigRegistry.Midi.OutputDevicePrefsKey;
             inputPrefsKey = ConfigRegistry.Midi.InputDevicePrefsKey;
+            clockToNone = ConfigRegistry.Midi.ClockToNoneValue;
         }
+
+        public IReadOnlyList<string> ConnectedInputs => connectedInputs;
+        public IReadOnlyList<string> ConnectedOutputs => connectedOutputs;
 
         private void OnEnable()
         {
@@ -108,6 +126,16 @@ namespace TemperaMental.Midi.Devices
                 CloseInput();
             }
 
+            if (clockInputName != null && removedInputs.Contains(clockInputName))
+            {
+                CloseClockInput();
+            }
+
+            if (clockOutputName != null && removedOutputs.Contains(clockOutputName))
+            {
+                CloseClockOutput();
+            }
+
             connectedOutputs = outputs;
             connectedInputs = inputs;
 
@@ -122,6 +150,135 @@ namespace TemperaMental.Midi.Devices
             else
             {
                 ReselectReconnected(addedOutputs, addedInputs);
+            }
+
+            // reopens chosen clock devices that have (re)appeared
+            ApplyClockRouting();
+        }
+
+        // "" for the same device as In, otherwise an input name
+        public void SetClockInput(string choice)
+        {
+            clockInputChoice = choice ?? "";
+            ApplyClockRouting();
+        }
+
+        // "" for the same device as Out, ClockToNoneValue for none, otherwise an output name
+        public void SetClockOutput(string choice)
+        {
+            clockOutputChoice = choice ?? "";
+            ApplyClockRouting();
+        }
+
+        // opens or closes the separate clock devices to match the choices, then tells listeners where clock goes
+        private void ApplyClockRouting()
+        {
+            // a separate device only when one is chosen and it isn't already the In / Out device
+            string wantedInput = clockInputChoice == "" || clockInputChoice == currentInputName ? null : clockInputChoice;
+            bool isOutputNone = clockOutputChoice == clockToNone;
+            string wantedOutput = clockOutputChoice == "" || isOutputNone || clockOutputChoice == currentOutputName ? null : clockOutputChoice;
+
+            if (wantedInput != clockInputName)
+            {
+                CloseClockInput();
+
+                if (wantedInput != null && connectedInputs.Contains(wantedInput))
+                {
+                    try
+                    {
+                        clockInput = InputDevice.GetByName(wantedInput);
+                        clockInputName = wantedInput;
+                        LogMan.Log($"Clock from '{wantedInput}'");
+                    }
+                    catch (Exception ex)
+                    {
+                        clockInput = null;
+                        clockInputName = null;
+                        LogMan.LogError($"Failed to open clock input {wantedInput}: {ex.Message}");
+                    }
+                }
+            }
+
+            if (wantedOutput != clockOutputName)
+            {
+                CloseClockOutput();
+
+                if (wantedOutput != null && connectedOutputs.Contains(wantedOutput))
+                {
+                    try
+                    {
+                        clockOutput = OutputDevice.GetByName(wantedOutput);
+                        clockOutput.PrepareForEventsSending();
+                        clockOutputName = wantedOutput;
+                        LogMan.Log($"Clock to '{wantedOutput}'");
+                    }
+                    catch (Exception ex)
+                    {
+                        clockOutput = null;
+                        clockOutputName = null;
+                        LogMan.LogError($"Failed to open clock output {wantedOutput}: {ex.Message}");
+                    }
+                }
+            }
+
+            RaiseClockRouting();
+        }
+
+        private void RaiseClockRouting()
+        {
+            ClockDestination destination = clockOutputChoice == clockToNone ? ClockDestination.None
+                : clockOutput != null ? ClockDestination.Separate
+                : ClockDestination.SameAsOut;
+
+            string sourceName = clockInput != null ? clockInputName : currentInputName;
+            string destinationName = destination == ClockDestination.Separate ? clockOutputName
+                : destination == ClockDestination.SameAsOut ? currentOutputName
+                : null;
+
+            // never forward clock back to the device it comes from
+            bool isForwardingAllowed = destinationName != null && destinationName != sourceName;
+
+            onClockRoutingChanged?.Invoke(new ClockRouting(clockInput, destination, clockOutput, isForwardingAllowed));
+        }
+
+        // listeners stop using the clock input before it is disposed
+        private void CloseClockInput()
+        {
+            if (clockInput == null) return;
+
+            InputDevice device = clockInput;
+            clockInput = null;
+            clockInputName = null;
+
+            RaiseClockRouting();
+
+            try
+            {
+                device.Dispose();
+            }
+            catch (Exception ex)
+            {
+                LogMan.LogWarning($"Error closing clock input: {ex.Message}");
+            }
+        }
+
+        private void CloseClockOutput()
+        {
+            if (clockOutput == null) return;
+
+            OutputDevice device = clockOutput;
+            clockOutput = null;
+            clockOutputName = null;
+
+            RaiseClockRouting();
+
+            try
+            {
+                device.Dispose();
+            }
+            catch (Exception ex)
+            {
+                LogMan.LogWarning($"Error closing clock output: {ex.Message}");
             }
         }
 
@@ -178,6 +335,10 @@ namespace TemperaMental.Midi.Devices
             {
                 CloseOutput();
 
+                // the port is about to become the Out device, so it no longer needs its own clock handle
+                // (Windows only lets a port be opened once)
+                if (clockOutputName == deviceName) CloseClockOutput();
+
                 currentOutput = OutputDevice.GetByName(deviceName);
                 currentOutput.PrepareForEventsSending();
                 currentOutputName = deviceName;
@@ -198,6 +359,8 @@ namespace TemperaMental.Midi.Devices
                 connectedOutputs.Remove(deviceName);
                 onDevicesUpdated?.Invoke(connectedOutputs, currentOutputName);
             }
+
+            ApplyClockRouting();
         }
 
         public void SetInputDevice(string deviceName)
@@ -205,6 +368,9 @@ namespace TemperaMental.Midi.Devices
             try
             {
                 CloseInput();
+
+                // the port is about to become the In device, so it no longer needs its own clock handle
+                if (clockInputName == deviceName) CloseClockInput();
 
                 currentInput = InputDevice.GetByName(deviceName);
                 currentInputName = deviceName;
@@ -225,6 +391,8 @@ namespace TemperaMental.Midi.Devices
                 connectedInputs.Remove(deviceName);
                 onInputDevicesUpdated?.Invoke(connectedInputs, currentInputName);
             }
+
+            ApplyClockRouting();
         }
 
         private List<string> GetOutputNames()
@@ -387,12 +555,16 @@ namespace TemperaMental.Midi.Devices
                 isWatcherSubscribed = false;
             }
 #endif
+            CloseClockInput();
+            CloseClockOutput();
             CloseInput();
             CloseOutput();
         }
 
         private void OnDestroy()
         {
+            CloseClockInput();
+            CloseClockOutput();
             CloseInput();
             CloseOutput();
         }

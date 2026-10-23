@@ -6,48 +6,101 @@ using TemperaMental.Applications.Config;
 using TemperaMental.Core;
 using TemperaMental.Logs;
 using TemperaMental.Midi.Core;
+using TemperaMental.Midi.Input;
 using TemperaMental.Midi.Output;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace TemperaMental.Midi.Clock
 {
-    // Internal clock running on a dedicated high-priority thread.
-    // Keeps a transport position in ticks (TicksPerBeat per beat) and raises OnBeat at every beat boundary.
-    // In Send mode it also steps every MIDI clock pulse (TicksPerBeat / PulsesPerBeat ticks) and sends F8, plus
-    // Start/Continue/Stop when enabled. Otherwise it only wakes for beats, which costs less CPU.
-    // Between steps it pumps the MidiOutputScheduler, so all MIDI output is sent from this one thread.
-    // OnBeat handlers run on the clock thread: keep them short and never touch Unity objects from them.
+    // The app's clock, running on a dedicated high-priority thread. Keeps a transport position in ticks
+    // (TicksPerBeat per beat) and raises OnBeat at every beat boundary. Between steps it pumps the
+    // MidiOutputScheduler, so all MIDI output is sent from this one thread.
+    //
+    // Internal: times itself and wakes once per beat.
+    // Send:     times itself, steps every MIDI clock pulse (TicksPerBeat / PulsesPerBeat ticks) and sends F8, plus
+    //           Start/Continue/Stop when enabled.
+    // Receive:  follows F8 from the clock source (the In device, or a separate Clock from device); each pulse is one
+    //           step. Start/Continue/Stop/Song Position from the source drive the sequencer through OnExternalTransport,
+    //           and are forwarded with the clock to the Clock to device unless that would send it back to its source.
+    //           The tempo is measured from the pulses.
+    //
+    // OnBeat and OnExternalTransport handlers run on the clock thread: keep them short and never touch Unity objects.
     public class ClockEngine : MonoBehaviour
     {
         // after a long stall (e.g. a debugger pause) catch up at most this many steps, then jump ahead
         const int MaxCatchUpSteps = 4;
 
+        // longest single sleep, so Receive mode notices a lost clock promptly
+        const int MaxSleepMs = 100;
+
         [SerializeField] MidiOutputScheduler outputScheduler;
+
+        // the In device's router, and the router for a separately chosen Clock from device
+        [SerializeField] MidiInputRouter inputRouter;
+        [SerializeField] MidiInputRouter clockInputRouter;
+
+        // tempo measured in Receive mode, rounded, raised on the main thread
+        [SerializeField] UnityEvent<int> onExternalTempoChanged = new UnityEvent<int>();
 
         int ticksPerBeat;
         int ticksPerPulse;
+        int pulsesPerBeat;
         long spinThresholdTicks;
+        long lateThresholdTicks;
+        long clockTimeoutTicks;
         double timestampFrequency;
+        float tempoHysteresis;
 
         // written by the main thread, read by the clock thread
         volatile int requestedBpm;
         volatile int clockMode;
+        volatile int clockDestination;
         volatile bool isTransportSent = true;
+        volatile bool isForwardingAllowed;
+        volatile bool isClockInputSeparate;
         long requestedEpoch;
         int pendingRestartTransport;
         volatile bool isRunning;
 
         readonly ConcurrentQueue<ClockTransport> transportQueue = new ConcurrentQueue<ClockTransport>();
+        readonly ConcurrentQueue<MidiMessageData> externalQueue = new ConcurrentQueue<MidiMessageData>();
 
         // owned by the clock thread
+        int appliedMode;
         int appliedBpm;
         int appliedStepTicks;
         long currentEpoch = -1;
+        long lastSeenRequestedEpoch = -1;
         long anchorTime;
         double anchorTick;
         double ticksPerTimestamp;
         long lastStepTick;
         long nextStepTime;
+
+        // Receive mode, owned by the clock thread
+        long pulseCount;            // every pulse received
+        long songPosition;          // the source's position (in pulses) of its next pulse
+        bool hasSongPosition;       // Start or Song Position seen, so the source's beats are known
+        bool isSourceRunning;       // between the source's Start/Continue and Stop
+        bool isEpochFromSong;       // beats follow the source's song position, otherwise pulses counted from epochOrigin
+        bool isEpochStarted;
+        long epochOrigin;
+        bool isRestartPending;      // the app asked to play; starts on the next pulse, or the source's next beat
+        long pendingEpoch;
+        long lastPulseTime;
+        double[] pulseIntervals;
+        int intervalCount;
+        int intervalIndex;
+        double intervalSum;
+
+        // written by the clock thread, read by the main thread
+        volatile bool isExternalClockPresent;
+        long measuredTempoBits;
+
+        // main thread
+        bool wasExternalClockPresent;
+        float displayedTempo;
 
         Thread clockThread;
         AutoResetEvent wakeSignal;
@@ -56,18 +109,29 @@ namespace TemperaMental.Midi.Clock
         long statSteps;
         long statLateSteps;
         long statMaxLateTicks;
-        long lateThresholdTicks;
 
         // listener exceptions are logged on the main thread
         readonly ConcurrentQueue<Exception> listenerErrors = new ConcurrentQueue<Exception>();
 
         public event Action<ClockBeat> OnBeat;
 
+        // transport received from the clock source in Receive mode: transport, epoch of the beats that follow,
+        // and for SongPosition the beat number (from the song start) the next frame begins on
+        public event Action<ClockTransport, long, int> OnExternalTransport;
+
         public int TicksPerBeat => ticksPerBeat;
 
         public ClockMode Mode => (ClockMode)clockMode;
 
-        private bool IsSendingClock => clockMode == (int)ClockMode.Send;
+        public bool IsExternalClockPresent => isExternalClockPresent;
+
+        public double MeasuredTempo => BitConverter.Int64BitsToDouble(Interlocked.Read(ref measuredTempoBits));
+
+        private bool IsReceiving => appliedMode == (int)ClockMode.Receive;
+
+        private bool IsSendingClock => clockMode == (int)ClockMode.Send && clockDestination != (int)ClockDestination.None;
+
+        private bool IsForwarding => clockDestination != (int)ClockDestination.None && isForwardingAllowed;
 
         // pulses are only needed while sending clock
         private int StepTicks => IsSendingClock ? ticksPerPulse : ticksPerBeat;
@@ -75,11 +139,16 @@ namespace TemperaMental.Midi.Clock
         private void Awake()
         {
             ticksPerBeat = ConfigRegistry.Midi.TicksPerBeat;
-            ticksPerPulse = Math.Max(1, ticksPerBeat / ConfigRegistry.Midi.PulsesPerBeat);
+            pulsesPerBeat = ConfigRegistry.Midi.PulsesPerBeat;
+            ticksPerPulse = Math.Max(1, ticksPerBeat / pulsesPerBeat);
 
             timestampFrequency = Stopwatch.Frequency;
             spinThresholdTicks = (long)(Stopwatch.Frequency * ConfigRegistry.Midi.ClockSpinThresholdMs / 1000.0);
             lateThresholdTicks = Stopwatch.Frequency / 1000;
+            clockTimeoutTicks = (long)(Stopwatch.Frequency * ConfigRegistry.Midi.ExternalClockTimeout);
+            tempoHysteresis = ConfigRegistry.Midi.TempoDisplayHysteresis;
+
+            pulseIntervals = new double[Math.Max(1, ConfigRegistry.Midi.TempoMeasurePulses)];
 
             requestedBpm = ConfigRegistry.Midi.DefaultBpm;
         }
@@ -90,6 +159,9 @@ namespace TemperaMental.Midi.Clock
 
             wakeSignal = new AutoResetEvent(false);
             outputScheduler.SetWakeHandle(wakeSignal);
+
+            inputRouter.MessageReceived += OnInputMessage;
+            clockInputRouter.MessageReceived += OnClockInputMessage;
 
             isRunning = true;
             clockThread = new Thread(ThreadLoop)
@@ -107,7 +179,11 @@ namespace TemperaMental.Midi.Clock
             {
                 LogMan.LogError($"Clock listener error: {ex}");
             }
+
+            UpdateExternalClockStatus();
         }
+
+        // --- main thread API ---
 
         public void SetBpm(int bpm)
         {
@@ -119,19 +195,28 @@ namespace TemperaMental.Midi.Clock
 
         public void SetClockMode(ClockMode mode)
         {
-            // following an external clock arrives in a later phase; until then it behaves as Internal
             clockMode = (int)mode;
             wakeSignal?.Set();
         }
 
-        // whether Start/Continue/Stop are sent along with the clock
+        // whether Start/Continue/Stop are sent (or forwarded) along with the clock
         public void SetTransportSent(bool isSent)
         {
             isTransportSent = isSent;
         }
 
+        public void SetClockRouting(bool isInputSeparate, ClockDestination destination, bool isForwardAllowed)
+        {
+            isClockInputSeparate = isInputSeparate;
+            clockDestination = (int)destination;
+            isForwardingAllowed = isForwardAllowed;
+            wakeSignal?.Set();
+        }
+
         // restarts the transport at tick 0 and raises beat 0 on the clock thread straight away.
         // when sending clock, the transport message (Start or Continue) goes out just before the first pulse.
+        // in Receive mode the restart waits for the next pulse, or for the source's next beat when its position is known,
+        // and no transport message is sent.
         // returns the new epoch; beats raised before the restart takes effect carry an older epoch
         public long Restart(ClockTransport transport = ClockTransport.None)
         {
@@ -142,7 +227,8 @@ namespace TemperaMental.Midi.Clock
             return epoch;
         }
 
-        // sends a transport message (e.g. Stop) as soon as possible without restarting the clock
+        // sends a transport message (e.g. Stop) as soon as possible without restarting the clock.
+        // ignored in Receive mode, where transport follows the clock source
         public void SendTransport(ClockTransport transport)
         {
             if (transport == ClockTransport.None) return;
@@ -151,15 +237,94 @@ namespace TemperaMental.Midi.Clock
             wakeSignal?.Set();
         }
 
+        // clock and transport messages from the clock source; any thread. Only used in Receive mode
+        public void ReceiveExternal(MidiMessageData message)
+        {
+            if (clockMode != (int)ClockMode.Receive) return;
+
+            switch (message.Kind)
+            {
+                case MidiMessageKind.TimingClock:
+                case MidiMessageKind.Start:
+                case MidiMessageKind.Continue:
+                case MidiMessageKind.Stop:
+                case MidiMessageKind.SongPosition:
+                    externalQueue.Enqueue(message);
+                    wakeSignal?.Set();
+                    break;
+            }
+        }
+
+        // returns punctuality since the last call and starts counting again
+        public ClockTimingStats TakeTimingStats()
+        {
+            long steps = Interlocked.Exchange(ref statSteps, 0);
+            long late = Interlocked.Exchange(ref statLateSteps, 0);
+            long maxLate = Interlocked.Exchange(ref statMaxLateTicks, 0);
+
+            return new ClockTimingStats(steps, late, maxLate * 1000.0 / Stopwatch.Frequency);
+        }
+
+        // driver threads
+        private void OnInputMessage(MidiMessageData message)
+        {
+            if (!isClockInputSeparate) ReceiveExternal(message);
+        }
+
+        private void OnClockInputMessage(MidiMessageData message)
+        {
+            if (isClockInputSeparate) ReceiveExternal(message);
+        }
+
+        private void UpdateExternalClockStatus()
+        {
+            if (clockMode != (int)ClockMode.Receive)
+            {
+                wasExternalClockPresent = false;
+                return;
+            }
+
+            bool isPresent = isExternalClockPresent;
+
+            if (isPresent != wasExternalClockPresent)
+            {
+                wasExternalClockPresent = isPresent;
+
+                if (isPresent)
+                    LogMan.Log("MIDI clock found");
+                else
+                    LogMan.LogWarning("No MIDI clock");
+            }
+
+            double tempo = MeasuredTempo;
+
+            if (isPresent && tempo > 0 && Math.Abs(tempo - displayedTempo) >= tempoHysteresis)
+            {
+                displayedTempo = (float)tempo;
+                onExternalTempoChanged?.Invoke((int)Math.Round(tempo));
+            }
+        }
+
+        // --- clock thread ---
+
         private void ThreadLoop()
         {
+            appliedMode = clockMode;
+
+            if (IsReceiving) EnterReceiveMode();
+
             while (isRunning)
             {
                 long now = Stopwatch.GetTimestamp();
 
                 ApplyRequests(now);
 
-                if (now >= nextStepTime)
+                if (IsReceiving)
+                {
+                    ProcessExternal();
+                    CheckClockTimeout(now);
+                }
+                else if (now >= nextStepTime)
                 {
                     DispatchDueSteps(now);
                     continue;
@@ -174,23 +339,27 @@ namespace TemperaMental.Midi.Clock
 
         private void WaitForNextWork()
         {
-            long target = nextStepTime;
+            long target = IsReceiving ? long.MaxValue : nextStepTime;
 
             if (outputScheduler.HasWork)
                 target = Math.Min(target, outputScheduler.NextSendTime);
 
-            long remaining = target - Stopwatch.GetTimestamp();
+            if (!externalQueue.IsEmpty) return;
+
+            long remaining = target == long.MaxValue ? long.MaxValue : target - Stopwatch.GetTimestamp();
 
             if (remaining <= 0) return;
 
             // sleep for most of the wait, then spin for the last part for accuracy
             if (remaining > spinThresholdTicks)
             {
-                int sleepMs = (int)((remaining - spinThresholdTicks) * 1000 / Stopwatch.Frequency);
+                double sleepMs = remaining == long.MaxValue
+                    ? MaxSleepMs
+                    : (remaining - spinThresholdTicks) * 1000.0 / Stopwatch.Frequency;
 
-                if (sleepMs > 0)
+                if (sleepMs >= 1)
                 {
-                    wakeSignal.WaitOne(sleepMs);
+                    wakeSignal.WaitOne((int)Math.Min(sleepMs, MaxSleepMs));
                     return;
                 }
             }
@@ -200,30 +369,42 @@ namespace TemperaMental.Midi.Clock
 
         private void ApplyRequests(long now)
         {
+            int mode = clockMode;
+
+            if (mode != appliedMode)
+            {
+                int previousMode = appliedMode;
+                appliedMode = mode;
+                OnModeChanged(previousMode, now);
+            }
+
             long epoch = Interlocked.Read(ref requestedEpoch);
 
-            if (epoch != currentEpoch)
+            if (epoch != lastSeenRequestedEpoch)
             {
-                currentEpoch = epoch;
-                SetTempo(requestedBpm);
-
-                anchorTime = now;
-                anchorTick = 0;
-                lastStepTick = 0;
-                appliedStepTicks = StepTicks;
-
+                lastSeenRequestedEpoch = epoch;
                 var transport = (ClockTransport)Interlocked.Exchange(ref pendingRestartTransport, 0);
-                SendTransportMessage(transport);
 
-                RaiseStep(0, now);
-
-                nextStepTime = TimeOfTick(NextStepTick(lastStepTick));
+                if (IsReceiving)
+                {
+                    // the restart happens on the next suitable pulse
+                    pendingEpoch = epoch;
+                    isRestartPending = true;
+                }
+                else
+                {
+                    currentEpoch = epoch;
+                    SendTransportMessage(transport);
+                    RestartInternal(now);
+                }
             }
 
-            while (transportQueue.TryDequeue(out ClockTransport transport))
+            while (transportQueue.TryDequeue(out ClockTransport queued))
             {
-                SendTransportMessage(transport);
+                if (!IsReceiving) SendTransportMessage(queued);
             }
+
+            if (IsReceiving) return;
 
             int bpm = requestedBpm;
 
@@ -244,6 +425,36 @@ namespace TemperaMental.Midi.Clock
                 appliedStepTicks = stepTicks;
                 nextStepTime = TimeOfTick(NextStepTick(lastStepTick));
             }
+        }
+
+        // the epoch is kept so playback carries on in the new mode; only the timing source changes
+        private void OnModeChanged(int previousMode, long now)
+        {
+            if (IsReceiving)
+            {
+                EnterReceiveMode();
+            }
+            else if (previousMode == (int)ClockMode.Receive)
+            {
+                while (externalQueue.TryDequeue(out _)) { }
+
+                isExternalClockPresent = false;
+                RestartInternal(now);
+            }
+        }
+
+        private void RestartInternal(long now)
+        {
+            SetTempo(requestedBpm);
+
+            anchorTime = now;
+            anchorTick = 0;
+            lastStepTick = 0;
+            appliedStepTicks = StepTicks;
+
+            RaiseStep(0, now);
+
+            nextStepTime = TimeOfTick(NextStepTick(lastStepTick));
         }
 
         private void DispatchDueSteps(long now)
@@ -274,6 +485,216 @@ namespace TemperaMental.Midi.Clock
             nextStepTime = stepTime;
         }
 
+        // --- Receive mode ---
+
+        private void EnterReceiveMode()
+        {
+            nextStepTime = long.MaxValue;
+
+            hasSongPosition = false;
+            isSourceRunning = false;
+            isEpochFromSong = false;
+            isEpochStarted = false;     // pulse-counted beats start on the next pulse
+            isRestartPending = false;
+
+            ResetTempoMeasurement();
+        }
+
+        private void ProcessExternal()
+        {
+            while (externalQueue.TryDequeue(out MidiMessageData message))
+            {
+                switch (message.Kind)
+                {
+                    case MidiMessageKind.TimingClock:
+                        OnExternalPulse(message.Timestamp);
+                        break;
+
+                    case MidiMessageKind.Start:
+                        OnExternalStart();
+                        break;
+
+                    case MidiMessageKind.Continue:
+                        OnExternalContinue();
+                        break;
+
+                    case MidiMessageKind.Stop:
+                        OnExternalStop();
+                        break;
+
+                    case MidiMessageKind.SongPosition:
+                        OnExternalSongPosition(message.Data1);
+                        break;
+                }
+            }
+        }
+
+        private void OnExternalPulse(long timestamp)
+        {
+            pulseCount++;
+            MeasureTempo(timestamp);
+            isExternalClockPresent = true;
+
+            if (IsForwarding)
+                outputScheduler.SendRealtime(MidiMessageKind.TimingClock);
+
+            long songPulse = -1;
+            bool isFollowingSong = hasSongPosition && isSourceRunning;
+
+            if (isFollowingSong)
+                songPulse = songPosition++;
+
+            // the app pressed Play: start now, or on the source's next beat if its beats are known
+            if (isRestartPending && (!isFollowingSong || songPulse % pulsesPerBeat == 0))
+            {
+                isRestartPending = false;
+                currentEpoch = pendingEpoch;
+                isEpochFromSong = isFollowingSong;
+                epochOrigin = isFollowingSong ? songPulse : pulseCount;
+                isEpochStarted = true;
+            }
+
+            if (!isEpochStarted && !isEpochFromSong)
+            {
+                isEpochStarted = true;
+                epochOrigin = pulseCount;
+            }
+
+            long position;
+
+            if (isEpochFromSong)
+            {
+                if (!isEpochStarted || songPulse < epochOrigin) return;
+                position = songPulse - epochOrigin;
+            }
+            else
+            {
+                position = pulseCount - epochOrigin;
+            }
+
+            lastStepTick = position * ticksPerPulse;
+            RaiseStep(lastStepTick, timestamp);
+        }
+
+        private void OnExternalStart()
+        {
+            hasSongPosition = true;
+            songPosition = 0;
+            isSourceRunning = true;
+
+            // the first pulse after Start is the first beat
+            StartSongEpoch(0);
+
+            ForwardTransport(ClockTransport.Start);
+            RaiseTransport(ClockTransport.Start, currentEpoch, 0);
+        }
+
+        private void OnExternalContinue()
+        {
+            if (!hasSongPosition)
+            {
+                // a Continue with no known position counts as a Start
+                OnExternalStart();
+                return;
+            }
+
+            isSourceRunning = true;
+
+            if (!isEpochFromSong)
+                StartSongEpoch(NextBeatBoundary(songPosition));
+
+            ForwardTransport(ClockTransport.Continue);
+            RaiseTransport(ClockTransport.Continue, currentEpoch, -1);
+        }
+
+        private void OnExternalStop()
+        {
+            isSourceRunning = false;
+
+            ForwardTransport(ClockTransport.Stop);
+            RaiseTransport(ClockTransport.Stop, currentEpoch, -1);
+        }
+
+        // Song Position is in sixteenths (6 pulses); the next frame starts on the first whole beat from there
+        private void OnExternalSongPosition(int sixteenths)
+        {
+            songPosition = (long)sixteenths * pulsesPerBeat / 4;
+            hasSongPosition = true;
+
+            long origin = NextBeatBoundary(songPosition);
+            StartSongEpoch(origin);
+
+            RaiseTransport(ClockTransport.SongPosition, currentEpoch, (int)(origin / pulsesPerBeat));
+        }
+
+        private void StartSongEpoch(long origin)
+        {
+            long epoch = Interlocked.Increment(ref requestedEpoch);
+            lastSeenRequestedEpoch = epoch;
+            currentEpoch = epoch;
+
+            isRestartPending = false;
+            isEpochFromSong = true;
+            isEpochStarted = true;
+            epochOrigin = origin;
+        }
+
+        private long NextBeatBoundary(long position)
+        {
+            return (position + pulsesPerBeat - 1) / pulsesPerBeat * pulsesPerBeat;
+        }
+
+        private void ForwardTransport(ClockTransport transport)
+        {
+            if (!IsForwarding || !isTransportSent) return;
+
+            outputScheduler.SendRealtime(ToMessageKind(transport));
+        }
+
+        private void MeasureTempo(long timestamp)
+        {
+            long gap = timestamp - lastPulseTime;
+            lastPulseTime = timestamp;
+
+            if (gap <= 0 || gap > clockTimeoutTicks)
+            {
+                ResetTempoMeasurement();
+                return;
+            }
+
+            double intervalMs = gap * 1000.0 / timestampFrequency;
+
+            if (intervalCount == pulseIntervals.Length)
+                intervalSum -= pulseIntervals[intervalIndex];
+            else
+                intervalCount++;
+
+            pulseIntervals[intervalIndex] = intervalMs;
+            intervalSum += intervalMs;
+            intervalIndex = (intervalIndex + 1) % pulseIntervals.Length;
+
+            double tempo = 60000.0 / (intervalSum / intervalCount * pulsesPerBeat);
+            Interlocked.Exchange(ref measuredTempoBits, BitConverter.DoubleToInt64Bits(tempo));
+        }
+
+        private void ResetTempoMeasurement()
+        {
+            intervalCount = 0;
+            intervalIndex = 0;
+            intervalSum = 0;
+        }
+
+        private void CheckClockTimeout(long now)
+        {
+            if (isExternalClockPresent && now - lastPulseTime > clockTimeoutTicks)
+            {
+                isExternalClockPresent = false;
+                ResetTempoMeasurement();
+            }
+        }
+
+        // --- shared ---
+
         private void RecordPunctuality(long stepTime)
         {
             long lateness = Stopwatch.GetTimestamp() - stepTime;
@@ -287,16 +708,6 @@ namespace TemperaMental.Midi.Clock
                 Interlocked.Exchange(ref statMaxLateTicks, lateness);
         }
 
-        // returns punctuality since the last call and starts counting again
-        public ClockTimingStats TakeTimingStats()
-        {
-            long steps = Interlocked.Exchange(ref statSteps, 0);
-            long late = Interlocked.Exchange(ref statLateSteps, 0);
-            long maxLate = Interlocked.Exchange(ref statMaxLateTicks, 0);
-
-            return new ClockTimingStats(steps, late, maxLate * 1000.0 / Stopwatch.Frequency);
-        }
-
         // the next multiple of the current step size, so changing step size keeps pulses and beats aligned
         private long NextStepTick(long tick)
         {
@@ -306,7 +717,7 @@ namespace TemperaMental.Midi.Clock
         private void RaiseStep(long tick, long timestamp)
         {
             // the pulse goes out first so the beat's frame follows it immediately
-            if (IsSendingClock && tick % ticksPerPulse == 0)
+            if (IsSendingClock && !IsReceiving && tick % ticksPerPulse == 0)
             {
                 outputScheduler.SendRealtime(MidiMessageKind.TimingClock);
             }
@@ -333,18 +744,40 @@ namespace TemperaMental.Midi.Clock
             }
         }
 
+        private void RaiseTransport(ClockTransport transport, long epoch, int songBeat)
+        {
+            Action<ClockTransport, long, int> handlers = OnExternalTransport;
+
+            if (handlers == null) return;
+
+            foreach (Action<ClockTransport, long, int> handler in handlers.GetInvocationList())
+            {
+                try
+                {
+                    handler(transport, epoch, songBeat);
+                }
+                catch (Exception ex)
+                {
+                    listenerErrors.Enqueue(ex);
+                }
+            }
+        }
+
         private void SendTransportMessage(ClockTransport transport)
         {
             if (transport == ClockTransport.None || !IsSendingClock || !isTransportSent) return;
 
-            MidiMessageKind kind = transport switch
+            outputScheduler.SendRealtime(ToMessageKind(transport));
+        }
+
+        private static MidiMessageKind ToMessageKind(ClockTransport transport)
+        {
+            return transport switch
             {
                 ClockTransport.Start => MidiMessageKind.Start,
                 ClockTransport.Continue => MidiMessageKind.Continue,
                 _ => MidiMessageKind.Stop
             };
-
-            outputScheduler.SendRealtime(kind);
         }
 
         private void SetTempo(int bpm)
@@ -365,6 +798,9 @@ namespace TemperaMental.Midi.Clock
 
         private void OnDisable()
         {
+            inputRouter.MessageReceived -= OnInputMessage;
+            clockInputRouter.MessageReceived -= OnClockInputMessage;
+
             isRunning = false;
             wakeSignal?.Set();
 
