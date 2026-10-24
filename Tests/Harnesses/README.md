@@ -61,7 +61,7 @@ fake output) and `Cleanup` at the end. `screenshot.sh <out.png>` saves the Game 
 | `EventsTestHarness` | Frame events: timing inside the beat, transforms, edits, file format 2 | `Setup`, `Play internal\|send`, `Reverse`, `Receive warm\|cold`, `Transforms`, `Edits`, `Files`, `PauseStart`/`PauseCheck`, `DisplayStart`/`DisplayCheck`, `LatchStart`/`LatchCheck`, `Cleanup` |
 | `RecordTestHarness` | Recording from the Tempera: triggers, Replace, Overdub, punch-in, following clock | `Setup`, `ReplaceTouch`, `ReplaceStartLength`, `OverdubNow`, `PunchIn`, `Receive start\|touch`, `Notes`, `OverdubNotes`, `Transforms`, `UiStates`, `Cleanup` |
 | `VoiceTestHarness` | Notes, canvas recall and Hold | `Setup`, `PlayNotes`, `StartInside`, `PauseResume`, `Loop`, `CanvasStep` then `CanvasCheck` (Unity must run between them), `CanvasFile`, `Hold`, `QuitRelease`, `Transforms`, `Cleanup` |
-| `UiHarness` | Main view surfaces, status line, panel locking | `State`, `Press <path under MainView>` (e.g. `SurfaceNext`, `RecordButtonPanel/Trigger`), `Record`, `Play`, `StopPlayback`, `Pulses <seconds>`, `RecordColour` |
+| `UiHarness` | Modes, their buttons, status line, panel locking, shortcuts | `State`, `Mode <Play\|Transform\|Edit\|Record\|Sound\|Settings>`, `Press <path under MainPanel>` (e.g. `ClockGroup/ClockMode`, `MidiGroup/ChannelPlus`), `Key <InputSystem key, e.g. N>`, `Record`, `Play`, `StopPlayback`, `Pulses <seconds>`, `RecordColour`, `Prefs` / `RestorePrefs <Prefs output>` (buttons save settings) |
 
 In `TemperaTestHarness`, `play` reaches the frame manager through `Update`, so put `play` and the next step in
 separate runs.

@@ -407,13 +407,13 @@ public static class RecordTestHarness
         return $"transform recording toggled on={on}, then off={!off}; recorder state {recorder.State}";
     }
 
-    // panels while recording, and the Record settings page's texts
+    // panels while recording, and the texts on Record mode.s buttons
     public static string UiStates()
     {
         var sb = new StringBuilder();
         var ui = Find<TemperaMental.UI.State.UIStateManager>();
         var panels = (List<UnityEngine.CanvasGroup>)typeof(TemperaMental.UI.State.UIStateManager).GetField("panels", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(ui);
-        string[] names = { "Device", "File", "Frame", "Transform", "Direction", "Record", "Playback", "Create", "Select" };
+        string[] names = { "Device", "File", "Frame", "Transform", "Direction", "Record", "Playback", "Create", "Select", "Clock" };
         string Panels() => string.Join(" ", panels.Select((p, i) => names[i] + (p.interactable ? "+" : "-")));
 
         ui.ActionOnPlaybackStateChanged(PlaybackState.Playing);
@@ -425,9 +425,10 @@ public static class RecordTestHarness
         sb.AppendLine("stopped:            " + Panels());
 
         var settings = Find<RecordSettingsManager>();
-        var view = UnityEngine.GameObject.Find("Canvas/MainPanel/DisplayPanel").transform.Find("RecordSettingsView/DisplayCanvas");
-        string Texts() => string.Join(" | ", new[] { "Source", "Trigger", "Mode", "Start", "Length" }.Select(n => n + " " + view.Find(n).GetComponent<TMPro.TextMeshProUGUI>().text));
-        sb.AppendLine("page:   " + Texts());
+        // Record mode's buttons (each shows its setting's value)
+        var group = UnityEngine.GameObject.Find("Canvas/MainPanel/RecordGroup").transform;
+        string Texts() => string.Join(" | ", new[] { "Source", "Trigger", "Mode", "Start", "Length" }.Select(n => n + " " + group.Find(n + "/Value").GetComponent<TMPro.TextMeshProUGUI>().text));
+        sb.AppendLine("buttons: " + Texts());
         settings.StepTrigger(); settings.StepMode(); settings.StepStartState(); settings.StepLength(); settings.StepLength();
         sb.AppendLine("stepped: " + Texts());
         // back to the defaults (not saved)
