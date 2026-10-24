@@ -390,24 +390,23 @@ public static class RecordTestHarness
         return result;
     }
 
-    // Source: Transforms keeps the old Record button
+    // the Transform page's Rec results records transform results (the old Record button's job)
     public static string Transforms()
     {
         var recorder = Find<MidiRecorder>();
         var frames = Find<FrameManager>();
-        recorder.SetSource(RecordSource.Transforms);
 
         var isRecordingField = typeof(FrameManager).GetField("isRecording", BindingFlags.Instance | BindingFlags.NonPublic);
-        recorder.ToggleRecord();
+        recorder.ToggleRecordTransforms();
         bool on = (bool)isRecordingField.GetValue(frames);
-        recorder.ToggleRecord();
+        recorder.ToggleRecordTransforms();
         bool off = (bool)isRecordingField.GetValue(frames);
 
         recorder.SetSource(RecordSource.Tempera);
         return $"transform recording toggled on={on}, then off={!off}; recorder state {recorder.State}";
     }
 
-    // panels while recording, and the texts on Record mode.s buttons
+    // panels while recording, and the texts on the Record page's row
     public static string UiStates()
     {
         var sb = new StringBuilder();
@@ -425,9 +424,9 @@ public static class RecordTestHarness
         sb.AppendLine("stopped:            " + Panels());
 
         var settings = Find<RecordSettingsManager>();
-        // Record mode's buttons (each shows its setting's value)
-        var group = UnityEngine.GameObject.Find("Canvas/MainPanel/RecordGroup").transform;
-        string Texts() => string.Join(" | ", new[] { "Source", "Trigger", "Mode", "Start", "Length" }.Select(n => n + " " + group.Find(n + "/Value").GetComponent<TMPro.TextMeshProUGUI>().text));
+        // the Record page's row (each button shows its setting's value)
+        var group = UnityEngine.GameObject.Find("Canvas/MainPanel/DisplayPanel/ButtonPanel/RecordGroup").transform;
+        string Texts() => string.Join(" | ", new[] { "Mode", "Length", "Trigger", "Start" }.Select(n => n + " " + group.Find(n + "/Value").GetComponent<TMPro.TextMeshProUGUI>().text));
         sb.AppendLine("buttons: " + Texts());
         settings.StepTrigger(); settings.StepMode(); settings.StepStartState(); settings.StepLength(); settings.StepLength();
         sb.AppendLine("stepped: " + Texts());

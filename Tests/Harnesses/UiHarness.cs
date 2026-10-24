@@ -2,11 +2,11 @@ using System.Linq;
 using System.Text;
 using TemperaMental.Core;
 using TemperaMental.Recording;
-using TemperaMental.UI.Modes;
+using TemperaMental.UI.Pages;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-// switches modes, presses UI buttons by path and reports the mode groups, their texts and the status line
+// switches pages, presses UI buttons by path and reports the page groups, their texts and the status line
 public static class UiHarness
 {
     static Transform MainPanel => GameObject.Find("Canvas/MainPanel").transform;
@@ -15,20 +15,20 @@ public static class UiHarness
     static readonly string[] IntPrefs =
     {
         "MidiChannel", "MaxBpm", "ClockMode", "ClockSendStartStop", "TemperaControlChannel", "FollowTempera",
-        "RecordSource", "RecordTrigger", "RecordMode", "RecordStartState", "RecordLength", "AppMode", "MainViewSurface"
+        "RecordSource", "RecordTrigger", "RecordMode", "RecordStartState", "RecordLength", "AppPage", "AppMode", "MainViewSurface"
     };
     static readonly string[] StringPrefs = { "ClockFromDevice", "ClockToDevice" };
 
-    // Play, Transform, Edit, Record, Sound or Settings, pressed on its tab
-    public static string Mode(string name)
+    // Compose, Play, Transform, Record or Setup, pressed on its tab
+    public static string Page(string name)
     {
-        var tab = MainPanel.Find("DisplayPanel/ButtonPanel/Tab" + name);
+        var tab = MainPanel.Find("TitlePanel/PageTabs/Tab" + name);
         if (tab == null) return "no tab " + name;
         tab.GetComponent<UnityEngine.UI.Button>().onClick.Invoke();
-        return "mode " + name + "\n" + State();
+        return "page " + name + "\n" + State();
     }
 
-    // a button by its path under MainPanel, e.g. ClockGroup/ClockMode or MidiGroup/ChannelPlus
+    // a button by its path under MainPanel, e.g. DisplayPanel/ButtonPanel/ClockGroup/ClockMode or SetupSheet/ChannelPlus
     public static string Press(string path)
     {
         var t = MainPanel.Find(path);
@@ -52,12 +52,30 @@ public static class UiHarness
         var seq = Object.FindAnyObjectByType<TemperaMental.Midi.Playbacks.FrameSequenceManager>();
         var looped = typeof(TemperaMental.Midi.Playbacks.FrameSequenceManager)
             .GetField("isLooped", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(seq);
-        return $"key {name}: mode {Object.FindAnyObjectByType<ModeUIManager>().Mode}, looped {looped}, playback {seq.State}";
+        return $"key {name}: page {Object.FindAnyObjectByType<PageUIManager>().Page}, looped {looped}, playback {seq.State}";
+    }
+
+    // places a red emitter at (2, 2) and a blue one at (0, 7), as if drawn on the grid
+    public static string Draw()
+    {
+        var frames = Object.FindAnyObjectByType<TemperaMental.Frames.FrameManager>();
+        frames.SetEmitterType(1);
+        frames.AddEmitter(new Vector2Int(2, 2));
+        frames.SetEmitterType(0);
+        frames.AddEmitter(new Vector2Int(0, 7));
+        return "drew: " + Frame();
+    }
+
+    // the current frame's emitters, one 64-bit mask per colour (Blue, Red, Yellow, Green)
+    public static string Frame()
+    {
+        var frame = Object.FindAnyObjectByType<TemperaMental.Frames.FrameManager>().PublishedCurrentFrame;
+        return string.Join(" ", frame.StartGroups.Select(g => g.ToString("X16")));
     }
 
     public static string Record()
     {
-        Object.FindAnyObjectByType<MidiRecorder>().ToggleRecord();
+        Object.FindAnyObjectByType<MidiRecorder>().ToggleRecordTempera();
         return "record pressed\n" + State();
     }
 
@@ -97,7 +115,8 @@ public static class UiHarness
     public static string RecordColour()
     {
         var b = MainPanel.Find("RecordPanel/Record").GetComponent<UnityEngine.UI.Button>();
-        return "record button colour " + b.image.color;
+        var results = MainPanel.Find("DisplayPanel/ButtonPanel/TransformRowGroup/RecResults").GetComponent<UnityEngine.UI.Button>();
+        return "record button colour " + b.image.color + ", rec results colour " + results.image.color;
     }
 
     // the saved settings, as "Key=value;..." to hand back to RestorePrefs
@@ -125,10 +144,10 @@ public static class UiHarness
     public static string State()
     {
         var sb = new StringBuilder();
-        var modes = Object.FindAnyObjectByType<ModeUIManager>();
-        sb.AppendLine("mode " + modes.Mode);
+        var pages = Object.FindAnyObjectByType<PageUIManager>();
+        sb.AppendLine("page " + pages.Page);
 
-        foreach (var group in MainPanel.GetComponentsInChildren<ModeGroup>(true))
+        foreach (var group in MainPanel.GetComponentsInChildren<PageGroup>(true))
         {
             var cg = group.GetComponent<CanvasGroup>();
             if (cg.alpha < 0.5f) continue;
