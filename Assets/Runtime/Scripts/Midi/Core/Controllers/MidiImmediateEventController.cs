@@ -1,5 +1,6 @@
 using TemperaMental.Core;
 using TemperaMental.Frames;
+using TemperaMental.Midi.Input;
 using UnityEngine;
 
 namespace TemperaMental.Midi.Core
@@ -17,6 +18,10 @@ namespace TemperaMental.Midi.Core
         public void ActionOnEmitterTypeChanged(int emitterId) => immediateManager.SetEmitterType(emitterId);
 
         public void ActionOnFrameChanged(FrameDetail frameDetail) => immediateManager.SendFrame(frameDetail.EmitterGroups);
+
+        // must be wired before the frame's listener so the device record is updated first
+        public void ActionOnTemperaControlEvent(TemperaControlEvent controlEvent) =>
+            immediateManager.TrackTemperaChange(controlEvent.Kind, controlEvent.EmitterId, controlEvent.Cell);
 
         public void ActionOnPlaybackReadyStateChanged(bool isReady)
         {

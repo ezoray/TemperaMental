@@ -25,6 +25,7 @@ namespace TemperaMental.Frames
         Frame copiedFrame;
 
         bool isRecording;
+        bool isFollowingTempera;
 
         PlaybackState playbackState;
 
@@ -210,6 +211,50 @@ namespace TemperaMental.Frames
                 currentEmitterId = emitterId;
 
                 onEmitterTypeChanged?.Invoke(currentEmitterId);
+            }
+        }
+
+        // --- changes made on the Tempera (Follow Tempera) ---
+        // applied to the current frame only while following and while the sequencer isn't playing (it then owns the
+        // device). Raised with IsFromTempera so nothing is sent back. A repeat of what the frame already holds is
+        // ignored, so an echo of the app's own output can't loop
+
+        public void SetFollowTempera(bool isFollowing)
+        {
+            isFollowingTempera = isFollowing;
+        }
+
+        private bool CanFollowTempera => isFollowingTempera && playbackState != PlaybackState.Playing;
+
+        public void SetEmitterTypeFromTempera(int emitterId)
+        {
+            if (!CanFollowTempera) return;
+
+            SetEmitterType(emitterId);
+        }
+
+        public void AddEmitterFromTempera(Vector2Int position, int emitterId)
+        {
+            if (!CanFollowTempera || currentFrame.CheckSameEmitterAtPosition(position, emitterId)) return;
+
+            // the colour is already resolved for 2-Lane by the decoder
+            currentFrame.AddEmitter(position, emitterId, enforceTwoLane: false);
+            PublishSequence();
+
+            int emitterCount = EmitterUtils.GetEmitterCount(currentFrame.GetEmitterGroups());
+            onAddEmitter?.Invoke(new EmitterDetail(position, emitterId, emitterCount, isFromTempera: true));
+        }
+
+        public void RemoveEmitterFromTempera(Vector2Int position)
+        {
+            if (!CanFollowTempera) return;
+
+            if (currentFrame.TryRemoveEmitter(position, out int emitterId))
+            {
+                PublishSequence();
+
+                int emitterCount = EmitterUtils.GetEmitterCount(currentFrame.GetEmitterGroups());
+                onRemoveEmitter?.Invoke(new EmitterDetail(position, emitterId, emitterCount, isFromTempera: true));
             }
         }
 

@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using TemperaMental.Core;
 using TemperaMental.Grid;
 using TemperaMental.Logs;
+using TemperaMental.Midi.Input;
+using TemperaMental.Utils;
 using UnityEngine;
 
 namespace TemperaMental.Frames
@@ -41,6 +43,27 @@ namespace TemperaMental.Frames
         }
 
         public void ActionOnEmittersTransformed(ulong[] emitterGroups) => frameManager.ReceiveEmitterGroups(emitterGroups);
+
+        // Follow Tempera
+        public void ActionOnFollowTemperaChanged(bool isFollowing) => frameManager.SetFollowTempera(isFollowing);
+
+        public void ActionOnTemperaControlEvent(TemperaControlEvent controlEvent)
+        {
+            switch (controlEvent.Kind)
+            {
+                case TemperaControlKind.SelectEmitter:
+                    frameManager.SetEmitterTypeFromTempera(controlEvent.EmitterId);
+                    break;
+
+                case TemperaControlKind.PlaceEmitter:
+                    frameManager.AddEmitterFromTempera(EmitterUtils.IndexToPosition((byte)controlEvent.Cell), controlEvent.EmitterId);
+                    break;
+
+                case TemperaControlKind.RemoveEmitter:
+                    frameManager.RemoveEmitterFromTempera(EmitterUtils.IndexToPosition((byte)controlEvent.Cell));
+                    break;
+            }
+        }
 
         // frame slider
         public void ActionOnSelectedFrameChanged(float selectedFrame) => frameManager.GoToSelectedFrame(Mathf.RoundToInt(selectedFrame));

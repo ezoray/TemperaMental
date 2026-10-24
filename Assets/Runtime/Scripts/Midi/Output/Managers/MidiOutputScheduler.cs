@@ -28,7 +28,13 @@ namespace TemperaMental.Midi.Output
             AddEmitter,
             RemoveEmitter,
             SelectEmitter,
-            ResetDevice
+            ResetDevice,
+
+            // the device changed on its own (e.g. a placement made on the Tempera): update what we know it shows,
+            // without sending anything
+            DevicePlaced,
+            DeviceRemoved,
+            DeviceSelected
         }
 
         readonly struct OutputCommand
@@ -70,6 +76,7 @@ namespace TemperaMental.Midi.Output
 
         // owned by the clock thread
         ulong[] deviceGroups;
+        int deviceActiveEmitter = -1;   // the emitter the device has selected, -1 when unknown
         ControlChangeEvent[] burst;
         int burstCount;
         int burstIndex;
@@ -158,6 +165,23 @@ namespace TemperaMental.Midi.Output
         public void EnqueueRemoveEmitter(int cellIndex)
         {
             Enqueue(new OutputCommand(CommandType.RemoveEmitter, cellIndex: (byte)cellIndex));
+        }
+
+        // keeps the record of what the device shows in step with changes made on the device itself,
+        // so later frame diffs are right. Nothing is sent
+        public void NoteDevicePlaced(int emitterId, int cellIndex)
+        {
+            Enqueue(new OutputCommand(CommandType.DevicePlaced, emitterId: (byte)emitterId, cellIndex: (byte)cellIndex));
+        }
+
+        public void NoteDeviceRemoved(int cellIndex)
+        {
+            Enqueue(new OutputCommand(CommandType.DeviceRemoved, cellIndex: (byte)cellIndex));
+        }
+
+        public void NoteDeviceSelected(int emitterId)
+        {
+            Enqueue(new OutputCommand(CommandType.DeviceSelected, emitterId: (byte)emitterId));
         }
 
         public void EnqueueSelectEmitter(int emitterId)
@@ -296,7 +320,21 @@ namespace TemperaMental.Midi.Output
                         break;
 
                     case CommandType.SelectEmitter:
+                        // already selected on the device (e.g. it was just picked on the Tempera)
+                        if (command.EmitterId == deviceActiveEmitter) continue;
                         AddToBurst(activateCC, command.EmitterId);
+                        break;
+
+                    case CommandType.DevicePlaced:
+                        SetDeviceCell(command.EmitterId, command.CellIndex);
+                        break;
+
+                    case CommandType.DeviceRemoved:
+                        SetDeviceCell(-1, command.CellIndex);
+                        break;
+
+                    case CommandType.DeviceSelected:
+                        deviceActiveEmitter = command.EmitterId;
                         break;
 
                     case CommandType.ResetDevice:
@@ -373,8 +411,22 @@ namespace TemperaMental.Midi.Output
             }
         }
 
+        // emitterId -1 clears the cell
+        private void SetDeviceCell(int emitterId, byte cellIndex)
+        {
+            ulong bit = 1UL << cellIndex;
+
+            for (int i = 0; i < emitterCount; i++)
+                deviceGroups[i] &= ~bit;
+
+            if (emitterId >= 0)
+                deviceGroups[emitterId] |= bit;
+        }
+
         private void AddToBurst(int cc, byte value)
         {
+            if (cc == activateCC) deviceActiveEmitter = value;
+
             ControlChangeEvent controlChange = burst[burstCount++];
             controlChange.ControlNumber = (SevenBitNumber)cc;
             controlChange.ControlValue = (SevenBitNumber)value;

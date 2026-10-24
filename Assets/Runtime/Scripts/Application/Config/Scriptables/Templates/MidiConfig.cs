@@ -68,6 +68,12 @@ namespace TemperaMental.Applications.Config
         public int ControlSelectFirstNote = 96; // 96–99 select emitter 1–4
         public int ControlArmFirstNote = 100; // 100–107 arm tracks 1–8
 
+        // Tempera settings view: the Control channel listened to, and whether the app follows the hardware
+        public int DefaultControlChannel = 16;
+        public bool DefaultFollowTempera = true;
+        public string ControlChannelPrefsKey = "TemperaControlChannel";
+        public string FollowTemperaPrefsKey = "FollowTempera";
+
         // cc numbers for emitters
         public int ActivateCC = 10;
         public int PlaceCC = 11;

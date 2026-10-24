@@ -1,4 +1,5 @@
 using TemperaMental.Core;
+using TemperaMental.Midi.Input;
 using TemperaMental.Midi.Output;
 using TemperaMental.Utils;
 using UnityEngine;
@@ -15,14 +16,40 @@ namespace TemperaMental.Midi.Core
 
         private bool SequencerRunning => playbackState == PlaybackState.Playing;
 
+        // changes that came from the Tempera are already on it, so they're never sent back (loop protection)
         public void AddEmitter(EmitterDetail emitterDetail)
         {
+            if (emitterDetail.IsFromTempera) return;
+
             outputScheduler.EnqueueAddEmitter(emitterDetail.EmitterId, EmitterUtils.PositionToIndex(emitterDetail.Position));
         }
 
         public void RemoveEmitter(EmitterDetail emitterDetail)
         {
+            if (emitterDetail.IsFromTempera) return;
+
             outputScheduler.EnqueueRemoveEmitter(EmitterUtils.PositionToIndex(emitterDetail.Position));
+        }
+
+        // whatever is done on the Tempera changes what it shows, followed or not, so the record used for frame diffs is
+        // kept up to date. Call this before the change is applied to the frame, so a colour selected on the Tempera
+        // isn't sent back to it
+        public void TrackTemperaChange(TemperaControlKind kind, int emitterId, int cell)
+        {
+            switch (kind)
+            {
+                case TemperaControlKind.SelectEmitter:
+                    outputScheduler.NoteDeviceSelected(emitterId);
+                    break;
+
+                case TemperaControlKind.PlaceEmitter:
+                    outputScheduler.NoteDevicePlaced(emitterId, cell);
+                    break;
+
+                case TemperaControlKind.RemoveEmitter:
+                    outputScheduler.NoteDeviceRemoved(cell);
+                    break;
+            }
         }
 
         public void SetEmitterType(int emitterId)
