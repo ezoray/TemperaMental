@@ -73,6 +73,19 @@ namespace TemperaMental.Applications.Config
         public string ControlChannelPrefsKey = "TemperaControlChannel";
         public string FollowTemperaPrefsKey = "FollowTempera";
 
+        // Record settings view: what the Record button records and how, saved when the view closes
+        public int DefaultRecordSource = 0; // Tempera
+        public int DefaultRecordTrigger = 2; // Either
+        public int DefaultRecordMode = 0; // Replace
+        public int DefaultRecordStartState = 0; // Clear
+        public int DefaultRecordLengthIndex = 0; // Off
+        public int[] RecordLengths = { 0, 1, 2, 4, 8, 16, 32, 64 }; // frames; 0 is no limit
+        public string RecordSourcePrefsKey = "RecordSource";
+        public string RecordTriggerPrefsKey = "RecordTrigger";
+        public string RecordModePrefsKey = "RecordMode";
+        public string RecordStartStatePrefsKey = "RecordStartState";
+        public string RecordLengthPrefsKey = "RecordLength";
+
         // cc numbers for emitters
         public int ActivateCC = 10;
         public int PlaceCC = 11;

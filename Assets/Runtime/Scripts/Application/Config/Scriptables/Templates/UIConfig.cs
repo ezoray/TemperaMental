@@ -32,6 +32,12 @@ namespace TemperaMental.Applications.Config
         public string NoDevicesText = "Connect Midi Device";
         public string SelectDeviceText = "Select Midi Device";
 
+        // record button: how fast it flashes while armed (seconds per change)
+        public float RecordArmFlashInterval = 0.35f;
+
+        // record settings view
+        public string RecordLengthOffText = "Off";
+
         // clock devices view
         public string SameAsInText = "Same as In";
         public string SameAsOutText = "Same as Out";

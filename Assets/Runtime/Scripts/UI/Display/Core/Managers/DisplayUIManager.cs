@@ -31,6 +31,11 @@ namespace TemperaMental.UI.Display.Core
             SetMainViewActive();
         }
 
+        public void ActionOnTemperaRecordStateChanged(RecordState recordState)
+        {
+            SetMainViewActive();
+        }
+
         public void ActionOnPlaybackStateChanged(PlaybackState playbackState)
         {
             SetMainViewActive();

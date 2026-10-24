@@ -27,6 +27,9 @@ namespace TemperaMental.Frames
         bool isRecording;
         bool isFollowingTempera;
 
+        // recording from the Tempera: following is paused while armed or recording, and drawing while recording
+        RecordState temperaRecordState;
+
         PlaybackState playbackState;
 
         public string onText;
@@ -65,6 +68,57 @@ namespace TemperaMental.Frames
         public void ToggleRecording()
         {
             SetRecording(!isRecording);
+        }
+
+        // turns recording transform results off (e.g. when the Record button is switched to recording the Tempera)
+        public void StopTransformRecording()
+        {
+            SetRecording(false);
+        }
+
+        // --- recording from the Tempera (MidiRecorder) ---
+
+        public void SetTemperaRecordState(RecordState state)
+        {
+            temperaRecordState = state;
+        }
+
+        public FrameSnapshot GetFrameSnapshot(int frameNumber)
+        {
+            if (frameNumber < 1 || frameNumber > frames.Count) return null;
+
+            return frames[frameNumber - 1].GetSnapshot();
+        }
+
+        // replaces a frame with recorded content, or adds it after the last frame
+        public void SetRecordedFrame(int frameNumber, FrameSnapshot content)
+        {
+            if (frameNumber < 1) return;
+
+            if (frameNumber <= frames.Count)
+            {
+                frames[frameNumber - 1].SetContent(content);
+            }
+            else
+            {
+                while (frames.Count < frameNumber - 1) frames.Add(new Frame());
+
+                frames.Add(new Frame(content));
+            }
+
+            NotifyFrameChanged();
+        }
+
+        // adds an overdubbed event to a frame
+        public void AddRecordedEvent(int frameNumber, FrameEvent frameEvent)
+        {
+            if (frameNumber < 1 || frameNumber > frames.Count) return;
+
+            Frame frame = frames[frameNumber - 1];
+            var events = new List<FrameEvent>(frame.Events) { frameEvent };
+            frame.SetEvents(events);
+
+            NotifyFrameChanged();
         }
 
         private void UpdateCurrentFrame(FrameSnapshot content)
@@ -246,7 +300,10 @@ namespace TemperaMental.Frames
             isFollowingTempera = isFollowing;
         }
 
-        private bool CanFollowTempera => isFollowingTempera && playbackState != PlaybackState.Playing;
+        private bool CanFollowTempera => isFollowingTempera && playbackState != PlaybackState.Playing && temperaRecordState == RecordState.Idle;
+
+        // a recording from the Tempera writes the frames; drawing on them meanwhile would be overwritten
+        private bool IsDrawingBlocked => temperaRecordState == RecordState.Recording;
 
         public void SetEmitterTypeFromTempera(int emitterId)
         {
@@ -282,6 +339,8 @@ namespace TemperaMental.Frames
 
         public void RemoveEmitter(Vector2Int position)
         {
+            if (IsDrawingBlocked) return;
+
             if (currentFrame.TryRemoveEmitter(position, out int emitterId))
             {
                 PublishSequence();
@@ -293,6 +352,8 @@ namespace TemperaMental.Frames
 
         public void AddEmitter(Vector2Int cellPosition)
         {
+            if (IsDrawingBlocked) return;
+
             int actualEmitterId = currentFrame.AddEmitter(cellPosition, currentEmitterId);
             PublishSequence();
 

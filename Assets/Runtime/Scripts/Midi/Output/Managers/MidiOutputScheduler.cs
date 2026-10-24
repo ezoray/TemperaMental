@@ -74,8 +74,12 @@ namespace TemperaMental.Midi.Output
 
         readonly ConcurrentQueue<OutputCommand> commands = new ConcurrentQueue<OutputCommand>();
 
+        // what the device shows, copied for other threads whenever it changes
+        volatile ulong[] publishedDeviceGroups;
+
         // owned by the clock thread
         ulong[] deviceGroups;
+        bool isDeviceChanged;
         int deviceActiveEmitter = -1;   // the emitter the device has selected, -1 when unknown
         ControlChangeEvent[] burst;
         int burstCount;
@@ -108,6 +112,7 @@ namespace TemperaMental.Midi.Output
                 midiChannel = (byte)(ConfigRegistry.Midi.DefaultMidiChannel - 1);
 
             deviceGroups = new ulong[emitterCount];
+            publishedDeviceGroups = new ulong[emitterCount];
 
             burst = new ControlChangeEvent[MaxBurstEvents];
             for (int i = 0; i < burst.Length; i++)
@@ -193,6 +198,13 @@ namespace TemperaMental.Midi.Output
         public void EnqueueClearAll()
         {
             Enqueue(new OutputCommand(CommandType.ResetDevice));
+        }
+
+        // any thread: a copy of what the device is known to show (what's been sent, and changes made on the Tempera).
+        // Commands still queued aren't included
+        public ulong[] GetDeviceGroups()
+        {
+            return (ulong[])publishedDeviceGroups.Clone();
         }
 
         private void Enqueue(OutputCommand command)
@@ -307,8 +319,13 @@ namespace TemperaMental.Midi.Output
             burstCount = 0;
             burstIndex = 0;
 
+            isDeviceChanged = false;
+
             while (burstCount == 0 && commands.TryDequeue(out OutputCommand command))
             {
+                // every command except a skipped select changes what the device shows
+                isDeviceChanged |= command.Type != CommandType.SelectEmitter && command.Type != CommandType.DeviceSelected;
+
                 switch (command.Type)
                 {
                     case CommandType.Frame:
@@ -348,6 +365,9 @@ namespace TemperaMental.Midi.Output
                         break;
                 }
             }
+
+            if (isDeviceChanged)
+                publishedDeviceGroups = (ulong[])deviceGroups.Clone();
 
             return burstCount > 0;
         }

@@ -21,8 +21,29 @@ namespace TemperaMental.UI.State
             }
         }
 
-        public void ActionOnPlaybackStateChanged(PlaybackState playbackState)
+        PlaybackState playbackState;
+        RecordState recordState;
+
+        public void ActionOnPlaybackStateChanged(PlaybackState newPlaybackState)
         {
+            playbackState = newPlaybackState;
+            Refresh();
+        }
+
+        public void ActionOnTemperaRecordStateChanged(RecordState newRecordState)
+        {
+            recordState = newRecordState;
+            Refresh();
+        }
+
+        private void Refresh()
+        {
+            if (recordState == RecordState.Recording)
+            {
+                ApplyState(UIStates.TemperaRecording);
+                return;
+            }
+
             switch (playbackState)
             {
                 case PlaybackState.Reset:

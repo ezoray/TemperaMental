@@ -1,9 +1,12 @@
+using System;
+using System.Diagnostics;
 using TemperaMental.Core;
 using TemperaMental.Frames;
 using TemperaMental.Logs;
 using TemperaMental.Midi.Clock;
 using TemperaMental.Midi.Core;
 using TemperaMental.Midi.Output;
+using TemperaMental.Recording;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
@@ -16,6 +19,12 @@ namespace TemperaMental.Midi.Playbacks
     // a step at the next event's tick. Reverse plays the frames backwards, but each frame's events forwards.
     // HandleBeat and HandleTick run on the clock thread. State shared with the main thread is guarded by
     // playbackStateLock, and UI notifications are raised from Update using volatile flags.
+    //
+    // Recording (driven by MidiRecorder): a recording belongs to one playback epoch. It starts on the transport's
+    // start when armed for it, or at a given moment (punching in when already playing, otherwise starting playback with
+    // the clock's tick 0 at that moment). While a Replace recording runs nothing is sent to the device and playback
+    // moves forward one frame per beat past the end of the frames, ignoring loop and reverse. A recording ends when
+    // asked, after its length, when playback stops or pauses, or when the epoch changes (seek, Song Position).
     public class FrameSequenceManager : MonoBehaviour
     {
         [SerializeField] FrameManager frameManager;
@@ -57,6 +66,24 @@ namespace TemperaMental.Midi.Playbacks
         volatile PlaybackView pendingView;
         PlaybackView raisedView;
 
+        // recording, under playbackStateLock
+        bool isArmedForStart;
+        RecordMode armedMode;
+        int armedLength;
+        bool isRecording;
+        RecordMode recordMode;
+        long recordStartBeat;
+        int recordLength;
+        int lastSessionId;
+        volatile RecordingSession recordingSession;
+
+        // which frame each recent beat played, so the recorder can place what arrives slightly late
+        const int BeatHistorySize = 64;
+        readonly object historyLock = new object();
+        readonly long[] historyEpochs = new long[BeatHistorySize];
+        readonly long[] historyBeats = new long[BeatHistorySize];
+        readonly int[] historyFrames = new int[BeatHistorySize];
+
         volatile PlaybackState playbackState;
 
         readonly object playbackStateLock = new object();
@@ -73,6 +100,8 @@ namespace TemperaMental.Midi.Playbacks
         private void Awake()
         {
             playbackState = PlaybackState.Reset;
+
+            for (int i = 0; i < BeatHistorySize; i++) historyEpochs[i] = -1;
         }
 
         private void OnEnable()
@@ -146,6 +175,9 @@ namespace TemperaMental.Midi.Playbacks
                         SetAnchorFrame(initialFrame);
                         SetPlayFrame(initialFrame);
                         StartPlayback(ClockTransport.Start);
+
+                        if (isArmedForStart)
+                            BeginRecording(armedMode, armedLength, 0, anchorFrame, 0, Stopwatch.GetTimestamp(), false);
                         break;
                 }
             }
@@ -188,6 +220,7 @@ namespace TemperaMental.Midi.Playbacks
                     case PlaybackState.Playing:
                         // restart the clock so the new frame plays immediately for a full beat;
                         // Start realigns the receiving device's beat with the restart
+                        EndRecording(TickNow());
                         SetPlayFrame(newSeekFrame);
                         playEpoch = clockEngine.Restart(ClockTransport.Start);
                         break;
@@ -238,6 +271,10 @@ namespace TemperaMental.Midi.Playbacks
                     // events the clock couldn't step to before the beat (a pulse late when following clock) still play,
                     // before the next frame
                     PlayDueEvents(long.MaxValue);
+
+                    if (isRecording && recordLength > 0 && beat.Beat - recordStartBeat >= recordLength)
+                        EndRecording(beat.Beat * clockEngine.TicksPerBeat);
+
                     AdvancePlayback(beat.Beat * clockEngine.TicksPerBeat);
                 }
             }
@@ -265,11 +302,17 @@ namespace TemperaMental.Midi.Playbacks
                 switch (transport)
                 {
                     case ClockTransport.Start:
+                        EndRecording(TickNow());
+
                         int startFrame = playbackState == PlaybackState.Playing ? anchorFrame : frameManager.GetCurrentFrameNumber();
                         SetAnchorFrame(startFrame);
                         SetPlayFrame(startFrame);
                         SetPlaybackState(PlaybackState.Playing);
                         playEpoch = epoch;
+
+                        // the first pulse after Start is frame 1's tick 0
+                        if (isArmedForStart)
+                            BeginRecording(armedMode, armedLength, 0, anchorFrame, 0, Stopwatch.GetTimestamp(), false);
                         break;
 
                     case ClockTransport.Continue:
@@ -289,6 +332,8 @@ namespace TemperaMental.Midi.Playbacks
                         break;
 
                     case ClockTransport.SongPosition:
+                        EndRecording(TickNow());
+
                         if (playbackState != PlaybackState.Playing)
                             SetAnchorFrame(songBeat + 1);
 
@@ -305,6 +350,133 @@ namespace TemperaMental.Midi.Playbacks
             playEpoch = clockEngine.Restart(transport);
         }
 
+        // --- recording ---
+
+        // the published recording: a new instance when one starts and when it ends; null before the first
+        public RecordingSession RecordingSession => recordingSession;
+
+        // the next start of the transport (Play from stopped, or the clock source's Start) begins a recording
+        public void ArmRecording(RecordMode mode, int lengthBeats)
+        {
+            lock (playbackStateLock)
+            {
+                isArmedForStart = true;
+                armedMode = mode;
+                armedLength = lengthBeats;
+            }
+        }
+
+        public void DisarmRecording()
+        {
+            lock (playbackStateLock)
+            {
+                isArmedForStart = false;
+            }
+        }
+
+        // starts recording at a moment (a touch on the Tempera, or now). When playing it punches in at that moment;
+        // otherwise playback starts from the given frame, with the clock's tick 0 at that moment
+        public RecordingSession StartRecordingAt(RecordMode mode, int lengthBeats, long timestamp, int currentFrame)
+        {
+            lock (playbackStateLock)
+            {
+                isArmedForStart = false;
+                EndRecording(TickNow());
+
+                if (playbackState == PlaybackState.Playing)
+                {
+                    int ticksPerBeat = clockEngine.TicksPerBeat;
+
+                    // the beat the moment falls in, or the start of the current beat if the clock can't say
+                    if (!clockEngine.TryGetTickAt(timestamp, out long epoch, out long tick) || epoch != playEpoch || tick < 0)
+                        tick = LastBeat * ticksPerBeat;
+
+                    long beat = tick / ticksPerBeat;
+                    int frame = TryGetFrameAtBeat(playEpoch, beat, out int beatFrame) ? beatFrame : playFrame;
+
+                    BeginRecording(mode, lengthBeats, beat, frame, (int)(tick - beat * ticksPerBeat), timestamp, true);
+                }
+                else
+                {
+                    SetAnchorFrame(currentFrame);
+                    SetPlayFrame(currentFrame);
+                    SetPlaybackState(PlaybackState.Playing);
+                    playEpoch = clockEngine.Restart(ClockTransport.Start, timestamp);
+
+                    BeginRecording(mode, lengthBeats, 0, anchorFrame, 0, timestamp, false);
+                }
+
+                return recordingSession;
+            }
+        }
+
+        public void StopRecording()
+        {
+            lock (playbackStateLock)
+            {
+                EndRecording(TickNow());
+            }
+        }
+
+        // the frame a recent beat of an epoch played
+        public bool TryGetFrameAtBeat(long epoch, long beat, out int frame)
+        {
+            lock (historyLock)
+            {
+                int index = (int)(beat % BeatHistorySize);
+                bool isKnown = historyEpochs[index] == epoch && historyBeats[index] == beat;
+
+                frame = isKnown ? historyFrames[index] : 0;
+                return isKnown;
+            }
+        }
+
+        public int PlayFrame => playFrame;
+
+        private bool IsRecordingReplace => isRecording && recordMode == RecordMode.Replace;
+
+        // the latest beat played in this playback's epoch
+        private long LastBeat => playingFrameTick / Math.Max(1, clockEngine.TicksPerBeat);
+
+        private long TickNow()
+        {
+            return clockEngine.TryGetTickAt(Stopwatch.GetTimestamp(), out long epoch, out long tick) && epoch == playEpoch
+                ? tick
+                : long.MaxValue;
+        }
+
+        private void BeginRecording(RecordMode mode, int lengthBeats, long startBeat, int startFrame, int startTick, long timestamp,
+            bool isPunchIn)
+        {
+            isArmedForStart = false;
+            isRecording = true;
+            recordMode = mode;
+            recordStartBeat = startBeat;
+            recordLength = lengthBeats;
+
+            recordingSession = new RecordingSession(++lastSessionId, mode, playEpoch, startBeat, startFrame, startTick,
+                timestamp, isPunchIn, lengthBeats);
+        }
+
+        private void EndRecording(long endTick)
+        {
+            if (!isRecording) return;
+
+            isRecording = false;
+            recordingSession = recordingSession.Ended(endTick);
+        }
+
+        private void RememberBeat(long beat, int frame)
+        {
+            lock (historyLock)
+            {
+                int index = (int)(beat % BeatHistorySize);
+                historyEpochs[index] = playEpoch;
+                historyBeats[index] = beat;
+                historyFrames[index] = frame;
+            }
+        }
+
         private void FinishPlayback()
         {
             SetPlaybackState(PlaybackState.Reset);
@@ -315,9 +487,20 @@ namespace TemperaMental.Midi.Playbacks
         // read on the clock thread by the transform manager, so it's always current
         public PlaybackState State => playbackState;
 
-        // sends the frame's start groups, then any events on its first tick, and asks the clock for the next event
+        // sends the frame's start groups, then any events on its first tick, and asks the clock for the next event.
+        // A Replace recording sends nothing: the frame is being recorded from the Tempera
         private void PlayCurrentFrame(long frameTick)
         {
+            playingFrameTick = frameTick;
+            nextEventIndex = 0;
+            RememberBeat(frameTick / clockEngine.TicksPerBeat, playFrame);
+
+            if (IsRecordingReplace)
+            {
+                playingFrame = null;
+                return;
+            }
+
             FrameSnapshot[] sequence = frameManager.PublishedSequence;
             int index = Mathf.Clamp(playFrame, 1, sequence.Length) - 1;
             FrameSnapshot frame = sequence[index];
@@ -325,8 +508,6 @@ namespace TemperaMental.Midi.Playbacks
             outputScheduler.EnqueueFrame(frame.StartGroups);
 
             playingFrame = frame;
-            playingFrameTick = frameTick;
-            nextEventIndex = 0;
 
             if (!frame.HasEvents) return;
 
@@ -337,7 +518,8 @@ namespace TemperaMental.Midi.Playbacks
         // plays the current frame's events up to this tick into its beat
         private void PlayDueEvents(long tickInFrame)
         {
-            if (playingFrame == null) return;
+            // a Replace recording punched in part way through this frame: the rest of it is recorded instead
+            if (playingFrame == null || IsRecordingReplace) return;
 
             FrameEvent[] events = playingFrame.Events;
             int firstIndex = nextEventIndex;
@@ -390,9 +572,10 @@ namespace TemperaMental.Midi.Playbacks
             anchorFrame = Mathf.Clamp(frame, 1, FrameCount);
         }
 
-        private void SetPlayFrame(int frame)
+        // a Replace recording can run past the last frame; the recorder adds the frames
+        private void SetPlayFrame(int frame, bool isPastEndAllowed = false)
         {
-            playFrame = Mathf.Clamp(frame, 1, FrameCount);
+            playFrame = isPastEndAllowed ? Math.Max(1, frame) : Mathf.Clamp(frame, 1, FrameCount);
             isNewPlayFrame = true;
         }
 
@@ -403,8 +586,12 @@ namespace TemperaMental.Midi.Playbacks
                 playbackState = state;
                 immediateManager.SetPlaybackState(state);
 
-                // a frame's remaining events don't carry over a pause or stop
-                if (state != PlaybackState.Playing) playingFrame = null;
+                // a frame's remaining events don't carry over a pause or stop, nor does a recording
+                if (state != PlaybackState.Playing)
+                {
+                    playingFrame = null;
+                    EndRecording(TickNow());
+                }
 
                 isPlaybackStateChanged = true;
             }
@@ -412,6 +599,13 @@ namespace TemperaMental.Midi.Playbacks
 
         private void AdvancePlayback(long frameTick)
         {
+            if (IsRecordingReplace)
+            {
+                SetPlayFrame(playFrame + 1, isPastEndAllowed: true);
+                PlayCurrentFrame(frameTick);
+                return;
+            }
+
             int frameCount = FrameCount;
             int nextFrame = playFrame + (isReversed ? -1 : 1);
 

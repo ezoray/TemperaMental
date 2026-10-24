@@ -64,6 +64,7 @@ namespace TemperaMental.Midi.Clock
         volatile bool isClockInputSeparate;
         long requestedEpoch;
         int pendingRestartTransport;
+        long pendingRestartTime;    // 0: restart now
         volatile bool isRunning;
 
         readonly ConcurrentQueue<ClockTransport> transportQueue = new ConcurrentQueue<ClockTransport>();
@@ -103,6 +104,17 @@ namespace TemperaMental.Midi.Clock
         long lastPulseStepTick;     // transport tick and time of the last pulse, for timing scheduled ticks after it
         long lastPulseStepTime;
         long interpolatedStepTime = long.MaxValue;
+        bool isRestartFree;         // the pending restart counts pulses from the next one, ignoring the source's beats
+
+        // where the transport is in time, for TryGetTickAt on any thread: tick referenceTick of referenceEpoch was at
+        // referenceTime, moving referenceRate ticks per timestamp unit (0 when unknown). In Receive mode ticks never
+        // reach referenceLimit, the next pulse's tick, until that pulse arrives
+        readonly object referenceLock = new object();
+        long referenceEpoch = -1;
+        double referenceTick;
+        long referenceTime;
+        double referenceRate;
+        long referenceLimit = long.MaxValue;
 
         // written by the clock thread, read by the main thread
         volatile bool isExternalClockPresent;
@@ -244,10 +256,14 @@ namespace TemperaMental.Midi.Clock
         // when sending clock, the transport message (Start or Continue) goes out just before the first pulse.
         // in Receive mode the restart waits for the next pulse, or for the source's next beat when its position is known,
         // and no transport message is sent.
+        // atTimestamp (a Stopwatch timestamp a little in the past, e.g. a touch on the Tempera) puts tick 0 at that
+        // moment: beat 0 is raised straight away and later steps are timed from it. In Receive mode tick 0 is then the
+        // pulse nearest that moment, counting pulses from there.
         // returns the new epoch; beats raised before the restart takes effect carry an older epoch
-        public long Restart(ClockTransport transport = ClockTransport.None)
+        public long Restart(ClockTransport transport = ClockTransport.None, long atTimestamp = 0)
         {
             Interlocked.Exchange(ref pendingRestartTransport, (int)transport);
+            Interlocked.Exchange(ref pendingRestartTime, atTimestamp);
             long epoch = Interlocked.Increment(ref requestedEpoch);
             wakeSignal?.Set();
 
@@ -290,6 +306,46 @@ namespace TemperaMental.Midi.Clock
             long maxLate = Interlocked.Exchange(ref statMaxLateTicks, 0);
 
             return new ClockTimingStats(steps, late, maxLate * 1000.0 / Stopwatch.Frequency);
+        }
+
+        // any thread: the epoch and transport tick at a Stopwatch timestamp, worked out from the latest step. Ticks
+        // before the epoch's tick 0 are negative. False until the clock has a position
+        public bool TryGetTickAt(long timestamp, out long epoch, out long tick)
+        {
+            lock (referenceLock)
+            {
+                epoch = referenceEpoch;
+                tick = 0;
+
+                if (referenceEpoch < 0) return false;
+
+                double position = referenceTick + (timestamp - referenceTime) * referenceRate;
+                tick = (long)Math.Floor(position);
+
+                if (tick >= referenceLimit) tick = referenceLimit - 1;
+
+                return true;
+            }
+        }
+
+        private void SetReference(double tick, long time, double rate, long limit)
+        {
+            lock (referenceLock)
+            {
+                referenceEpoch = currentEpoch;
+                referenceTick = tick;
+                referenceTime = time;
+                referenceRate = rate;
+                referenceLimit = limit;
+            }
+        }
+
+        private void ClearReference()
+        {
+            lock (referenceLock)
+            {
+                referenceEpoch = -1;
+            }
         }
 
         // clock thread only (call it from an OnBeat or OnTick handler): asks for a step at this tick of the current
@@ -431,18 +487,27 @@ namespace TemperaMental.Midi.Clock
             {
                 lastSeenRequestedEpoch = epoch;
                 var transport = (ClockTransport)Interlocked.Exchange(ref pendingRestartTransport, 0);
+                long restartTime = Interlocked.Exchange(ref pendingRestartTime, 0);
 
                 if (IsReceiving)
                 {
-                    // the restart happens on the next suitable pulse
-                    pendingEpoch = epoch;
-                    isRestartPending = true;
+                    if (restartTime != 0)
+                    {
+                        RestartAtNearestPulse(epoch, restartTime);
+                    }
+                    else
+                    {
+                        // the restart happens on the next suitable pulse
+                        pendingEpoch = epoch;
+                        isRestartPending = true;
+                        isRestartFree = false;
+                    }
                 }
                 else
                 {
                     currentEpoch = epoch;
                     SendTransportMessage(transport);
-                    RestartInternal(now);
+                    RestartInternal(restartTime != 0 ? Math.Min(restartTime, now) : now);
                 }
             }
 
@@ -461,6 +526,7 @@ namespace TemperaMental.Midi.Clock
                 anchorTick = TickAt(now);
                 anchorTime = now;
                 SetTempo(bpm);
+                SetReference(anchorTick, anchorTime, ticksPerTimestamp, long.MaxValue);
 
                 nextStepTime = TimeOfTick(NextDueTick(lastStepTick));
             }
@@ -490,17 +556,20 @@ namespace TemperaMental.Midi.Clock
             }
         }
 
-        private void RestartInternal(long now)
+        // tick 0 at 'start', normally now; a past start (a recording's trigger) makes later steps catch up straight away
+        private void RestartInternal(long start)
         {
             SetTempo(requestedBpm);
 
-            anchorTime = now;
+            anchorTime = start;
             anchorTick = 0;
             lastStepTick = 0;
             appliedStepTicks = StepTicks;
             scheduledTick = long.MaxValue;
 
-            RaiseStep(0, now);
+            SetReference(0, anchorTime, ticksPerTimestamp, long.MaxValue);
+
+            RaiseStep(0, start);
 
             nextStepTime = TimeOfTick(NextDueTick(lastStepTick));
         }
@@ -539,6 +608,7 @@ namespace TemperaMental.Midi.Clock
         private void EnterReceiveMode()
         {
             nextStepTime = long.MaxValue;
+            ClearReference();
 
             hasSongPosition = false;
             isSourceRunning = false;
@@ -595,13 +665,14 @@ namespace TemperaMental.Midi.Clock
                 songPulse = songPosition++;
 
             // the app pressed Play: start now, or on the source's next beat if its beats are known
-            if (isRestartPending && (!isFollowingSong || songPulse % pulsesPerBeat == 0))
+            if (isRestartPending && (isRestartFree || !isFollowingSong || songPulse % pulsesPerBeat == 0))
             {
                 isRestartPending = false;
                 currentEpoch = pendingEpoch;
-                isEpochFromSong = isFollowingSong;
-                epochOrigin = isFollowingSong ? songPulse : pulseCount;
+                isEpochFromSong = isFollowingSong && !isRestartFree;
+                epochOrigin = isEpochFromSong ? songPulse : pulseCount;
                 isEpochStarted = true;
+                isRestartFree = false;
             }
 
             if (!isEpochStarted && !isEpochFromSong)
@@ -630,8 +701,51 @@ namespace TemperaMental.Midi.Clock
             lastStepTick = position * ticksPerPulse;
             lastPulseStepTick = lastStepTick;
             lastPulseStepTime = timestamp;
+            SetPulseReference();
 
             RaiseStep(lastStepTick, timestamp);
+
+            ScheduleInterpolatedStep();
+        }
+
+        // ticks after the last pulse move at the measured pulse rate, and stop short of the next pulse
+        private void SetPulseReference()
+        {
+            double rate = intervalCount == 0 ? 0 : ticksPerPulse / (intervalSum / intervalCount * timestampFrequency / 1000.0);
+
+            SetReference(lastPulseStepTick, lastPulseStepTime, rate, lastPulseStepTick + ticksPerPulse);
+        }
+
+        // a restart at a moment in the past (a recording's trigger): tick 0 is the pulse nearest that moment, and the
+        // epoch counts pulses from there, ignoring the source's beats. When the last pulse is nearer, the epoch starts
+        // on it straight away (late); otherwise on the next pulse
+        private void RestartAtNearestPulse(long epoch, long restartTime)
+        {
+            double pulseTimestamps = intervalCount == 0 ? 0 : intervalSum / intervalCount * timestampFrequency / 1000.0;
+            bool isLastPulseNearer = isExternalClockPresent && pulseTimestamps > 0 &&
+                                     restartTime - lastPulseTime < pulseTimestamps / 2;
+
+            if (!isLastPulseNearer)
+            {
+                pendingEpoch = epoch;
+                isRestartPending = true;
+                isRestartFree = true;
+                return;
+            }
+
+            isRestartPending = false;
+            isRestartFree = false;
+            currentEpoch = epoch;
+            isEpochFromSong = false;
+            isEpochStarted = true;
+            epochOrigin = pulseCount;
+
+            lastStepTick = 0;
+            lastPulseStepTick = 0;
+            lastPulseStepTime = lastPulseTime;
+            SetPulseReference();
+
+            RaiseStep(0, lastPulseTime);
 
             ScheduleInterpolatedStep();
         }
@@ -722,6 +836,7 @@ namespace TemperaMental.Midi.Clock
             currentEpoch = epoch;
 
             isRestartPending = false;
+            isRestartFree = false;
             isEpochFromSong = true;
             isEpochStarted = true;
             epochOrigin = origin;

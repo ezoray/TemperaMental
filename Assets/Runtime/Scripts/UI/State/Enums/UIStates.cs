@@ -19,9 +19,12 @@ namespace TemperaMental.UI.State
 
         // presets
         All = Device | File | Frame | Transform | Direction | Record | Playback | Creation | Selection,
-        Playing = Playback | Device | Frame | Creation | Selection,
-        Paused = Playback | Device | Frame | Creation | Selection,
+        Playing = Playback | Device | Frame | Creation | Selection | Record,
+        Paused = Playback | Device | Frame | Creation | Selection | Record,
 
         Recording = Device | File | Frame | Transform | Direction | Record | Creation | Selection,
+
+        // recording from the Tempera writes the frames, so frame edits, files and transforms wait
+        TemperaRecording = Playback | Device | Frame | Record,
     }
 }
