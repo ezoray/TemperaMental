@@ -12,8 +12,10 @@ namespace TemperaMental.Midi.Playbacks
 {
     // Sequencer: plays one frame per beat of the ClockEngine.
     // Play, resume and seek restart the clock so the chosen frame is sent straight away.
-    // HandleBeat runs on the clock thread. State shared with the main thread is guarded by playbackStateLock,
-    // and UI notifications are raised from Update using volatile flags.
+    // Each frame's start groups are sent on its beat, then its events at their ticks: the sequencer asks the clock for
+    // a step at the next event's tick. Reverse plays the frames backwards, but each frame's events forwards.
+    // HandleBeat and HandleTick run on the clock thread. State shared with the main thread is guarded by
+    // playbackStateLock, and UI notifications are raised from Update using volatile flags.
     public class FrameSequenceManager : MonoBehaviour
     {
         [SerializeField] FrameManager frameManager;
@@ -33,6 +35,28 @@ namespace TemperaMental.Midi.Playbacks
         // epoch of the clock restart that began the current playback; beats from other epochs are ignored
         long playEpoch = -1;
 
+        // the frame being played and how far through its events it is (clock thread, under playbackStateLock)
+        FrameSnapshot playingFrame;
+        long playingFrameTick;
+        int nextEventIndex;
+        ulong[] playingGroups;
+
+        // what the grid should show once a frame's events have played, posted to Update
+        sealed class PlaybackView
+        {
+            public readonly int FrameNumber;
+            public readonly ulong[] Groups;
+
+            public PlaybackView(int frameNumber, ulong[] groups)
+            {
+                FrameNumber = frameNumber;
+                Groups = groups;
+            }
+        }
+
+        volatile PlaybackView pendingView;
+        PlaybackView raisedView;
+
         volatile PlaybackState playbackState;
 
         readonly object playbackStateLock = new object();
@@ -41,6 +65,9 @@ namespace TemperaMental.Midi.Playbacks
         [SerializeField] UnityEvent<PlaybackState> onPlaybackStateChanged;
         [SerializeField] UnityEvent<bool> onLoopStateChanged;
         [SerializeField] UnityEvent<bool> onReverseStateChanged;
+
+        // the emitters shown as a frame's events play (the frame's start is shown through onPlaybackFrameChanged)
+        [SerializeField] UnityEvent<FrameDetail> onPlaybackEmittersChanged = new UnityEvent<FrameDetail>();
 
 
         private void Awake()
@@ -51,6 +78,7 @@ namespace TemperaMental.Midi.Playbacks
         private void OnEnable()
         {
             clockEngine.OnBeat += HandleBeat;
+            clockEngine.OnTick += HandleTick;
             clockEngine.OnExternalTransport += HandleExternalTransport;
         }
 
@@ -67,6 +95,20 @@ namespace TemperaMental.Midi.Playbacks
             {
                 isNewPlayFrame = false;
                 onPlaybackFrameChanged?.Invoke(playFrame);
+            }
+
+            // after the frame change, so the events are drawn over the frame's start; a view left over from an earlier
+            // frame, or arriving once playback has stopped, is dropped
+            PlaybackView view = pendingView;
+
+            if (view != null && view != raisedView)
+            {
+                raisedView = view;
+
+                if (playbackState == PlaybackState.Playing && view.FrameNumber == playFrame)
+                {
+                    onPlaybackEmittersChanged?.Invoke(new FrameDetail(view.FrameNumber, FrameCount, view.Groups));
+                }
             }
 
             if (isPlaybackStateChanged)
@@ -189,12 +231,26 @@ namespace TemperaMental.Midi.Playbacks
                 // beat 0 is the restart that started (or resumed) playback: play the current frame
                 if (beat.Beat == 0)
                 {
-                    PlayCurrentFrame();
+                    PlayCurrentFrame(0);
                 }
                 else
                 {
-                    AdvancePlayback();
+                    // events the clock couldn't step to before the beat (a pulse late when following clock) still play,
+                    // before the next frame
+                    PlayDueEvents(long.MaxValue);
+                    AdvancePlayback(beat.Beat * clockEngine.TicksPerBeat);
                 }
+            }
+        }
+
+        // clock thread
+        private void HandleTick(ClockTick tick)
+        {
+            lock (playbackStateLock)
+            {
+                if (playbackState != PlaybackState.Playing || tick.Epoch != playEpoch) return;
+
+                PlayDueEvents(tick.Tick - playingFrameTick);
             }
         }
 
@@ -259,12 +315,72 @@ namespace TemperaMental.Midi.Playbacks
         // read on the clock thread by the transform manager, so it's always current
         public PlaybackState State => playbackState;
 
-        private void PlayCurrentFrame()
+        // sends the frame's start groups, then any events on its first tick, and asks the clock for the next event
+        private void PlayCurrentFrame(long frameTick)
         {
-            ulong[][] sequence = frameManager.PublishedSequence;
+            FrameSnapshot[] sequence = frameManager.PublishedSequence;
             int index = Mathf.Clamp(playFrame, 1, sequence.Length) - 1;
+            FrameSnapshot frame = sequence[index];
 
-            outputScheduler.EnqueueFrame(sequence[index]);
+            outputScheduler.EnqueueFrame(frame.StartGroups);
+
+            playingFrame = frame;
+            playingFrameTick = frameTick;
+            nextEventIndex = 0;
+
+            if (!frame.HasEvents) return;
+
+            playingGroups = (ulong[])frame.StartGroups.Clone();
+            PlayDueEvents(0);
+        }
+
+        // plays the current frame's events up to this tick into its beat
+        private void PlayDueEvents(long tickInFrame)
+        {
+            if (playingFrame == null) return;
+
+            FrameEvent[] events = playingFrame.Events;
+            int firstIndex = nextEventIndex;
+
+            while (nextEventIndex < events.Length && events[nextEventIndex].Tick <= tickInFrame)
+            {
+                FrameEvent frameEvent = events[nextEventIndex++];
+
+                SendEvent(frameEvent);
+                frameEvent.ApplyTo(playingGroups);
+            }
+
+            if (nextEventIndex > firstIndex)
+            {
+                pendingView = new PlaybackView(playFrame, (ulong[])playingGroups.Clone());
+            }
+
+            if (nextEventIndex < events.Length)
+            {
+                clockEngine.ScheduleTick(playingFrameTick + events[nextEventIndex].Tick);
+            }
+        }
+
+        private void SendEvent(FrameEvent frameEvent)
+        {
+            switch (frameEvent.Type)
+            {
+                case FrameEventType.Select:
+                    outputScheduler.EnqueueSelectEmitter(frameEvent.EmitterId);
+                    break;
+
+                case FrameEventType.Place:
+                    outputScheduler.EnqueueAddEmitter(frameEvent.EmitterId, frameEvent.Cell);
+                    break;
+
+                case FrameEventType.Remove:
+                    outputScheduler.EnqueueRemoveEmitter(frameEvent.Cell);
+                    break;
+
+                case FrameEventType.ClearAll:
+                    outputScheduler.EnqueueClearAll();
+                    break;
+            }
         }
 
         private int FrameCount => frameManager.PublishedSequence.Length;
@@ -287,11 +403,14 @@ namespace TemperaMental.Midi.Playbacks
                 playbackState = state;
                 immediateManager.SetPlaybackState(state);
 
+                // a frame's remaining events don't carry over a pause or stop
+                if (state != PlaybackState.Playing) playingFrame = null;
+
                 isPlaybackStateChanged = true;
             }
         }
 
-        private void AdvancePlayback()
+        private void AdvancePlayback(long frameTick)
         {
             int frameCount = FrameCount;
             int nextFrame = playFrame + (isReversed ? -1 : 1);
@@ -322,12 +441,13 @@ namespace TemperaMental.Midi.Playbacks
                 SetPlayFrame(nextFrame);
             }
 
-            PlayCurrentFrame();
+            PlayCurrentFrame(frameTick);
         }
 
         private void OnDisable()
         {
             clockEngine.OnBeat -= HandleBeat;
+            clockEngine.OnTick -= HandleTick;
             clockEngine.OnExternalTransport -= HandleExternalTransport;
         }
     }

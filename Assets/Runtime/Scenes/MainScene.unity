@@ -12502,6 +12502,34 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  onPlaybackEmittersChanged:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 56300612}
+        m_TargetAssemblyTypeName: TemperaMental.Grid.GridEventController, Assembly-CSharp
+        m_MethodName: ActionOnFrameChanged
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 597592033}
+        m_TargetAssemblyTypeName: TemperaMental.UI.Display.MainView.MainViewUIManager,
+          Assembly-CSharp
+        m_MethodName: ActionOnFrameChanged
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!4 &723133474
 Transform:
   m_ObjectHideFlags: 0

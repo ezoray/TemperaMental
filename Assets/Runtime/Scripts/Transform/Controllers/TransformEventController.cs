@@ -20,8 +20,7 @@ namespace TemperaMental.Transforms
 
         public void OnClickDirection(int directionValue)
         {
-            ulong[] emitterGroup = frameManager.GetCurrentFrameEmitters();
-            transformManager.HandleDirectionChange(emitterGroup, directionValue);
+            transformManager.HandleDirectionChange(frameManager.GetCurrentFrameSnapshot(), directionValue);
         }
 
         public void OnClickToggleLatching() => transformManager.ToggleLatching();

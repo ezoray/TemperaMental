@@ -14,8 +14,9 @@ using UnityEngine.Events;
 namespace TemperaMental.Midi.Clock
 {
     // The app's clock, running on a dedicated high-priority thread. Keeps a transport position in ticks
-    // (TicksPerBeat per beat) and raises OnBeat at every beat boundary. Between steps it pumps the
-    // MidiOutputScheduler, so all MIDI output is sent from this one thread.
+    // (TicksPerBeat per beat) and raises OnBeat at every beat boundary, and OnTick at steps in between (clock pulses,
+    // and any tick a listener asks for with ScheduleTick). Between steps it pumps the MidiOutputScheduler, so all
+    // MIDI output is sent from this one thread.
     //
     // Internal: times itself and wakes once per beat.
     // Send:     times itself, steps every MIDI clock pulse (TicksPerBeat / PulsesPerBeat ticks) and sends F8, plus
@@ -23,9 +24,11 @@ namespace TemperaMental.Midi.Clock
     // Receive:  follows F8 from the clock source (the In device, or a separate Clock from device); each pulse is one
     //           step. Start/Continue/Stop/Song Position from the source drive the sequencer through OnExternalTransport,
     //           and are forwarded with the clock to the Clock to device unless that would send it back to its source.
-    //           The tempo is measured from the pulses.
+    //           The tempo is measured from the pulses. A scheduled tick between two pulses is timed from the last pulse
+    //           and the measured pulse length; until a tempo is measured it waits for the next pulse.
     //
-    // OnBeat and OnExternalTransport handlers run on the clock thread: keep them short and never touch Unity objects.
+    // OnBeat, OnTick and OnExternalTransport handlers run on the clock thread: keep them short and never touch Unity
+    // objects.
     public class ClockEngine : MonoBehaviour
     {
         // after a long stall (e.g. a debugger pause) catch up at most this many steps, then jump ahead
@@ -78,6 +81,10 @@ namespace TemperaMental.Midi.Clock
         long lastStepTick;
         long nextStepTime;
 
+        // the next tick a listener asked for, valid only for the epoch it was asked in
+        long scheduledTick = long.MaxValue;
+        long scheduledEpoch = -1;
+
         // Receive mode, owned by the clock thread
         long pulseCount;            // every pulse received
         long songPosition;          // the source's position (in pulses) of its next pulse
@@ -93,6 +100,9 @@ namespace TemperaMental.Midi.Clock
         int intervalCount;
         int intervalIndex;
         double intervalSum;
+        long lastPulseStepTick;     // transport tick and time of the last pulse, for timing scheduled ticks after it
+        long lastPulseStepTime;
+        long interpolatedStepTime = long.MaxValue;
 
         // written by the clock thread, read by the main thread
         volatile bool isExternalClockPresent;
@@ -113,7 +123,24 @@ namespace TemperaMental.Midi.Clock
         // listener exceptions are logged on the main thread
         readonly ConcurrentQueue<Exception> listenerErrors = new ConcurrentQueue<Exception>();
 
-        public event Action<ClockBeat> OnBeat;
+        // handlers are kept in arrays replaced when listeners are added or removed, so raising them on the clock thread
+        // allocates nothing (OnTick can be raised every pulse)
+        readonly object handlerLock = new object();
+        volatile Action<ClockBeat>[] beatHandlers = new Action<ClockBeat>[0];
+        volatile Action<ClockTick>[] tickHandlers = new Action<ClockTick>[0];
+
+        public event Action<ClockBeat> OnBeat
+        {
+            add { lock (handlerLock) beatHandlers = AddHandler(beatHandlers, value); }
+            remove { lock (handlerLock) beatHandlers = RemoveHandler(beatHandlers, value); }
+        }
+
+        // every step that isn't a beat boundary
+        public event Action<ClockTick> OnTick
+        {
+            add { lock (handlerLock) tickHandlers = AddHandler(tickHandlers, value); }
+            remove { lock (handlerLock) tickHandlers = RemoveHandler(tickHandlers, value); }
+        }
 
         // transport received from the clock source in Receive mode: transport, epoch of the beats that follow,
         // and for SongPosition the beat number (from the song start) the next frame begins on
@@ -265,6 +292,20 @@ namespace TemperaMental.Midi.Clock
             return new ClockTimingStats(steps, late, maxLate * 1000.0 / Stopwatch.Frequency);
         }
 
+        // clock thread only (call it from an OnBeat or OnTick handler): asks for a step at this tick of the current
+        // epoch, which is raised through OnTick. Only the earliest pending request is kept, so ask again for the next
+        // one from its handler. Ignored for ticks already passed
+        public void ScheduleTick(long tick)
+        {
+            if (tick <= lastStepTick) return;
+
+            if (!HasScheduledTick || tick < scheduledTick)
+            {
+                scheduledTick = tick;
+                scheduledEpoch = currentEpoch;
+            }
+        }
+
         // driver threads
         private void OnInputMessage(MidiMessageData message)
         {
@@ -323,6 +364,12 @@ namespace TemperaMental.Midi.Clock
                 {
                     ProcessExternal();
                     CheckClockTimeout(now);
+
+                    if (now >= interpolatedStepTime)
+                    {
+                        DispatchInterpolatedStep();
+                        continue;
+                    }
                 }
                 else if (now >= nextStepTime)
                 {
@@ -339,7 +386,7 @@ namespace TemperaMental.Midi.Clock
 
         private void WaitForNextWork()
         {
-            long target = IsReceiving ? long.MaxValue : nextStepTime;
+            long target = IsReceiving ? interpolatedStepTime : nextStepTime;
 
             if (outputScheduler.HasWork)
                 target = Math.Min(target, outputScheduler.NextSendTime);
@@ -415,7 +462,7 @@ namespace TemperaMental.Midi.Clock
                 anchorTime = now;
                 SetTempo(bpm);
 
-                nextStepTime = TimeOfTick(NextStepTick(lastStepTick));
+                nextStepTime = TimeOfTick(NextDueTick(lastStepTick));
             }
 
             int stepTicks = StepTicks;
@@ -423,7 +470,7 @@ namespace TemperaMental.Midi.Clock
             if (stepTicks != appliedStepTicks)
             {
                 appliedStepTicks = stepTicks;
-                nextStepTime = TimeOfTick(NextStepTick(lastStepTick));
+                nextStepTime = TimeOfTick(NextDueTick(lastStepTick));
             }
         }
 
@@ -451,24 +498,26 @@ namespace TemperaMental.Midi.Clock
             anchorTick = 0;
             lastStepTick = 0;
             appliedStepTicks = StepTicks;
+            scheduledTick = long.MaxValue;
 
             RaiseStep(0, now);
 
-            nextStepTime = TimeOfTick(NextStepTick(lastStepTick));
+            nextStepTime = TimeOfTick(NextDueTick(lastStepTick));
         }
 
         private void DispatchDueSteps(long now)
         {
-            long nextTick = NextStepTick(lastStepTick);
+            long nextTick = NextDueTick(lastStepTick);
             long stepTime = TimeOfTick(nextTick);
             long stepDuration = Math.Max(1, (long)(appliedStepTicks / ticksPerTimestamp));
 
             long lateness = now - stepTime;
 
+            // a scheduled tick jumped over here is caught up by its listener at the next step
             if (lateness > stepDuration * MaxCatchUpSteps)
             {
                 lastStepTick += lateness / stepDuration * appliedStepTicks;
-                nextTick = NextStepTick(lastStepTick);
+                nextTick = NextDueTick(lastStepTick);
                 stepTime = TimeOfTick(nextTick);
             }
 
@@ -478,7 +527,7 @@ namespace TemperaMental.Midi.Clock
                 RecordPunctuality(stepTime);
                 RaiseStep(lastStepTick, stepTime);
 
-                nextTick = NextStepTick(lastStepTick);
+                nextTick = NextDueTick(lastStepTick);
                 stepTime = TimeOfTick(nextTick);
             }
 
@@ -496,6 +545,7 @@ namespace TemperaMental.Midi.Clock
             isEpochFromSong = false;
             isEpochStarted = false;     // pulse-counted beats start on the next pulse
             isRestartPending = false;
+            interpolatedStepTime = long.MaxValue;
 
             ResetTempoMeasurement();
         }
@@ -564,7 +614,12 @@ namespace TemperaMental.Midi.Clock
 
             if (isEpochFromSong)
             {
-                if (!isEpochStarted || songPulse < epochOrigin) return;
+                if (!isEpochStarted || songPulse < epochOrigin)
+                {
+                    interpolatedStepTime = long.MaxValue;
+                    return;
+                }
+
                 position = songPulse - epochOrigin;
             }
             else
@@ -573,7 +628,40 @@ namespace TemperaMental.Midi.Clock
             }
 
             lastStepTick = position * ticksPerPulse;
+            lastPulseStepTick = lastStepTick;
+            lastPulseStepTime = timestamp;
+
             RaiseStep(lastStepTick, timestamp);
+
+            ScheduleInterpolatedStep();
+        }
+
+        // times a scheduled tick that falls before the next pulse from the last pulse and the measured pulse length.
+        // later ticks wait for their pulse; with no tempo measured yet they're raised with the next pulse instead
+        private void ScheduleInterpolatedStep()
+        {
+            interpolatedStepTime = long.MaxValue;
+
+            if (!HasScheduledTick || intervalCount == 0) return;
+            if (scheduledTick >= lastPulseStepTick + ticksPerPulse) return;
+
+            double pulseTimestamps = intervalSum / intervalCount * timestampFrequency / 1000.0;
+            double offset = (scheduledTick - lastPulseStepTick) * pulseTimestamps / ticksPerPulse;
+
+            interpolatedStepTime = lastPulseStepTime + (long)Math.Round(offset);
+        }
+
+        private void DispatchInterpolatedStep()
+        {
+            long stepTime = interpolatedStepTime;
+            interpolatedStepTime = long.MaxValue;
+
+            if (!HasScheduledTick || scheduledTick >= lastPulseStepTick + ticksPerPulse) return;
+
+            lastStepTick = scheduledTick;
+            RaiseStep(lastStepTick, stepTime);
+
+            ScheduleInterpolatedStep();
         }
 
         private void OnExternalStart()
@@ -714,28 +802,66 @@ namespace TemperaMental.Midi.Clock
             return (tick / appliedStepTicks + 1) * appliedStepTicks;
         }
 
+        // the next regular step, or a scheduled tick before it
+        private long NextDueTick(long tick)
+        {
+            long next = NextStepTick(tick);
+
+            return HasScheduledTick && scheduledTick < next ? scheduledTick : next;
+        }
+
+        private bool HasScheduledTick => scheduledEpoch == currentEpoch && scheduledTick != long.MaxValue && scheduledTick > lastStepTick;
+
         private void RaiseStep(long tick, long timestamp)
         {
+            // reached (or passed): listeners ask for their next one from their handlers
+            if (scheduledTick <= tick) scheduledTick = long.MaxValue;
+
             // the pulse goes out first so the beat's frame follows it immediately
             if (IsSendingClock && !IsReceiving && tick % ticksPerPulse == 0)
             {
                 outputScheduler.SendRealtime(MidiMessageKind.TimingClock);
             }
 
-            if (tick % ticksPerBeat != 0) return;
+            if (tick % ticksPerBeat != 0)
+            {
+                RaiseTick(tick, timestamp);
+                return;
+            }
 
-            Action<ClockBeat> handlers = OnBeat;
+            Action<ClockBeat>[] handlers = beatHandlers;
 
-            if (handlers == null) return;
+            if (handlers.Length == 0) return;
 
             ClockBeat beat = new ClockBeat(currentEpoch, tick / ticksPerBeat, timestamp);
 
             // call each listener separately so one failing doesn't stop the others
-            foreach (Action<ClockBeat> handler in handlers.GetInvocationList())
+            foreach (Action<ClockBeat> handler in handlers)
             {
                 try
                 {
                     handler(beat);
+                }
+                catch (Exception ex)
+                {
+                    listenerErrors.Enqueue(ex);
+                }
+            }
+        }
+
+        private void RaiseTick(long tick, long timestamp)
+        {
+            Action<ClockTick>[] handlers = tickHandlers;
+
+            if (handlers.Length == 0) return;
+
+            ClockTick clockTick = new ClockTick(currentEpoch, tick, timestamp);
+
+            foreach (Action<ClockTick> handler in handlers)
+            {
+                try
+                {
+                    handler(clockTick);
                 }
                 catch (Exception ex)
                 {
@@ -761,6 +887,30 @@ namespace TemperaMental.Midi.Clock
                     listenerErrors.Enqueue(ex);
                 }
             }
+        }
+
+        private static T[] AddHandler<T>(T[] handlers, T handler) where T : Delegate
+        {
+            if (handler == null) return handlers;
+
+            var result = new T[handlers.Length + 1];
+            Array.Copy(handlers, result, handlers.Length);
+            result[handlers.Length] = handler;
+
+            return result;
+        }
+
+        private static T[] RemoveHandler<T>(T[] handlers, T handler) where T : Delegate
+        {
+            int index = Array.LastIndexOf(handlers, handler);
+
+            if (index < 0) return handlers;
+
+            var result = new T[handlers.Length - 1];
+            Array.Copy(handlers, 0, result, 0, index);
+            Array.Copy(handlers, index + 1, result, index, handlers.Length - index - 1);
+
+            return result;
         }
 
         private void SendTransportMessage(ClockTransport transport)

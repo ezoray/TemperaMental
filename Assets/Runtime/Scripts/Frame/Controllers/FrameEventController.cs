@@ -42,7 +42,7 @@ namespace TemperaMental.Frames
             }
         }
 
-        public void ActionOnEmittersTransformed(ulong[] emitterGroups) => frameManager.ReceiveEmitterGroups(emitterGroups);
+        public void ActionOnEmittersTransformed(FrameSnapshot result) => frameManager.ReceiveTransformResult(result);
 
         // Follow Tempera
         public void ActionOnFollowTemperaChanged(bool isFollowing) => frameManager.SetFollowTempera(isFollowing);

@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using TemperaMental.Applications.Config;
 using TemperaMental.Core;
+using TemperaMental.Frames;
 using TemperaMental.Logs;
 using TemperaMental.Settings;
 using TemperaMental.Utils;
@@ -116,6 +118,14 @@ namespace TemperaMental.Transforms
                     : Mathf.Max(count - targetOffset, 0);
 
             return DoRandomTransform(groups, target, activeEmitterIds);
+        }
+
+        // random placements can't be matched to a frame's timed events, so they're dropped whenever Random changes the
+        // emitters. A step that changes nothing (Up and Down only adjust the count) keeps them
+        protected override FrameEvent[] TransformEvents(ulong[] startGroups, ulong[] resultGroups, FrameEvent[] events,
+            Func<ulong[], ulong[]> transform)
+        {
+            return EmitterUtils.CheckGroupsDifferent(startGroups, resultGroups) ? FrameEvent.None : events;
         }
 
         public void AdjustTargetOffset(int change)

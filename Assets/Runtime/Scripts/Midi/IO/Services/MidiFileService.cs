@@ -36,7 +36,9 @@ namespace TemperaMental.Midi.IO
                     return false;
                 }
 
-                midiFile.Write(savePath, true);
+                // a single track keeps events on the same tick in order, which the app's own format relies on;
+                // the default multi-track format would move the markers into a track of their own
+                midiFile.Write(savePath, true, MidiFileFormat.SingleTrack);
                 return true;         
 
             }

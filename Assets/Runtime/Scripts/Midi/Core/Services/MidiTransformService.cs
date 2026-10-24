@@ -3,12 +3,27 @@ using Melanchall.DryWetMidi.Common;
 using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Interaction;
 using TemperaMental.Applications.Config;
+using TemperaMental.Core;
 using TemperaMental.Frames;
 using TemperaMental.Utils;
 using UnityEngine;
 
 namespace TemperaMental.Midi.Transforms
 {
+    // Converts frames to and from MIDI files.
+    //
+    // Format 2 (written, as a single-track file): TicksPerBeat (96) ticks per quarter note, one frame per quarter note.
+    // A format marker at time 0, then for each frame, all at the frame's time: its START_FRAME_NO_n marker, a clear of
+    // all emitters and the frame's start groups (CC10 colour, CC11 cells), so every frame is absolute and seekable. If
+    // the frame has events, a FRAME_EVENTS marker follows, then each event at its tick: Select = CC10,
+    // Place = CC10 + CC11, Remove = CC12 cell, ClearAll = CC12 64. A DAW playing the file therefore drives the Tempera
+    // as the app would.
+    // Reading relies on the order of events on the same tick. If the markers and CCs are in different tracks (a DAW
+    // may save it that way), that order is lost, so the CCs on a frame's beat are all read as its start groups: events
+    // on the frame's first tick are folded into them.
+    //
+    // Format 1 (older files, or any file without the format marker): read as before, grouping CCs into frames by
+    // quarter note and applying placements only.
     public class MidiTransformService : MonoBehaviour
     {
         const int MICROSECONDS_PER_MINUTE = 60_000_000;
@@ -21,6 +36,8 @@ namespace TemperaMental.Midi.Transforms
 
         string frameStartPrefix;
         string seqEndMarker;
+        string formatMarker;
+        string eventsMarker;
 
         int gridWidth;
         int gridHeight;
@@ -31,8 +48,10 @@ namespace TemperaMental.Midi.Transforms
         {
             frameStartPrefix = ConfigRegistry.Midi.FrameStartPrefix;
             seqEndMarker = ConfigRegistry.Midi.SeqEndMarker;
+            formatMarker = ConfigRegistry.Midi.FileFormatMarker;
+            eventsMarker = ConfigRegistry.Midi.FrameEventsMarker;
 
-            ticksPerFrame = ConfigRegistry.Midi.TicksPerFrame;
+            ticksPerFrame = (short)ConfigRegistry.Midi.TicksPerBeat;
 
             activateCC = ConfigRegistry.Midi.ActivateCC;
             placeCC = ConfigRegistry.Midi.PlaceCC;
@@ -46,14 +65,28 @@ namespace TemperaMental.Midi.Transforms
             gridSize = gridWidth * gridHeight;
         }
 
+        // --- writing (format 2) ---
+
         public MidiFile FromFramesToMidiFile(IReadOnlyList<Frame> sourceFrames, int bpm)
         {
             MidiFile midiFile = BuildMidiFile();
             TrackChunk trackChunk = BuildTrackChunk(bpm);
 
-            using (var manager = trackChunk.ManageTimedEvents())
+            var events = new List<TimedEvent> { new TimedEvent(new MarkerEvent(formatMarker), 0) };
+
+            WriteFrames(events, sourceFrames);
+
+            // the events are built in time order; adding them with delta times keeps the order of events on the same
+            // tick, which the reader relies on
+            long previousTime = 0;
+
+            foreach (TimedEvent timedEvent in events)
             {
-                WriteFrames(manager, sourceFrames);
+                MidiEvent midiEvent = timedEvent.Event;
+                midiEvent.DeltaTime = timedEvent.Time - previousTime;
+                previousTime = timedEvent.Time;
+
+                trackChunk.Events.Add(midiEvent);
             }
 
             midiFile.Chunks.Add(trackChunk);
@@ -78,89 +111,334 @@ namespace TemperaMental.Midi.Transforms
             return trackChunk;
         }
 
-        private void WriteFrames(TimedObjectsManager<TimedEvent> manager, IReadOnlyList<Frame> sourceFrames)
+        private void WriteFrames(List<TimedEvent> events, IReadOnlyList<Frame> sourceFrames)
         {
             for (int i = 0; i < sourceFrames.Count; i++)
             {
                 long frameTick = i * ticksPerFrame;
+                Frame frame = sourceFrames[i];
 
-                int frameNumber = i + 1;
-
-                frameTick = WriteFrameStart(manager, frameTick, frameNumber);
+                // set a marker to track frame changes on playback
+                events.Add(new TimedEvent(new MarkerEvent($"{frameStartPrefix}{i + 1}"), frameTick));
 
                 // clear all emitters at the start of every frame so each frame is absolute
                 // this allows seeking to any frame without depending upon previous frame state
-                frameTick = ClearAllEmitters(manager, frameTick);
+                for (byte emitterId = 0; emitterId < emitterCount; emitterId++)
+                {
+                    AddControlChange(events, frameTick, activateCC, emitterId);
+                    AddControlChange(events, frameTick, removeCC, clearEmittersValue);
+                }
 
-                WriteAllEmitters(manager, frameTick, sourceFrames[i]);
+                WriteStartGroups(events, frameTick, frame.GetEmitterGroups());
+
+                if (!frame.HasEvents) continue;
+
+                events.Add(new TimedEvent(new MarkerEvent(eventsMarker), frameTick));
+
+                foreach (FrameEvent frameEvent in frame.Events)
+                {
+                    WriteEvent(events, frameTick + frameEvent.Tick, frameEvent);
+                }
             }
 
             // set marker at end of last frame/quarter note to force playback to play to the end before looping
-            manager.Objects.Add(new TimedEvent(new MarkerEvent(seqEndMarker), sourceFrames.Count * ticksPerFrame));
-        }
-
-        // set a marker to track frame changes on playback
-        private long WriteFrameStart(TimedObjectsManager<TimedEvent> manager, long tick, int frameNumber)
-        {
-            manager.Objects.Add(new TimedEvent(new MarkerEvent($"{frameStartPrefix}{frameNumber}"), tick++));
-
-            return tick;
+            events.Add(new TimedEvent(new MarkerEvent(seqEndMarker), sourceFrames.Count * ticksPerFrame));
         }
 
         // write emitters in turn by type
-        private void WriteAllEmitters(TimedObjectsManager<TimedEvent> manager, long tick, Frame frame)
+        private void WriteStartGroups(List<TimedEvent> events, long tick, ulong[] emitterGroups)
         {
-            ulong[] emitterGroups = frame.GetEmitterGroups();
-
             for (byte emitterId = 0; emitterId < emitterCount; emitterId++)
             {
                 ulong group = emitterGroups[emitterId];
 
                 if (group == 0) continue;
 
-                tick = WriteActivateEmitter(manager, tick, emitterId);
+                AddControlChange(events, tick, activateCC, emitterId);
 
                 for (byte pos = 0; pos < gridSize; pos++)
                 {
                     if ((group & (1UL << pos)) != 0)
                     {
-                        tick = WriteEmitterEvent(manager, tick, placeCC, pos);
+                        AddControlChange(events, tick, placeCC, pos);
                     }
                 }
             }
         }
 
-        private long WriteActivateEmitter(TimedObjectsManager<TimedEvent> manager, long tick, byte emitter)
+        private void WriteEvent(List<TimedEvent> events, long tick, FrameEvent frameEvent)
         {
-            manager.Objects.Add(new TimedEvent(new ControlChangeEvent((SevenBitNumber)activateCC, (SevenBitNumber)emitter), tick++));
-
-            return tick;
-        }
-
-        private long WriteEmitterEvent(TimedObjectsManager<TimedEvent> manager, long tick, int cc, byte value)
-        {
-            manager.Objects.Add(new TimedEvent(new ControlChangeEvent((SevenBitNumber)cc, (SevenBitNumber)value), tick++));
-
-            return tick;
-        }
-
-        private long ClearAllEmitters(TimedObjectsManager<TimedEvent> manager, long tick)
-        {
-            for (byte emitterId = 0; emitterId < emitterCount; emitterId++)
+            switch (frameEvent.Type)
             {
-                tick = WriteActivateEmitter(manager, tick, emitterId);
-                tick = WriteEmitterEvent(manager, tick, removeCC, clearEmittersValue);
-            }
+                case FrameEventType.Select:
+                    AddControlChange(events, tick, activateCC, (byte)frameEvent.EmitterId);
+                    break;
 
-            return tick;
+                case FrameEventType.Place:
+                    AddControlChange(events, tick, activateCC, (byte)frameEvent.EmitterId);
+                    AddControlChange(events, tick, placeCC, (byte)frameEvent.Cell);
+                    break;
+
+                case FrameEventType.Remove:
+                    AddControlChange(events, tick, removeCC, (byte)frameEvent.Cell);
+                    break;
+
+                case FrameEventType.ClearAll:
+                    AddControlChange(events, tick, removeCC, clearEmittersValue);
+                    break;
+            }
         }
+
+        private void AddControlChange(List<TimedEvent> events, long tick, int cc, byte value)
+        {
+            events.Add(new TimedEvent(new ControlChangeEvent((SevenBitNumber)cc, (SevenBitNumber)value), tick));
+        }
+
+        // --- reading ---
 
         public List<Frame> FromMidiFileToFrames(MidiFile midiFile)
         {
-            List<Frame> frames = new List<Frame>();
-
-            long ticksPerFrame = GetTicksPerFrame(midiFile);
             ICollection<TimedEvent> timedEvents = midiFile.GetTimedEvents();
+
+            return IsFormat2(timedEvents)
+                ? ReadFormat2(timedEvents, GetTicksPerFrame(midiFile), IsOrderKept(midiFile))
+                : ReadFormat1(timedEvents, GetTicksPerFrame(midiFile));
+        }
+
+        // whether the markers and the CCs share a track, so their order on the same tick is the order they were written in
+        private static bool IsOrderKept(MidiFile midiFile)
+        {
+            int tracksWithEvents = 0;
+
+            foreach (TrackChunk trackChunk in midiFile.GetTrackChunks())
+            {
+                bool hasMarker = false;
+                bool hasControlChange = false;
+
+                foreach (MidiEvent midiEvent in trackChunk.Events)
+                {
+                    hasMarker |= midiEvent is MarkerEvent;
+                    hasControlChange |= midiEvent is ControlChangeEvent;
+                }
+
+                if (hasControlChange && !hasMarker) return false;
+                if (hasMarker || hasControlChange) tracksWithEvents++;
+            }
+
+            return tracksWithEvents <= 1;
+        }
+
+        private bool IsFormat2(ICollection<TimedEvent> timedEvents)
+        {
+            foreach (var timedEvent in timedEvents)
+            {
+                if (timedEvent.Event is MarkerEvent marker && marker.Text == formatMarker) return true;
+            }
+
+            return false;
+        }
+
+        // frames start at their START_FRAME_NO_ markers. The start groups are rebuilt from the CCs that follow,
+        // until the frame's FRAME_EVENTS marker; CCs after that are events, timed from the frame's start.
+        // A CC10 directly followed on the same tick by a CC11 is one placement; a CC10 on its own is a colour select
+        private List<Frame> ReadFormat2(ICollection<TimedEvent> timedEvents, long fileTicksPerFrame, bool isOrderKept)
+        {
+            var frames = new List<Frame>();
+            var reader = new Format2FrameReader(emitterCount, ticksPerFrame, fileTicksPerFrame, activateCC, placeCC, removeCC,
+                clearEmittersValue, isOrderKept);
+
+            foreach (var timedEvent in timedEvents)
+            {
+                switch (timedEvent.Event)
+                {
+                    case MarkerEvent marker when marker.Text.StartsWith(frameStartPrefix, System.StringComparison.Ordinal):
+                        reader.Finish(frames);
+                        reader.Begin(timedEvent.Time);
+                        break;
+
+                    case MarkerEvent marker when marker.Text == eventsMarker:
+                        reader.BeginEvents();
+                        break;
+
+                    case MarkerEvent marker when marker.Text == seqEndMarker:
+                        reader.Finish(frames);
+                        break;
+
+                    case ControlChangeEvent cc:
+                        reader.Read(timedEvent.Time, cc.ControlNumber, cc.ControlValue);
+                        break;
+                }
+            }
+
+            reader.Finish(frames);
+
+            return frames;
+        }
+
+        // reads one frame at a time for ReadFormat2
+        sealed class Format2FrameReader
+        {
+            readonly int emitterCount;
+            readonly int ticksPerBeat;
+            readonly long fileTicksPerFrame;
+            readonly int activateCC;
+            readonly int placeCC;
+            readonly int removeCC;
+            readonly byte clearValue;
+
+            // otherwise the FRAME_EVENTS marker can't be placed among the CCs, and only CCs after the frame's first
+            // tick are events
+            readonly bool isOrderKept;
+
+            readonly List<FrameEvent> events = new List<FrameEvent>();
+            ulong[] startGroups;
+            long frameTime;
+            bool isReadingEvents;
+            int currentEmitter;
+
+            // a CC10 in the events that may yet turn out to be the first half of a placement
+            int pendingSelect = -1;
+            long pendingSelectTime;
+
+            public Format2FrameReader(int emitterCount, int ticksPerBeat, long fileTicksPerFrame, int activateCC, int placeCC,
+                int removeCC, byte clearValue, bool isOrderKept)
+            {
+                this.isOrderKept = isOrderKept;
+                this.emitterCount = emitterCount;
+                this.ticksPerBeat = ticksPerBeat;
+                this.fileTicksPerFrame = fileTicksPerFrame;
+                this.activateCC = activateCC;
+                this.placeCC = placeCC;
+                this.removeCC = removeCC;
+                this.clearValue = clearValue;
+            }
+
+            public void Begin(long time)
+            {
+                startGroups = new ulong[emitterCount];
+                events.Clear();
+                frameTime = time;
+                isReadingEvents = false;
+                pendingSelect = -1;
+            }
+
+            public void BeginEvents()
+            {
+                if (startGroups != null) isReadingEvents = true;
+            }
+
+            public void Read(long time, int controlNumber, int value)
+            {
+                // CCs before the first frame marker belong to no frame
+                if (startGroups == null) return;
+
+                bool isEvent = isOrderKept ? isReadingEvents : time > frameTime;
+
+                if (isEvent)
+                    ReadEvent(time, controlNumber, value);
+                else
+                    ReadStart(controlNumber, value);
+            }
+
+            private void ReadStart(int controlNumber, int value)
+            {
+                if (controlNumber == activateCC)
+                {
+                    if (value < emitterCount) currentEmitter = value;
+                }
+                else if (controlNumber == placeCC)
+                {
+                    if (value < 64) Place(startGroups, currentEmitter, value);
+                }
+                else if (controlNumber == removeCC)
+                {
+                    if (value == clearValue)
+                        System.Array.Clear(startGroups, 0, startGroups.Length);
+                    else if (value < 64)
+                        Remove(startGroups, value);
+                }
+            }
+
+            private void ReadEvent(long time, int controlNumber, int value)
+            {
+                int tick = ToTick(time);
+
+                if (controlNumber == activateCC)
+                {
+                    FlushPendingSelect();
+
+                    if (value >= emitterCount) return;
+
+                    currentEmitter = value;
+                    pendingSelect = value;
+                    pendingSelectTime = time;
+                }
+                else if (controlNumber == placeCC)
+                {
+                    bool isPlacementPair = pendingSelect >= 0 && pendingSelectTime == time;
+
+                    if (!isPlacementPair) FlushPendingSelect();
+                    pendingSelect = -1;
+
+                    if (value < 64) events.Add(FrameEvent.Place(tick, currentEmitter, value));
+                }
+                else if (controlNumber == removeCC)
+                {
+                    FlushPendingSelect();
+
+                    if (value == clearValue)
+                        events.Add(FrameEvent.ClearAll(tick));
+                    else if (value < 64)
+                        events.Add(FrameEvent.Remove(tick, value));
+                }
+            }
+
+            private void FlushPendingSelect()
+            {
+                if (pendingSelect < 0) return;
+
+                events.Add(FrameEvent.Select(ToTick(pendingSelectTime), pendingSelect));
+                pendingSelect = -1;
+            }
+
+            // file ticks from the frame's start, scaled to the app's ticks per beat
+            private int ToTick(long time)
+            {
+                long offset = time - frameTime;
+
+                return (int)(offset * ticksPerBeat / fileTicksPerFrame);
+            }
+
+            public void Finish(List<Frame> frames)
+            {
+                if (startGroups == null) return;
+
+                FlushPendingSelect();
+
+                var frame = new Frame(startGroups);
+                frame.SetEvents(events);
+                frames.Add(frame);
+
+                startGroups = null;
+            }
+
+            private static void Place(ulong[] groups, int emitterId, int cell)
+            {
+                Remove(groups, cell);
+                groups[emitterId] |= 1UL << cell;
+            }
+
+            private static void Remove(ulong[] groups, int cell)
+            {
+                for (int i = 0; i < groups.Length; i++)
+                    groups[i] &= ~(1UL << cell);
+            }
+        }
+
+        // format 1: CC events grouped into frames by quarter note; only placements are applied, markers are ignored
+        private List<Frame> ReadFormat1(ICollection<TimedEvent> timedEvents, long fileTicksPerFrame)
+        {
+            List<Frame> frames = new List<Frame>();
 
             long currentFrameTick = -1;
             Frame currentFrame = null;
@@ -172,7 +450,7 @@ namespace TemperaMental.Midi.Transforms
                 // skip non-CC events entirely — markers should not trigger frame boundaries
                 if (timedEvent.Event is not ControlChangeEvent cc) continue;
 
-                long frameTick = (timedEvent.Time / ticksPerFrame) * ticksPerFrame;
+                long frameTick = (timedEvent.Time / fileTicksPerFrame) * fileTicksPerFrame;
 
                 if (frameTick != currentFrameTick)
                 {
@@ -211,6 +489,6 @@ namespace TemperaMental.Midi.Transforms
             short tpqn = (midiFile.TimeDivision as TicksPerQuarterNoteTimeDivision)?.TicksPerQuarterNote ?? ticksPerFrame;
 
             return tpqn;
-        }   
+        }
     }
 }

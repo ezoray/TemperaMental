@@ -189,6 +189,12 @@ namespace TemperaMental.Midi.Output
             Enqueue(new OutputCommand(CommandType.SelectEmitter, emitterId: (byte)emitterId));
         }
 
+        // removes every emitter from the device, as when a device is selected
+        public void EnqueueClearAll()
+        {
+            Enqueue(new OutputCommand(CommandType.ResetDevice));
+        }
+
         private void Enqueue(OutputCommand command)
         {
             commands.Enqueue(command);

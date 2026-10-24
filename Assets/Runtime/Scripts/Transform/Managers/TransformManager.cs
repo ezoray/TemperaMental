@@ -16,7 +16,8 @@ namespace TemperaMental.Transforms
 {
     // Latched transforms run on the clock thread at each beat (while the sequencer isn't playing), so their
     // output is sent exactly on the beat. Each result is also queued for the main thread, which applies it to the
-    // current frame (or records it) in Update.
+    // current frame (or records it) in Update. A frame's timed events are moved along with its emitters (Random drops
+    // them when it changes the emitters).
     // The transform services are shared between the clock thread and the main thread (button presses), so every
     // use of them is guarded by transformLock. UnityEvents are raised on the main thread only.
     public class TransformManager : MonoBehaviour
@@ -37,17 +38,18 @@ namespace TemperaMental.Transforms
 
         // clock thread
         ulong[] beatGroups;
-        ulong[] lastSeenPublished;
-        ulong[] lastBeatOutput;
+        ulong[] stepInputGroups;
+        FrameSnapshot lastSeenPublished;
+        FrameSnapshot lastBeatOutput;
 
         // results of latched transforms, from the clock thread to the main thread
-        readonly ConcurrentQueue<ulong[]> beatResults = new ConcurrentQueue<ulong[]>();
+        readonly ConcurrentQueue<FrameSnapshot> beatResults = new ConcurrentQueue<FrameSnapshot>();
 
         // result of an immediate (button press) transform, raised once the lock is released
-        ulong[] immediateResult;
+        FrameSnapshot immediateResult;
 
         [SerializeField] UnityEvent<TransformType, TransformDetail> onTransformChanged;
-        [SerializeField] UnityEvent<ulong[]> onEmittersTransformed;
+        [SerializeField] UnityEvent<FrameSnapshot> onEmittersTransformed;
         [SerializeField] UnityEvent<TransformDirections, bool> onDirectionLatchStateChanged;
         [SerializeField] UnityEvent<TransformActiveEmitters> onTransformsReset;
         [SerializeField] UnityEvent<int> onTransformRateChanged;
@@ -60,6 +62,7 @@ namespace TemperaMental.Transforms
             currentTransformType = TransformType.Shift;
 
             beatGroups = new ulong[ConfigRegistry.Grid.EmitterCount];
+            stepInputGroups = new ulong[ConfigRegistry.Grid.EmitterCount];
         }
 
         private void OnEnable()
@@ -84,7 +87,7 @@ namespace TemperaMental.Transforms
         private void Update()
         {
             // apply every result in order: when recording, each one becomes a new frame
-            while (beatResults.TryDequeue(out ulong[] result))
+            while (beatResults.TryDequeue(out FrameSnapshot result))
             {
                 onEmittersTransformed?.Invoke(result);
             }
@@ -102,46 +105,52 @@ namespace TemperaMental.Transforms
                 return;
             }
 
-            ulong[] published = frameManager.PublishedCurrentGroups;
+            FrameSnapshot published = frameManager.PublishedCurrentFrame;
 
             if (published == null) return;
 
             // if the main thread hasn't published anything since the last beat (it may not have applied our last
             // result yet), carry on from that result so a slow frame doesn't repeat the same step
-            ulong[] input = published == lastSeenPublished && lastBeatOutput != null ? lastBeatOutput : published;
+            FrameSnapshot input = published == lastSeenPublished && lastBeatOutput != null ? lastBeatOutput : published;
             lastSeenPublished = published;
+
+            FrameEvent[] events = input.Events;
 
             lock (transformLock)
             {
-                Array.Copy(input, beatGroups, beatGroups.Length);
+                Array.Copy(input.StartGroups, beatGroups, beatGroups.Length);
 
                 foreach (var transformService in transformServices)
                 {
                     if (!transformService.IsLatched || !transformService.TickAndCheck()) continue;
 
-                    ulong[] resultGroups = transformService.DoTransform(beatGroups);
+                    Array.Copy(beatGroups, stepInputGroups, beatGroups.Length);
+
+                    ulong[] resultGroups = transformService.DoTransform(stepInputGroups);
                     Array.Copy(resultGroups, beatGroups, beatGroups.Length);
+
+                    events = transformService.TransformEventsLatched(stepInputGroups, beatGroups, events);
                 }
             }
 
-            if (!EmitterUtils.CheckGroupsDifferent(input, beatGroups))
+            if (!EmitterUtils.CheckGroupsDifferent(input.StartGroups, beatGroups) && FrameEvent.AreSame(events, input.Events))
             {
                 lastBeatOutput = input;
                 return;
             }
 
-            ulong[] output = (ulong[])beatGroups.Clone();
+            var output = new FrameSnapshot((ulong[])beatGroups.Clone(), events);
             lastBeatOutput = output;
 
-            outputScheduler.EnqueueFrame(output);
+            outputScheduler.EnqueueFrame(output.StartGroups);
             beatResults.Enqueue(output);
         }
 
-        public void HandleDirectionChange(ulong[] emitterGroup, int directionValue)
+        public void HandleDirectionChange(FrameSnapshot frame, int directionValue)
         {
             lock (transformLock)
             {
-                transformServices[(int)currentTransformType].HandleDirectionChange(emitterGroup, directionValue);
+                transformServices[(int)currentTransformType].HandleDirectionChange(frame, directionValue);
             }
 
             RaiseImmediateResult();
@@ -173,6 +182,7 @@ namespace TemperaMental.Transforms
             onTransformRateChanged?.Invoke(rate);
         }
 
+        // the Random slider sets a number of emitters; the frame's timed events are dropped, as for any random change
         public void RandomiseEmitters(ulong[] emitterGroup, int targetCount)
         {
             ulong[] transformedGroups;
@@ -183,7 +193,7 @@ namespace TemperaMental.Transforms
                     .DoRandomTransform(emitterGroup, targetCount, randomTransformService.TransformMode).Clone();
             }
 
-            onEmittersTransformed?.Invoke(transformedGroups);
+            onEmittersTransformed?.Invoke(new FrameSnapshot(transformedGroups, FrameEvent.None));
         }
 
         public void SelectEmitter(int emitterId)
@@ -273,19 +283,19 @@ namespace TemperaMental.Transforms
         }
 
         // raised by a service during HandleDirectionChange, inside the lock; kept until the lock is released
-        private void ActionOnEmittersTransformed(ulong[] transformedGroups)
+        private void ActionOnEmittersTransformed(FrameSnapshot result)
         {
-            immediateResult = (ulong[])transformedGroups.Clone();
+            immediateResult = result;
         }
 
         private void RaiseImmediateResult()
         {
-            ulong[] result = immediateResult;
+            FrameSnapshot result = immediateResult;
             immediateResult = null;
 
             if (result == null) return;
 
-            if (EmitterUtils.CheckGroupsDifferent(frameManager.GetCurrentFrameEmitters(), result))
+            if (!result.HasSameContent(frameManager.GetCurrentFrameSnapshot()))
             {
                 onEmittersTransformed?.Invoke(result);
             }

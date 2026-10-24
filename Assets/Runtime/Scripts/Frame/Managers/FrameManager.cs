@@ -12,12 +12,12 @@ namespace TemperaMental.Frames
     {
         readonly List<Frame> frames = new List<Frame>();
 
-        // immutable copy of every frame's emitters, replaced after each change, read by the sequencer on the clock thread
-        volatile ulong[][] publishedSequence = new ulong[0][];
+        // immutable copy of every frame, replaced after each change, read by the sequencer on the clock thread
+        volatile FrameSnapshot[] publishedSequence = new FrameSnapshot[0];
 
-        // immutable copy of the current frame's emitters, read by the transforms on the clock thread.
-        // a new array is published whenever the current frame changes, so a reference check detects changes
-        volatile ulong[] publishedCurrentGroups;
+        // immutable copy of the current frame, read by the transforms on the clock thread.
+        // a new snapshot is published whenever the current frame changes, so a reference check detects changes
+        volatile FrameSnapshot publishedCurrentFrame;
 
         Frame currentFrame;
         int currentFrameIndex;
@@ -49,15 +49,16 @@ namespace TemperaMental.Frames
             AddFrame();
         }
 
-        public void ReceiveEmitterGroups(ulong[] emitterGroups)
+        // the result of a transform: the start groups and the events carried along with them
+        public void ReceiveTransformResult(FrameSnapshot result)
         {
             if (isRecording)
             {
-                RecordFrame(emitterGroups);
+                RecordFrame(result);
             }
             else
             {
-                UpdateCurrentFrame(emitterGroups);
+                UpdateCurrentFrame(result);
             }
         }
 
@@ -66,9 +67,17 @@ namespace TemperaMental.Frames
             SetRecording(!isRecording);
         }
 
-        private void UpdateCurrentFrame(ulong[] emitterGroups)
-        {  
-            currentFrame.SetEmitterGroups(emitterGroups);
+        private void UpdateCurrentFrame(FrameSnapshot content)
+        {
+            currentFrame.SetContent(content);
+
+            NotifyFrameChanged();
+        }
+
+        // replaces the current frame's timed events
+        public void SetCurrentFrameEvents(IEnumerable<FrameEvent> events)
+        {
+            currentFrame.SetEvents(events);
 
             NotifyFrameChanged();
         }
@@ -89,13 +98,26 @@ namespace TemperaMental.Frames
             return currentFrame.GetEmitterGroups();
         }
 
+        public FrameSnapshot GetCurrentFrameSnapshot()
+        {
+            return currentFrame.GetSnapshot();
+        }
+
         public void SetPlaybackState(PlaybackState newPlaybackState)
         {
+            bool wasPlaying = playbackState == PlaybackState.Playing;
+
             playbackState = newPlaybackState;
 
             if(playbackState == PlaybackState.Playing)
             {
                 SetRecording(false);
+            }
+            else if (wasPlaying)
+            {
+                // playback may have stopped part way through a frame's events: show and send the frame as it
+                // starts again, which is what editing and transforms work on
+                NotifyFrameChanged();
             }
         }
 
@@ -126,7 +148,7 @@ namespace TemperaMental.Frames
 
         public void ClearFrame()
         {
-            currentFrame.ClearEmitters();
+            currentFrame.Clear();
 
             LogMan.Log("Frame cleared");
 
@@ -305,11 +327,11 @@ namespace TemperaMental.Frames
             return new FrameDetail(currentFrameIndex + 1, frames.Count, frame.GetEmitterGroups());
         }
 
-        private void RecordFrame(ulong[] emitterGroups)
+        private void RecordFrame(FrameSnapshot content)
         {
             if (playbackState == PlaybackState.Playing) return;
-      
-            InsertFrameAt(currentFrameIndex + 1, new Frame(emitterGroups));
+
+            InsertFrameAt(currentFrameIndex + 1, new Frame(content));
         }
 
         private void SetCurrentFrame(int index)
@@ -341,13 +363,13 @@ namespace TemperaMental.Frames
             SetCurrentFrame(index);
         }
 
-        public ulong[][] PublishedSequence => publishedSequence;
+        public FrameSnapshot[] PublishedSequence => publishedSequence;
 
-        public ulong[] PublishedCurrentGroups => publishedCurrentGroups;
+        public FrameSnapshot PublishedCurrentFrame => publishedCurrentFrame;
 
         private void PublishSequence()
         {
-            var sequence = new ulong[frames.Count][];
+            var sequence = new FrameSnapshot[frames.Count];
 
             for (int i = 0; i < sequence.Length; i++)
             {
@@ -358,7 +380,7 @@ namespace TemperaMental.Frames
 
             if (currentFrame != null)
             {
-                publishedCurrentGroups = currentFrame.GetSnapshot();
+                publishedCurrentFrame = currentFrame.GetSnapshot();
             }
         }
 

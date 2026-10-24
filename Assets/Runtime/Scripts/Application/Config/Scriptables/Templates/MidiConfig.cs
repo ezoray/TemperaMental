@@ -21,8 +21,7 @@ namespace TemperaMental.Applications.Config
         public int MinBpm = 10;
    
 
-        // tick resolution and interval between ticks
-        public short TicksPerFrame = 120; // used only when creating midifiles
+        // gap between sent messages (format 1 files used 120 ticks per frame; format 2 uses TicksPerBeat)
         public float EventIntervalMS = 0.0001f; // in seconds despite the name: gap between sent messages
 
         // internal clock
@@ -84,5 +83,10 @@ namespace TemperaMental.Applications.Config
         // markers in midifile
         public string FrameStartPrefix = "START_FRAME_NO_";
         public string SeqEndMarker = "END_SEQ";
+
+        // file format 2 (TicksPerBeat per frame, with timed events): a marker at the start of the file, and one in
+        // each frame between its start state and its events
+        public string FileFormatMarker = "TEMPERAMENTAL_FORMAT_2";
+        public string FrameEventsMarker = "FRAME_EVENTS";
     }
 }

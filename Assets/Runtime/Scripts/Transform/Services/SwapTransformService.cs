@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using TemperaMental.Applications.Config;
 using TemperaMental.Core;
+using TemperaMental.Frames;
 using TemperaMental.Settings;
 using TemperaMental.Utils;
 
@@ -29,6 +30,19 @@ namespace TemperaMental.Transforms
             if (directions == TransformDirections.None)
                 return groups;
             return DoSingleTransform(groups, directions);
+        }
+
+        // a colour select follows its colour's emitters: one is passed through on a cell outside that colour's own
+        // lane, where 2-Lane can't pin it
+        protected override int TransformSelectedEmitter(int emitterId, Func<ulong[], ulong[]> transform)
+        {
+            ulong ownLane = EmitterUtils.LaneMasks[emitterId];
+            int cell = 0;
+
+            while (cell < 63 && (ownLane & (1UL << cell)) != 0)
+                cell++;
+
+            return TryMoveEmitter(emitterId, cell, transform, out int newEmitterId, out _) ? newEmitterId : emitterId;
         }
 
         // swap has no meaningful individual mode — an immediate unlatched press while
