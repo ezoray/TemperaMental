@@ -35,13 +35,16 @@ namespace TemperaMental.Applications.Config
         // record button: how fast it flashes while armed (seconds per change)
         public float RecordArmFlashInterval = 0.35f;
 
-        // record settings view
+        // record settings
         public string RecordLengthOffText = "Off";
 
-        // main view: the button row surface last shown (File, Clock, Record)
-        public string MainViewSurfacePrefsKey = "MainViewSurface";
+        // the mode last shown (Play, Transform, Edit, Record, Sound, Settings)
+        public string AppModePrefsKey = "AppMode";
 
-        // clock devices view
+        // the canvas display when no canvas is chosen
+        public string NoCanvasText = "-";
+
+        // clock devices
         public string SameAsInText = "Same as In";
         public string SameAsOutText = "Same as Out";
         public string NoneText = "None";

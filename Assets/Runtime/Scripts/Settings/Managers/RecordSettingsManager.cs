@@ -8,7 +8,7 @@ using UnityEngine.Events;
 namespace TemperaMental.Settings
 {
     // what the Record button records and how: source, trigger, mode, starting state and length. Each setting is
-    // stepped through its choices by one button. Saved in PlayerPrefs when the settings view closes
+    // stepped through its choices by one button. Saved in PlayerPrefs as soon as they change
     public class RecordSettingsManager : MonoBehaviour
     {
         int[] lengths;

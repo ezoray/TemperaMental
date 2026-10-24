@@ -6,7 +6,7 @@ using UnityEngine.Events;
 namespace TemperaMental.Settings
 {
     // the Tempera's Control MIDI channel (where its emitter notes arrive) and whether the app follows changes made on
-    // the hardware. Saved in PlayerPrefs when the settings view closes
+    // the hardware. Saved in PlayerPrefs as soon as they change
     public class TemperaSettingsManager : MonoBehaviour
     {
         string controlChannelPrefsKey;
@@ -42,6 +42,8 @@ namespace TemperaMental.Settings
 
             onControlChannelChanged?.Invoke(controlChannel);
         }
+
+        public void ToggleFollowTempera() => SetFollowTempera(!isFollowing);
 
         public void SetFollowTempera(bool isFollow)
         {

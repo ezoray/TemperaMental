@@ -13,6 +13,9 @@ namespace TemperaMental.UI.Core
         // hack this needs to be wired under Debug in the inspector as the field does not show normally
         [SerializeField] TextMeshProUGUI buttonText;
 
+        // optional small caption above the value (mode buttons show "CLOCK" over "Internal"); dims with it
+        [SerializeField] TextMeshProUGUI captionText;
+
         float alphaValue;
 
         protected override void Awake()
@@ -32,10 +35,16 @@ namespace TemperaMental.UI.Core
             {
                 float targetAlpha = (state == SelectionState.Disabled) ? alphaValue : 1f;
 
-                Color color = buttonText.color;
-                color.a = targetAlpha;
-                buttonText.color = color;
+                SetAlpha(buttonText, targetAlpha);
+                if (captionText != null) SetAlpha(captionText, targetAlpha);
             }
+        }
+
+        private static void SetAlpha(TextMeshProUGUI text, float alpha)
+        {
+            Color color = text.color;
+            color.a = alpha;
+            text.color = color;
         }
     }
 }

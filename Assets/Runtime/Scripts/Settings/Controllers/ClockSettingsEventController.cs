@@ -2,33 +2,34 @@ using UnityEngine;
 
 namespace TemperaMental.Settings
 {
+    // clock settings are saved as soon as they change
     public class ClockSettingsEventController : MonoBehaviour
     {
         [SerializeField] ClockSettingsManager settingsManager;
 
-        // -1 or +1 from the < and > buttons
-        public void OnClickClockMode(int directionValue) => settingsManager.StepClockMode(directionValue);
-
-        // 0 from the Off button, 1 from the On button
-        public void OnClickSendStartStop(int value) => settingsManager.SetSendStartStop(value != 0);
-
-        // -1 or +1 from the < and > buttons on the clock devices view
-        public void OnClickClockFrom(int directionValue) => settingsManager.StepClockFrom(directionValue);
-
-        public void OnClickClockTo(int directionValue) => settingsManager.StepClockTo(directionValue);
-
-        public void OnClockSettingsClosed() => settingsManager.SaveClockSettings();
-
-        // the main view's Clock surface: each press steps the setting and saves it straight away
-        public void OnClickSurfaceClockMode()
+        // Play mode's Clock button steps through Internal, Send and Receive
+        public void OnClickNextClockMode()
         {
             settingsManager.StepClockMode(1);
             settingsManager.SaveClockSettings();
         }
 
-        public void OnClickSurfaceSendStartStop()
+        public void OnClickToggleSendStartStop()
         {
             settingsManager.ToggleSendStartStop();
+            settingsManager.SaveClockSettings();
+        }
+
+        // -1 or +1 from the < and > buttons in Settings mode
+        public void OnClickClockFrom(int directionValue)
+        {
+            settingsManager.StepClockFrom(directionValue);
+            settingsManager.SaveClockSettings();
+        }
+
+        public void OnClickClockTo(int directionValue)
+        {
+            settingsManager.StepClockTo(directionValue);
             settingsManager.SaveClockSettings();
         }
     }

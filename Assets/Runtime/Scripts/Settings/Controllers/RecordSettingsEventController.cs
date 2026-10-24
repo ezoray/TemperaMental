@@ -2,43 +2,36 @@ using UnityEngine;
 
 namespace TemperaMental.Settings
 {
+    // each Record mode button steps its setting to the next choice and saves it straight away
     public class RecordSettingsEventController : MonoBehaviour
     {
         [SerializeField] RecordSettingsManager settingsManager;
 
-        // each Record settings button steps its setting to the next choice
-        public void OnClickSource() => settingsManager.StepSource();
+        public void OnClickSource()
+        {
+            settingsManager.StepSource();
+            settingsManager.SaveRecordSettings();
+        }
 
-        public void OnClickTrigger() => settingsManager.StepTrigger();
-
-        public void OnClickMode() => settingsManager.StepMode();
-
-        public void OnClickStartState() => settingsManager.StepStartState();
-
-        public void OnClickLength() => settingsManager.StepLength();
-
-        public void OnRecordSettingsClosed() => settingsManager.SaveRecordSettings();
-
-        // the main view's Record surface: each press steps the setting and saves it straight away
-        public void OnClickSurfaceTrigger()
+        public void OnClickTrigger()
         {
             settingsManager.StepTrigger();
             settingsManager.SaveRecordSettings();
         }
 
-        public void OnClickSurfaceMode()
+        public void OnClickMode()
         {
             settingsManager.StepMode();
             settingsManager.SaveRecordSettings();
         }
 
-        public void OnClickSurfaceStartState()
+        public void OnClickStartState()
         {
             settingsManager.StepStartState();
             settingsManager.SaveRecordSettings();
         }
 
-        public void OnClickSurfaceLength()
+        public void OnClickLength()
         {
             settingsManager.StepLength();
             settingsManager.SaveRecordSettings();

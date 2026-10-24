@@ -10,7 +10,7 @@ using UnityEngine.Events;
 namespace TemperaMental.Settings
 {
     // Clock mode (Internal, Send, Receive), whether Start/Stop are sent, and which devices clock comes from and goes to.
-    // Saved in PlayerPrefs when the settings view closes.
+    // Saved in PlayerPrefs as soon as they change.
     // Clock from: "" means the In device, otherwise an input name.
     // Clock to: "" means the Out device, ClockToNoneValue means nowhere, otherwise an output name.
     public class ClockSettingsManager : MonoBehaviour
