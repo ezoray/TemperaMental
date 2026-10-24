@@ -20,13 +20,17 @@ namespace TemperaMental.Midi.IO
 
         [SerializeField] UnityEvent<int> onBpmLoaded;
         [SerializeField] UnityEvent<List<Frame>, bool> onFramesLoaded;
+
+        // a loaded file's canvas (Program Change), or -1; not raised when appending
+        [SerializeField] UnityEvent<int> onCanvasLoaded = new UnityEvent<int>();
         [SerializeField] UnityEvent onFramesSaved;
 
-        public void SaveAsMidiFile(IReadOnlyList<Frame> frames, int bpm)
+        // canvas: Program Change 0–127 saved with the frames, or -1 for none
+        public void SaveAsMidiFile(IReadOnlyList<Frame> frames, int bpm, int canvas)
         {
             try
             {
-                MidiFile midiFile = transformService.FromFramesToMidiFile(frames, bpm);
+                MidiFile midiFile = transformService.FromFramesToMidiFile(frames, bpm, canvas);
 
                 if (fileService.TrySaveMidiFile(midiFile))
                 {
@@ -54,6 +58,8 @@ namespace TemperaMental.Midi.IO
 
                     onBpmLoaded?.Invoke(bpm);
                     onFramesLoaded?.Invoke(frames, isAppend);
+
+                    if (!isAppend) onCanvasLoaded?.Invoke(MidiUtils.GetProgramFromMidiFile(midiFile));
                 }
             }
             catch (Exception ex)

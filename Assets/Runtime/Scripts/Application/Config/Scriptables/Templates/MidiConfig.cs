@@ -86,6 +86,13 @@ namespace TemperaMental.Applications.Config
         public string RecordStartStatePrefsKey = "RecordStartState";
         public string RecordLengthPrefsKey = "RecordLength";
 
+        // canvas recall: a stepped canvas is sent once it stops changing for this long (seconds)
+        public float CanvasSendDelay = 0.75f;
+
+        // Hold: the note held so emitters sound without playing the Tempera (middle C), and its velocity
+        public int HoldNote = 60;
+        public int HoldVelocity = 100;
+
         // cc numbers for emitters
         public int ActivateCC = 10;
         public int PlaceCC = 11;

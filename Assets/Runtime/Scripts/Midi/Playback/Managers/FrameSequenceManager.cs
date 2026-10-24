@@ -17,6 +17,11 @@ namespace TemperaMental.Midi.Playbacks
     // Play, resume and seek restart the clock so the chosen frame is sent straight away.
     // Each frame's start groups are sent on its beat, then its events at their ticks: the sequencer asks the clock for
     // a step at the next event's tick. Reverse plays the frames backwards, but each frame's events forwards.
+    // Note events are played on their channels. At each frame's start the notes that should be sounding there (from the
+    // frames before it) are compared with those sounding, and corrected, so starting part way through, seeking, looping
+    // and reverse leave the right notes on; pausing and stopping release them. A note being held live on the Tempera
+    // isn't turned on again (e.g. while overdubbing it), and a Note Off is only sent for a note the sequencer turned on,
+    // so a note played live is never cut.
     // HandleBeat and HandleTick run on the clock thread. State shared with the main thread is guarded by
     // playbackStateLock, and UI notifications are raised from Update using volatile flags.
     //
@@ -76,6 +81,20 @@ namespace TemperaMental.Midi.Playbacks
         int recordLength;
         int lastSessionId;
         volatile RecordingSession recordingSession;
+
+        // notes the sequencer has turned on (channel * 128 + note), under playbackStateLock
+        const int NoteSlots = 16 * 128;
+        readonly ulong[] soundingNotes = new ulong[NoteSlots / 64];
+
+        // notes being held on the Tempera right now, from the recorder; replaced, never changed in place
+        volatile ulong[] liveNotes = new ulong[NoteSlots / 64];
+
+        // the notes that should be sounding at the start of frame heldIndex (0-based) of heldSequence, worked out from
+        // the frames before it; playing forward only adds one frame's notes each beat
+        readonly ulong[] heldNotes = new ulong[NoteSlots / 64];
+        readonly byte[] heldVelocities = new byte[NoteSlots];
+        FrameSnapshot[] heldSequence;
+        int heldIndex;
 
         // which frame each recent beat played, so the recorder can place what arrives slightly late
         const int BeatHistorySize = 64;
@@ -456,6 +475,9 @@ namespace TemperaMental.Midi.Playbacks
 
             recordingSession = new RecordingSession(++lastSessionId, mode, playEpoch, startBeat, startFrame, startTick,
                 timestamp, isPunchIn, lengthBeats);
+
+            // the Tempera is played live while a Replace recording runs
+            if (mode == RecordMode.Replace) ReleaseNotes();
         }
 
         private void EndRecording(long endTick)
@@ -506,6 +528,7 @@ namespace TemperaMental.Midi.Playbacks
             FrameSnapshot frame = sequence[index];
 
             outputScheduler.EnqueueFrame(frame.StartGroups);
+            CorrectSoundingNotes(sequence, index);
 
             playingFrame = frame;
 
@@ -562,7 +585,103 @@ namespace TemperaMental.Midi.Playbacks
                 case FrameEventType.ClearAll:
                     outputScheduler.EnqueueClearAll();
                     break;
+
+                case FrameEventType.NoteOn:
+                    if (IsBitSet(liveNotes, NoteSlot(frameEvent))) break;
+                    outputScheduler.EnqueueNoteOn(frameEvent.Channel, frameEvent.Note, frameEvent.Velocity);
+                    SetBit(soundingNotes, NoteSlot(frameEvent), true);
+                    break;
+
+                case FrameEventType.NoteOff:
+                    if (!IsBitSet(soundingNotes, NoteSlot(frameEvent))) break;
+                    outputScheduler.EnqueueNoteOff(frameEvent.Channel, frameEvent.Note);
+                    SetBit(soundingNotes, NoteSlot(frameEvent), false);
+                    break;
             }
+        }
+
+        // turns off the notes that shouldn't be sounding at the start of this frame and turns on those that should
+        private void CorrectSoundingNotes(FrameSnapshot[] sequence, int index)
+        {
+            if (!ReferenceEquals(sequence, heldSequence) || index < heldIndex)
+            {
+                Array.Clear(heldNotes, 0, heldNotes.Length);
+                heldSequence = sequence;
+                heldIndex = 0;
+            }
+
+            for (; heldIndex < index; heldIndex++)
+            {
+                foreach (FrameEvent frameEvent in sequence[heldIndex].Events)
+                {
+                    if (!frameEvent.IsNote) continue;
+
+                    int slot = NoteSlot(frameEvent);
+                    bool isOn = frameEvent.Type == FrameEventType.NoteOn;
+
+                    SetBit(heldNotes, slot, isOn);
+                    if (isOn) heldVelocities[slot] = (byte)frameEvent.Velocity;
+                }
+            }
+
+            ulong[] live = liveNotes;
+
+            for (int word = 0; word < soundingNotes.Length; word++)
+            {
+                ulong toStop = soundingNotes[word] & ~heldNotes[word];
+                ulong toStart = heldNotes[word] & ~soundingNotes[word] & ~live[word];
+                ulong started = toStart;
+
+                for (int bit = 0; (toStop | toStart) != 0 && bit < 64; bit++)
+                {
+                    ulong mask = 1UL << bit;
+                    int slot = word * 64 + bit;
+
+                    if ((toStop & mask) != 0) outputScheduler.EnqueueNoteOff(slot >> 7, slot & 127);
+                    else if ((toStart & mask) != 0) outputScheduler.EnqueueNoteOn(slot >> 7, slot & 127, heldVelocities[slot]);
+
+                    toStop &= ~mask;
+                    toStart &= ~mask;
+                }
+
+                soundingNotes[word] = (soundingNotes[word] & heldNotes[word]) | started;
+            }
+        }
+
+        // any thread: the notes held on the Tempera now (channel * 128 + note bits); the array mustn't change afterwards
+        public void SetLiveNotes(ulong[] notes)
+        {
+            liveNotes = notes;
+        }
+
+        private static bool IsBitSet(ulong[] bits, int slot) => (bits[slot >> 6] & (1UL << (slot & 63))) != 0;
+
+        // turns off every note the sequencer turned on
+        private void ReleaseNotes()
+        {
+            for (int word = 0; word < soundingNotes.Length; word++)
+            {
+                ulong sounding = soundingNotes[word];
+
+                for (int bit = 0; sounding != 0 && bit < 64; bit++)
+                {
+                    if ((sounding & (1UL << bit)) == 0) continue;
+
+                    int slot = word * 64 + bit;
+                    outputScheduler.EnqueueNoteOff(slot >> 7, slot & 127);
+                    sounding &= ~(1UL << bit);
+                }
+
+                soundingNotes[word] = 0;
+            }
+        }
+
+        private static int NoteSlot(FrameEvent frameEvent) => (frameEvent.Channel & 15) * 128 + (frameEvent.Note & 127);
+
+        private static void SetBit(ulong[] bits, int slot, bool isSet)
+        {
+            if (isSet) bits[slot >> 6] |= 1UL << (slot & 63);
+            else bits[slot >> 6] &= ~(1UL << (slot & 63));
         }
 
         private int FrameCount => frameManager.PublishedSequence.Length;
@@ -586,10 +705,11 @@ namespace TemperaMental.Midi.Playbacks
                 playbackState = state;
                 immediateManager.SetPlaybackState(state);
 
-                // a frame's remaining events don't carry over a pause or stop, nor does a recording
+                // a frame's remaining events don't carry over a pause or stop, nor do notes or a recording
                 if (state != PlaybackState.Playing)
                 {
                     playingFrame = null;
+                    ReleaseNotes();
                     EndRecording(TickNow());
                 }
 

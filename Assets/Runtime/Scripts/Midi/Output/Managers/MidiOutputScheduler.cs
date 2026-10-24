@@ -34,24 +34,35 @@ namespace TemperaMental.Midi.Output
             // without sending anything
             DevicePlaced,
             DeviceRemoved,
-            DeviceSelected
+            DeviceSelected,
+
+            // notes (on the given channel) and Program Change (on the MIDI channel), sent as they are
+            NoteOn,
+            NoteOff,
+            ProgramChange
         }
 
+        // for notes, EmitterId is the channel, CellIndex the note and Value the velocity; for Program Change, Value is
+        // the program
         readonly struct OutputCommand
         {
             public readonly CommandType Type;
             public readonly ulong[] Groups;
             public readonly byte EmitterId;
             public readonly byte CellIndex;
+            public readonly byte Value;
 
-            public OutputCommand(CommandType type, ulong[] groups = null, byte emitterId = 0, byte cellIndex = 0)
+            public OutputCommand(CommandType type, ulong[] groups = null, byte emitterId = 0, byte cellIndex = 0, byte value = 0)
             {
                 Type = type;
                 Groups = groups;
                 EmitterId = emitterId;
                 CellIndex = cellIndex;
+                Value = value;
             }
         }
+
+        const int NoteSlots = 16 * 128;
 
         int activateCC;
         int placeCC;
@@ -81,7 +92,8 @@ namespace TemperaMental.Midi.Output
         ulong[] deviceGroups;
         bool isDeviceChanged;
         int deviceActiveEmitter = -1;   // the emitter the device has selected, -1 when unknown
-        ControlChangeEvent[] burst;
+        MidiEvent[] burst;
+        ControlChangeEvent[] controlChanges;
         int burstCount;
         int burstIndex;
         long nextSendTime;
@@ -91,6 +103,14 @@ namespace TemperaMental.Midi.Output
         readonly StartEvent startEvent = new StartEvent();
         readonly ContinueEvent continueEvent = new ContinueEvent();
         readonly StopEvent stopEvent = new StopEvent();
+
+        // a note or Program Change command is a burst of one message, so one instance of each is enough
+        readonly NoteOnEvent noteOnEvent = new NoteOnEvent();
+        readonly NoteOffEvent noteOffEvent = new NoteOffEvent();
+        readonly ProgramChangeEvent programChangeEvent = new ProgramChangeEvent();
+
+        // notes sent and not yet released (channel * 128 + note), owned by the clock thread; released at quit
+        readonly ulong[] soundingNotes = new ulong[NoteSlots / 64];
 
         // called on the clock thread after every message sent (used by the MIDI monitor)
         public event Action<MidiMessageData> MessageSent;
@@ -114,10 +134,11 @@ namespace TemperaMental.Midi.Output
             deviceGroups = new ulong[emitterCount];
             publishedDeviceGroups = new ulong[emitterCount];
 
-            burst = new ControlChangeEvent[MaxBurstEvents];
-            for (int i = 0; i < burst.Length; i++)
+            burst = new MidiEvent[MaxBurstEvents];
+            controlChanges = new ControlChangeEvent[MaxBurstEvents];
+            for (int i = 0; i < controlChanges.Length; i++)
             {
-                burst[i] = new ControlChangeEvent((SevenBitNumber)0, (SevenBitNumber)0);
+                controlChanges[i] = new ControlChangeEvent((SevenBitNumber)0, (SevenBitNumber)0);
             }
         }
 
@@ -200,6 +221,40 @@ namespace TemperaMental.Midi.Output
             Enqueue(new OutputCommand(CommandType.ResetDevice));
         }
 
+        // channel 0–15, note and velocity 0–127
+        public void EnqueueNoteOn(int channel, int note, int velocity)
+        {
+            Enqueue(new OutputCommand(CommandType.NoteOn, emitterId: (byte)channel, cellIndex: (byte)note, value: (byte)velocity));
+        }
+
+        public void EnqueueNoteOff(int channel, int note)
+        {
+            Enqueue(new OutputCommand(CommandType.NoteOff, emitterId: (byte)channel, cellIndex: (byte)note));
+        }
+
+        // program 0–127, on the MIDI channel (on the Tempera: loads a canvas)
+        public void EnqueueProgramChange(int program)
+        {
+            Enqueue(new OutputCommand(CommandType.ProgramChange, value: (byte)program));
+        }
+
+        // main thread, only once the clock thread has stopped (ClockEngine.OnDisable): sends a Note Off for every note
+        // still on, so nothing keeps sounding on the device after the app quits
+        public void ReleaseNotesNow()
+        {
+            for (int slot = 0; slot < NoteSlots; slot++)
+            {
+                if ((soundingNotes[slot >> 6] & (1UL << (slot & 63))) == 0) continue;
+
+                noteOffEvent.Channel = (FourBitNumber)(slot >> 7);
+                noteOffEvent.NoteNumber = (SevenBitNumber)(slot & 127);
+                noteOffEvent.Velocity = (SevenBitNumber)0;
+                Send(noteOffEvent);
+            }
+
+            Array.Clear(soundingNotes, 0, soundingNotes.Length);
+        }
+
         // any thread: a copy of what the device is known to show (what's been sent, and changes made on the Tempera).
         // Commands still queued aren't included
         public ulong[] GetDeviceGroups()
@@ -226,12 +281,11 @@ namespace TemperaMental.Midi.Output
 
             if (now < nextSendTime) return false;
 
-            ControlChangeEvent controlChange = burst[burstIndex++];
+            MidiEvent midiEvent = burst[burstIndex++];
 
-            if (Send(controlChange))
+            if (Send(midiEvent))
             {
-                MessageSent?.Invoke(new MidiMessageData(Stopwatch.GetTimestamp(), MidiMessageKind.ControlChange,
-                    controlChange.Channel, controlChange.ControlNumber, controlChange.ControlValue));
+                MessageSent?.Invoke(MidiMessageData.FromEvent(midiEvent, Stopwatch.GetTimestamp()));
             }
 
             nextSendTime = now + intervalTicks;
@@ -323,8 +377,9 @@ namespace TemperaMental.Midi.Output
 
             while (burstCount == 0 && commands.TryDequeue(out OutputCommand command))
             {
-                // every command except a skipped select changes what the device shows
-                isDeviceChanged |= command.Type != CommandType.SelectEmitter && command.Type != CommandType.DeviceSelected;
+                // emitter commands (other than selects) change what the device shows
+                isDeviceChanged |= command.Type < CommandType.NoteOn &&
+                                   command.Type != CommandType.SelectEmitter && command.Type != CommandType.DeviceSelected;
 
                 switch (command.Type)
                 {
@@ -362,6 +417,17 @@ namespace TemperaMental.Midi.Output
 
                     case CommandType.ResetDevice:
                         BuildResetDevice();
+                        break;
+
+                    case CommandType.NoteOn:
+                    case CommandType.NoteOff:
+                        BuildNote(command.Type == CommandType.NoteOn, command.EmitterId, command.CellIndex, command.Value);
+                        break;
+
+                    case CommandType.ProgramChange:
+                        programChangeEvent.Channel = (FourBitNumber)midiChannel;
+                        programChangeEvent.ProgramNumber = (SevenBitNumber)Math.Min(command.Value, (byte)127);
+                        burst[burstCount++] = programChangeEvent;
                         break;
                 }
             }
@@ -449,14 +515,39 @@ namespace TemperaMental.Midi.Output
                 deviceGroups[emitterId] |= bit;
         }
 
+        private void BuildNote(bool isOn, byte channel, byte note, byte velocity)
+        {
+            int slot = (channel & 15) * 128 + (note & 127);
+
+            if (isOn && velocity > 0)
+            {
+                noteOnEvent.Channel = (FourBitNumber)(channel & 15);
+                noteOnEvent.NoteNumber = (SevenBitNumber)(note & 127);
+                noteOnEvent.Velocity = (SevenBitNumber)Math.Min(velocity, (byte)127);
+                burst[burstCount++] = noteOnEvent;
+
+                soundingNotes[slot >> 6] |= 1UL << (slot & 63);
+            }
+            else
+            {
+                noteOffEvent.Channel = (FourBitNumber)(channel & 15);
+                noteOffEvent.NoteNumber = (SevenBitNumber)(note & 127);
+                noteOffEvent.Velocity = (SevenBitNumber)0;
+                burst[burstCount++] = noteOffEvent;
+
+                soundingNotes[slot >> 6] &= ~(1UL << (slot & 63));
+            }
+        }
+
         private void AddToBurst(int cc, byte value)
         {
             if (cc == activateCC) deviceActiveEmitter = value;
 
-            ControlChangeEvent controlChange = burst[burstCount++];
+            ControlChangeEvent controlChange = controlChanges[burstCount];
             controlChange.ControlNumber = (SevenBitNumber)cc;
             controlChange.ControlValue = (SevenBitNumber)value;
             controlChange.Channel = (FourBitNumber)midiChannel;
+            burst[burstCount++] = controlChange;
         }
     }
 }

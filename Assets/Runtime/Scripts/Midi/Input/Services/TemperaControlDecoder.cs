@@ -10,12 +10,14 @@ namespace TemperaMental.Midi.Input
     // Turns notes on the Tempera's Control MIDI channel (Settings → Control MIDI channel → Out on the Tempera) into
     // emitter actions: 96–99 select a colour, 0–91 Note On places the selected colour, Note Off removes, 100–107 arm
     // a track. The selected colour is remembered, since a placement note doesn't carry it.
-    // Runs on the main thread from the In device's messages; other channels are ignored.
+    // Notes on any other channel are notes played on the Tempera (Send MIDI notes), passed on through onPlayedNote.
+    // Runs on the main thread from the In device's messages.
     public class TemperaControlDecoder : MonoBehaviour
     {
         [SerializeField] MidiInputRouter inputRouter;
 
         [SerializeField] UnityEvent<TemperaControlEvent> onControlEvent = new UnityEvent<TemperaControlEvent>();
+        [SerializeField] UnityEvent<TemperaNoteEvent> onPlayedNote = new UnityEvent<TemperaNoteEvent>();
 
         int selectFirstNote;
         int armFirstNote;
@@ -53,10 +55,15 @@ namespace TemperaMental.Midi.Input
         public void Decode(MidiMessageData message)
         {
             if (message.Kind != MidiMessageKind.NoteOn && message.Kind != MidiMessageKind.NoteOff) return;
-            if (message.Channel != controlChannel) return;
 
             int note = message.Data1;
             bool isNoteOn = message.Kind == MidiMessageKind.NoteOn;
+
+            if (message.Channel != controlChannel)
+            {
+                onPlayedNote?.Invoke(new TemperaNoteEvent(isNoteOn, message.Channel, note, isNoteOn ? message.Data2 : 0, message.Timestamp));
+                return;
+            }
 
             if (note >= selectFirstNote && note < selectFirstNote + emitterCount)
             {

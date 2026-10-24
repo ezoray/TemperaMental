@@ -14,6 +14,9 @@ namespace TemperaMental.Recording
         // wired after the device record and Follow Tempera listeners
         public void ActionOnTemperaControlEvent(TemperaControlEvent controlEvent) => recorder.ActionOnTemperaControlEvent(controlEvent);
 
+        // notes played on the Tempera (any channel but the Control channel)
+        public void ActionOnPlayedNote(TemperaNoteEvent noteEvent) => recorder.ActionOnPlayedNote(noteEvent);
+
         // Record settings
         public void ActionOnRecordSourceChanged(RecordSource source) => recorder.SetSource(source);
 

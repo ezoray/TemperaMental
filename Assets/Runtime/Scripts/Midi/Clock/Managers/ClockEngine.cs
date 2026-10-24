@@ -1078,6 +1078,9 @@ namespace TemperaMental.Midi.Clock
             clockThread?.Join();
             clockThread = null;
 
+            // the clock thread has stopped, so the scheduler can send from here: release any notes still on
+            outputScheduler.ReleaseNotesNow();
+
             outputScheduler.SetWakeHandle(null);
             wakeSignal?.Dispose();
             wakeSignal = null;

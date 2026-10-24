@@ -16,8 +16,9 @@ namespace TemperaMental.Midi.Transforms
     // A format marker at time 0, then for each frame, all at the frame's time: its START_FRAME_NO_n marker, a clear of
     // all emitters and the frame's start groups (CC10 colour, CC11 cells), so every frame is absolute and seekable. If
     // the frame has events, a FRAME_EVENTS marker follows, then each event at its tick: Select = CC10,
-    // Place = CC10 + CC11, Remove = CC12 cell, ClearAll = CC12 64. A DAW playing the file therefore drives the Tempera
-    // as the app would.
+    // Place = CC10 + CC11, Remove = CC12 cell, ClearAll = CC12 64, and notes as Note On / Note Off on their channels.
+    // A Program Change at time 0 recalls the Tempera canvas. A DAW playing the file therefore drives the Tempera as
+    // the app would.
     // Reading relies on the order of events on the same tick. If the markers and CCs are in different tracks (a DAW
     // may save it that way), that order is lost, so the CCs on a frame's beat are all read as its start groups: events
     // on the frame's first tick are folded into them.
@@ -67,12 +68,16 @@ namespace TemperaMental.Midi.Transforms
 
         // --- writing (format 2) ---
 
-        public MidiFile FromFramesToMidiFile(IReadOnlyList<Frame> sourceFrames, int bpm)
+        // canvas: Program Change 0–127 at the start (the Tempera loads that canvas), or -1 for none
+        public MidiFile FromFramesToMidiFile(IReadOnlyList<Frame> sourceFrames, int bpm, int canvas = -1)
         {
             MidiFile midiFile = BuildMidiFile();
             TrackChunk trackChunk = BuildTrackChunk(bpm);
 
             var events = new List<TimedEvent> { new TimedEvent(new MarkerEvent(formatMarker), 0) };
+
+            if (canvas >= 0 && canvas <= 127)
+                events.Add(new TimedEvent(new ProgramChangeEvent((SevenBitNumber)canvas), 0));
 
             WriteFrames(events, sourceFrames);
 
@@ -186,6 +191,16 @@ namespace TemperaMental.Midi.Transforms
                 case FrameEventType.ClearAll:
                     AddControlChange(events, tick, removeCC, clearEmittersValue);
                     break;
+
+                case FrameEventType.NoteOn:
+                    events.Add(new TimedEvent(new NoteOnEvent((SevenBitNumber)frameEvent.Note, (SevenBitNumber)frameEvent.Velocity)
+                        { Channel = (FourBitNumber)frameEvent.Channel }, tick));
+                    break;
+
+                case FrameEventType.NoteOff:
+                    events.Add(new TimedEvent(new NoteOffEvent((SevenBitNumber)frameEvent.Note, (SevenBitNumber)0)
+                        { Channel = (FourBitNumber)frameEvent.Channel }, tick));
+                    break;
             }
         }
 
@@ -267,6 +282,15 @@ namespace TemperaMental.Midi.Transforms
                     case ControlChangeEvent cc:
                         reader.Read(timedEvent.Time, cc.ControlNumber, cc.ControlValue);
                         break;
+
+                    // a Note On with velocity 0 is a Note Off
+                    case NoteOnEvent noteOn:
+                        reader.ReadNote(timedEvent.Time, noteOn.Channel, noteOn.NoteNumber, noteOn.Velocity);
+                        break;
+
+                    case NoteOffEvent noteOff:
+                        reader.ReadNote(timedEvent.Time, noteOff.Channel, noteOff.NoteNumber, 0);
+                        break;
                 }
             }
 
@@ -338,6 +362,17 @@ namespace TemperaMental.Midi.Transforms
                     ReadEvent(time, controlNumber, value);
                 else
                     ReadStart(controlNumber, value);
+            }
+
+            // notes are always events: they're never part of a frame's start
+            public void ReadNote(long time, int channel, int note, int velocity)
+            {
+                if (startGroups == null) return;
+
+                FlushPendingSelect();
+
+                int tick = ToTick(time);
+                events.Add(velocity > 0 ? FrameEvent.NoteOn(tick, channel, note, velocity) : FrameEvent.NoteOff(tick, channel, note));
             }
 
             private void ReadStart(int controlNumber, int value)

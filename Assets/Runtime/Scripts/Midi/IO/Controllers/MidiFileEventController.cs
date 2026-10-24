@@ -14,6 +14,7 @@ namespace TemperaMental.Midi.IO
         [SerializeField] MidiTempoManager midiTempoManager;
         [SerializeField] FrameManager frameManager;
         [SerializeField] MidiFileManager fileManager;
+        [SerializeField] CanvasManager canvasManager;
 
         private bool IsKeyHeld => Keyboard.current.anyKey.isPressed;
 
@@ -39,7 +40,7 @@ namespace TemperaMental.Midi.IO
             int bpm = midiTempoManager.GetBpm();
             IReadOnlyList<Frame> frames = frameManager.GetFrames();
 
-            fileManager.SaveAsMidiFile(frames, bpm);
+            fileManager.SaveAsMidiFile(frames, bpm, canvasManager.Program);
         }
     }
 }

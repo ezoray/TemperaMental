@@ -120,12 +120,29 @@ namespace TemperaMental.Transforms
             return DoRandomTransform(groups, target, activeEmitterIds);
         }
 
-        // random placements can't be matched to a frame's timed events, so they're dropped whenever Random changes the
-        // emitters. A step that changes nothing (Up and Down only adjust the count) keeps them
+        // random placements can't be matched to a frame's timed emitter events, so they're dropped whenever Random
+        // changes the emitters (notes are kept). A step that changes nothing (Up and Down only adjust the count) keeps them
         protected override FrameEvent[] TransformEvents(ulong[] startGroups, ulong[] resultGroups, FrameEvent[] events,
             Func<ulong[], ulong[]> transform)
         {
-            return EmitterUtils.CheckGroupsDifferent(startGroups, resultGroups) ? FrameEvent.None : events;
+            if (!EmitterUtils.CheckGroupsDifferent(startGroups, resultGroups)) return events;
+
+            return KeepNotes(events);
+        }
+
+        public static FrameEvent[] KeepNotes(FrameEvent[] events)
+        {
+            int noteCount = 0;
+            foreach (FrameEvent frameEvent in events) if (frameEvent.IsNote) noteCount++;
+
+            if (noteCount == 0) return FrameEvent.None;
+            if (noteCount == events.Length) return events;
+
+            var notes = new FrameEvent[noteCount];
+            int index = 0;
+            foreach (FrameEvent frameEvent in events) if (frameEvent.IsNote) notes[index++] = frameEvent;
+
+            return notes;
         }
 
         public void AdjustTargetOffset(int change)

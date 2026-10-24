@@ -185,12 +185,16 @@ namespace TemperaMental.Frames
             bool isEmitterValid = frameEvent.EmitterId >= 0 && frameEvent.EmitterId < EmitterCount;
             bool isCellValid = frameEvent.Cell >= 0 && frameEvent.Cell < CellCount;
 
+            bool isNoteValid = frameEvent.Channel >= 0 && frameEvent.Channel < 16 && frameEvent.Note >= 0 && frameEvent.Note < 128;
+
             return frameEvent.Type switch
             {
                 FrameEventType.Select => isEmitterValid,
                 FrameEventType.Place => isEmitterValid && isCellValid,
                 FrameEventType.Remove => isCellValid,
                 FrameEventType.ClearAll => true,
+                FrameEventType.NoteOn => isNoteValid && frameEvent.Velocity > 0 && frameEvent.Velocity < 128,
+                FrameEventType.NoteOff => isNoteValid,
                 _ => false
             };
         }

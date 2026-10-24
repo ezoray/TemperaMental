@@ -24,6 +24,19 @@ namespace TemperaMental.Utils
             }
         }
 
+        // the Program Change at the start of the file (the Tempera canvas), or -1
+        public static int GetProgramFromMidiFile(MidiFile midiFile)
+        {
+            foreach (TimedEvent timedEvent in midiFile.GetTimedEvents())
+            {
+                if (timedEvent.Time > 0) break;
+
+                if (timedEvent.Event is ProgramChangeEvent programChange) return programChange.ProgramNumber;
+            }
+
+            return -1;
+        }
+
         public static int GetTotalFrames(MidiFile midiFile)
         {
             short ticksPerQuarterNote = ((TicksPerQuarterNoteTimeDivision)midiFile.TimeDivision).TicksPerQuarterNote;

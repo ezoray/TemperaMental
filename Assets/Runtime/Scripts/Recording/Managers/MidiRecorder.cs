@@ -27,6 +27,8 @@ namespace TemperaMental.Recording
     // Overdub: the frames play as usual, and placements and removals played are added to the frame playing at the
     //   time (colour selects aren't: playback sends its own).
     // In both, a note that changes nothing (an echo of what the app sent, or a repeat) isn't recorded.
+    // Notes played on the Tempera (Send MIDI notes on) are recorded too, on their channels. Notes already held when a
+    // recording starts are recorded as starting there, and notes still on when it ends are ended there.
     //
     // With Source set to Transforms, the Record button toggles FrameManager's recording of transform results instead.
     [DefaultExecutionOrder(-10)] // before the sequencer's Update, so a recorded frame exists when playback moves to it
@@ -46,6 +48,22 @@ namespace TemperaMental.Recording
         [SerializeField] UnityEvent<FrameDetail> onRecordingEmittersChanged = new UnityEvent<FrameDetail>();
 
         enum Outcome { Recorded, Ignored, NotReady }
+
+        // something played on the Tempera waiting to be placed in time: when it arrived, and the event (its tick is
+        // filled in once placed)
+        readonly struct InputEvent
+        {
+            public readonly long Timestamp;
+            public readonly FrameEvent Event;
+
+            public InputEvent(long timestamp, FrameEvent frameEvent)
+            {
+                Timestamp = timestamp;
+                Event = frameEvent;
+            }
+        }
+
+        const int NoteSlots = 16 * 128;
 
         sealed class RecordedFrame
         {
@@ -68,13 +86,20 @@ namespace TemperaMental.Recording
 
         // armed: what the Tempera showed when armed, and what's been played on it since
         ulong[] armedStart;
-        readonly List<TemperaControlEvent> armedEvents = new List<TemperaControlEvent>();
+        readonly List<InputEvent> armedEvents = new List<InputEvent>();
+
+        // notes held on the Tempera now (channel * 128 + note), and the velocity each was last played with
+        readonly bool[] heldInputNotes = new bool[NoteSlots];
+        readonly byte[] inputVelocities = new byte[NoteSlots];
+
+        // notes the recording has turned on and not yet off, ended when it ends
+        readonly bool[] openNotes = new bool[NoteSlots];
 
         // recording
         RecordingSession session;
         int lastSessionId;
         ulong[] initialGroups;
-        readonly List<TemperaControlEvent> pending = new List<TemperaControlEvent>();
+        readonly List<InputEvent> pending = new List<InputEvent>();
         readonly List<RecordedFrame> recorded = new List<RecordedFrame>();
         int lastSelected;
         int recordedCount;
@@ -215,24 +240,58 @@ namespace TemperaMental.Recording
         {
             if (controlEvent.Kind == TemperaControlKind.ArmTrack) return;
 
+            var input = new InputEvent(controlEvent.Timestamp, ToFrameEvent(controlEvent, 0));
+
             if (state == RecordState.Armed)
             {
                 // a placement that changes what the Tempera shows is a touch; selecting a colour isn't
                 bool isTouch = (trigger == RecordTrigger.Touch || trigger == RecordTrigger.Either) &&
                                controlEvent.Kind == TemperaControlKind.PlaceEmitter &&
-                               IsChange(Replay(armedStart, armedEvents), ToFrameEvent(controlEvent, 0));
+                               IsChange(Replay(armedStart, armedEvents), input.Event);
 
-                armedEvents.Add(controlEvent);
+                armedEvents.Add(input);
 
                 if (isTouch) StartAt(controlEvent.Timestamp);
             }
             else if (state == RecordState.Recording)
             {
-                pending.Add(controlEvent);
-                ProcessPending();
-                FlushFrames();
-                RaiseView();
+                AddPending(input);
             }
+        }
+
+        // notes played on the Tempera; always followed, so notes already held when a recording starts are known
+        public void ActionOnPlayedNote(TemperaNoteEvent noteEvent)
+        {
+            int slot = (noteEvent.Channel & 15) * 128 + (noteEvent.Note & 127);
+            bool isOn = noteEvent.IsOn && noteEvent.Velocity > 0;
+
+            heldInputNotes[slot] = isOn;
+            if (isOn) inputVelocities[slot] = (byte)noteEvent.Velocity;
+
+            // the sequencer doesn't double a note that's being played live
+            var live = new ulong[NoteSlots / 64];
+            for (int i = 0; i < NoteSlots; i++)
+            {
+                if (heldInputNotes[i]) live[i >> 6] |= 1UL << (i & 63);
+            }
+            sequencer.SetLiveNotes(live);
+
+            FrameEvent frameEvent = isOn
+                ? FrameEvent.NoteOn(0, noteEvent.Channel, noteEvent.Note, noteEvent.Velocity)
+                : FrameEvent.NoteOff(0, noteEvent.Channel, noteEvent.Note);
+
+            var input = new InputEvent(noteEvent.Timestamp, frameEvent);
+
+            if (state == RecordState.Armed) armedEvents.Add(input);
+            else if (state == RecordState.Recording) AddPending(input);
+        }
+
+        private void AddPending(InputEvent input)
+        {
+            pending.Add(input);
+            ProcessPending();
+            FlushFrames();
+            RaiseView();
         }
 
         // a touch, or Now: the sequencer starts playback (or punches in) with the recording beginning at this moment
@@ -280,9 +339,9 @@ namespace TemperaMental.Recording
 
             // what was played on the Tempera before the trigger is where the recording starts from; the trigger and
             // anything after it are recorded
-            var before = new List<TemperaControlEvent>();
+            var before = new List<InputEvent>();
 
-            foreach (TemperaControlEvent armedEvent in armedEvents)
+            foreach (InputEvent armedEvent in armedEvents)
             {
                 if (armedEvent.Timestamp < started.StartTimestamp) before.Add(armedEvent);
                 else pending.Add(armedEvent);
@@ -290,6 +349,28 @@ namespace TemperaMental.Recording
 
             initialGroups = Replay(armedStart ?? new ulong[emitterCount], before);
             armedEvents.Clear();
+
+            // notes held at the trigger start there: those held now, less the effect of what was played after it
+            var heldAtStart = (bool[])heldInputNotes.Clone();
+
+            for (int i = pending.Count - 1; i >= 0; i--)
+            {
+                FrameEvent later = pending[i].Event;
+                if (later.IsNote) heldAtStart[NoteSlot(later)] = later.Type == FrameEventType.NoteOff;
+            }
+
+            var startNotes = new List<InputEvent>();
+
+            for (int slot = 0; slot < NoteSlots; slot++)
+            {
+                if (!heldAtStart[slot]) continue;
+
+                int velocity = inputVelocities[slot] > 0 ? inputVelocities[slot] : 100;
+                startNotes.Add(new InputEvent(started.StartTimestamp, FrameEvent.NoteOn(0, slot >> 7, slot & 127, velocity)));
+            }
+
+            pending.InsertRange(0, startNotes);
+            System.Array.Clear(openNotes, 0, openNotes.Length);
 
             if (started.Mode == RecordMode.Replace) StartReplace();
 
@@ -328,6 +409,9 @@ namespace TemperaMental.Recording
 
         private void FinishSession()
         {
+            EndOpenNotes();
+            FlushFrames();
+
             int frameCount = recorded.Count;
             RecordMode finishedMode = session.Mode;
 
@@ -353,18 +437,18 @@ namespace TemperaMental.Recording
             // in arrival order; once one can't be placed yet, neither can the ones after it
             while (pending.Count > 0)
             {
-                TemperaControlEvent controlEvent = pending[0];
-                Outcome outcome = Record(controlEvent);
+                InputEvent input = pending[0];
+                Outcome outcome = Record(input);
 
-                if (outcome == Outcome.NotReady && now - controlEvent.Timestamp < pendingTimeoutTicks) break;
+                if (outcome == Outcome.NotReady && now - input.Timestamp < pendingTimeoutTicks) break;
 
                 pending.RemoveAt(0);
             }
         }
 
-        private Outcome Record(TemperaControlEvent controlEvent)
+        private Outcome Record(InputEvent input)
         {
-            if (!clockEngine.TryGetTickAt(controlEvent.Timestamp, out long epoch, out long tick)) return Outcome.NotReady;
+            if (!clockEngine.TryGetTickAt(input.Timestamp, out long epoch, out long tick)) return Outcome.NotReady;
 
             // the clock hasn't reached the recording's epoch yet (following clock, it starts on a pulse)
             if (epoch < session.Epoch) return Outcome.NotReady;
@@ -380,12 +464,93 @@ namespace TemperaMental.Recording
 
             long beat = tick / ticksPerBeat;
             int tickInFrame = (int)(tick - beat * ticksPerBeat);
-            FrameEvent frameEvent = ToFrameEvent(controlEvent, tickInFrame);
+            FrameEvent frameEvent = input.Event.WithTick(tickInFrame);
+
+            if (frameEvent.IsNote)
+            {
+                return session.Mode == RecordMode.Replace
+                    ? RecordReplaceNote((int)(beat - session.StartBeat), frameEvent)
+                    : RecordOverdubNote(epoch, beat, frameEvent);
+            }
 
             return session.Mode == RecordMode.Replace
                 ? RecordReplace((int)(beat - session.StartBeat), frameEvent)
                 : RecordOverdub(epoch, beat, frameEvent);
         }
+
+        // notes are recorded as played: they change nothing on the grid, so nothing after them moves
+        private Outcome RecordReplaceNote(int frameIndex, FrameEvent frameEvent)
+        {
+            if (frameIndex < 0) return Outcome.Ignored;
+            if (session.LengthBeats > 0 && frameIndex >= session.LengthBeats) return Outcome.Ignored;
+
+            EnsureFrames(frameIndex);
+            RecordedFrame frame = recorded[frameIndex];
+
+            Insert(frame.Events, frameEvent);
+            frame.IsDirty = true;
+
+            NoteRecorded(frameEvent);
+            return Outcome.Recorded;
+        }
+
+        private Outcome RecordOverdubNote(long epoch, long beat, FrameEvent frameEvent)
+        {
+            if (!sequencer.TryGetFrameAtBeat(epoch, beat, out int frameNumber)) return Outcome.NotReady;
+
+            if (session.LengthBeats > 0 && beat - session.StartBeat >= session.LengthBeats) return Outcome.Ignored;
+
+            if (frameManager.GetFrameSnapshot(frameNumber) == null) return Outcome.Ignored;
+
+            frameManager.AddRecordedEvent(frameNumber, frameEvent);
+
+            NoteRecorded(frameEvent);
+            return Outcome.Recorded;
+        }
+
+        private void NoteRecorded(FrameEvent frameEvent)
+        {
+            openNotes[NoteSlot(frameEvent)] = frameEvent.Type == FrameEventType.NoteOn;
+            recordedCount++;
+        }
+
+        // notes still on when the recording ends are ended where it ends, so nothing hangs on replay
+        private void EndOpenNotes()
+        {
+            if (session == null) return;
+
+            long endTick = session.EndTick != long.MaxValue ? session.EndTick - 1 : -1;
+
+            for (int slot = 0; slot < NoteSlots; slot++)
+            {
+                if (!openNotes[slot]) continue;
+
+                openNotes[slot] = false;
+
+                if (session.Mode == RecordMode.Replace)
+                {
+                    if (recorded.Count == 0) continue;
+
+                    int frameIndex = recorded.Count - 1;
+                    int tick = ticksPerBeat - 1;
+
+                    if (endTick >= 0)
+                    {
+                        frameIndex = Mathf.Clamp((int)(endTick / ticksPerBeat - session.StartBeat), 0, recorded.Count - 1);
+                        tick = (int)(endTick % ticksPerBeat);
+                    }
+
+                    Insert(recorded[frameIndex].Events, FrameEvent.NoteOff(tick, slot >> 7, slot & 127));
+                    recorded[frameIndex].IsDirty = true;
+                }
+                else if (endTick >= 0 && sequencer.TryGetFrameAtBeat(session.Epoch, endTick / ticksPerBeat, out int frameNumber))
+                {
+                    frameManager.AddRecordedEvent(frameNumber, FrameEvent.NoteOff((int)(endTick % ticksPerBeat), slot >> 7, slot & 127));
+                }
+            }
+        }
+
+        private static int NoteSlot(FrameEvent frameEvent) => (frameEvent.Channel & 15) * 128 + (frameEvent.Note & 127);
 
         private Outcome RecordReplace(int frameIndex, FrameEvent frameEvent)
         {
@@ -575,13 +740,13 @@ namespace TemperaMental.Recording
             };
         }
 
-        private ulong[] Replay(ulong[] start, List<TemperaControlEvent> events)
+        private static ulong[] Replay(ulong[] start, List<InputEvent> events)
         {
             ulong[] groups = (ulong[])start.Clone();
 
-            foreach (TemperaControlEvent controlEvent in events)
+            foreach (InputEvent input in events)
             {
-                ToFrameEvent(controlEvent, 0).ApplyTo(groups);
+                input.Event.ApplyTo(groups);
             }
 
             return groups;

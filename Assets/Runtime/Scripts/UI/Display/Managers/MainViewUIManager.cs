@@ -15,9 +15,13 @@ namespace TemperaMental.UI.Display.MainView
         [SerializeField] TextMeshProUGUI emittersText;
         [SerializeField] TextMeshProUGUI logText;
 
-        // status line: the clock on the left, recording on the right
+        // status line: the clock on the left, the canvas and Hold in the middle, recording on the right
         [SerializeField] TextMeshProUGUI clockStatusText;
+        [SerializeField] TextMeshProUGUI soundStatusText;
         [SerializeField] TextMeshProUGUI recordStatusText;
+
+        int canvas = -1;
+        bool isHolding;
 
         ClockMode clockMode;
         bool isExternalClockPresent;
@@ -150,6 +154,29 @@ namespace TemperaMental.UI.Display.MainView
         {
             recordMode = mode;
             RefreshRecordStatus();
+        }
+
+        // the Tempera canvas (Program Change 0–127, shown 1–128), or -1
+        public void ActionOnCanvasChanged(int program)
+        {
+            canvas = program;
+            RefreshSoundStatus();
+        }
+
+        public void ActionOnHoldChanged(bool isHold)
+        {
+            isHolding = isHold;
+            RefreshSoundStatus();
+        }
+
+        private void RefreshSoundStatus()
+        {
+            if (soundStatusText == null) return;
+
+            string canvasText = canvas >= 0 ? $"Canvas {canvas + 1}" : "";
+            string holdText = isHolding ? "Hold" : "";
+
+            soundStatusText.text = canvasText.Length > 0 && holdText.Length > 0 ? $"{canvasText}  {holdText}" : canvasText + holdText;
         }
 
         // recording transform results

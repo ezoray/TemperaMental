@@ -182,7 +182,8 @@ namespace TemperaMental.Transforms
             onTransformRateChanged?.Invoke(rate);
         }
 
-        // the Random slider sets a number of emitters; the frame's timed events are dropped, as for any random change
+        // the Random slider sets a number of emitters; the frame's timed emitter events are dropped, as for any random
+        // change, and its notes kept
         public void RandomiseEmitters(ulong[] emitterGroup, int targetCount)
         {
             ulong[] transformedGroups;
@@ -193,7 +194,8 @@ namespace TemperaMental.Transforms
                     .DoRandomTransform(emitterGroup, targetCount, randomTransformService.TransformMode).Clone();
             }
 
-            onEmittersTransformed?.Invoke(new FrameSnapshot(transformedGroups, FrameEvent.None));
+            FrameEvent[] notes = RandomTransformService.KeepNotes(frameManager.GetCurrentFrameSnapshot().Events);
+            onEmittersTransformed?.Invoke(new FrameSnapshot(transformedGroups, notes));
         }
 
         public void SelectEmitter(int emitterId)

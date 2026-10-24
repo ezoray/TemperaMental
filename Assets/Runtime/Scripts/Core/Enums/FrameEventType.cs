@@ -6,6 +6,10 @@ namespace TemperaMental.Core
         Select,     // selects an emitter colour on the device; changes nothing on the grid
         Place,      // places an emitter at a cell
         Remove,     // removes whatever emitter is at a cell
-        ClearAll    // removes every emitter
+        ClearAll,   // removes every emitter
+
+        // notes played on the Tempera (its voices), on their MIDI channel; they change nothing on the grid
+        NoteOn,
+        NoteOff
     }
 }

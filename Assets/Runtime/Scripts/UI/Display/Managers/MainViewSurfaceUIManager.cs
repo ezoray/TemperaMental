@@ -5,12 +5,12 @@ using UnityEngine;
 
 namespace TemperaMental.UI.Display.MainView
 {
-    // The main view's button row has switchable surfaces (File, Clock, Record), stepped with the < and > buttons at
+    // The main view's button row has switchable surfaces (File, Clock, Record, Tempera), stepped with the < and > buttons at
     // each end of the row. The surface shown is remembered. Clock and Record buttons show a dimmed caption and the
     // setting's current value; pressing one steps the setting (see the settings event controllers).
     public class MainViewSurfaceUIManager : MonoBehaviour
     {
-        [Header("Order: File, Clock, Record")]
+        [Header("Order: File, Clock, Record, Tempera")]
         [SerializeField] GameObject[] surfaces;
 
         [Header("Clock surface")]
@@ -22,6 +22,9 @@ namespace TemperaMental.UI.Display.MainView
         [SerializeField] TextMeshProUGUI modeText;
         [SerializeField] TextMeshProUGUI startStateText;
         [SerializeField] TextMeshProUGUI lengthText;
+
+        [Header("Tempera surface")]
+        [SerializeField] TextMeshProUGUI holdText;
 
         string prefsKey;
         int surfaceIndex;
@@ -72,6 +75,9 @@ namespace TemperaMental.UI.Display.MainView
 
         public void ActionOnRecordLengthChanged(int frames) =>
             SetButtonText(lengthText, "Len", frames > 0 ? frames.ToString() : ConfigRegistry.UI.RecordLengthOffText);
+
+        public void ActionOnHoldChanged(bool isHolding) =>
+            SetButtonText(holdText, "Hold", isHolding ? ConfigRegistry.UI.OnText : ConfigRegistry.UI.OffText);
 
         // one line, the caption dimmed; the buttons are too short for two
         private static void SetButtonText(TextMeshProUGUI text, string caption, string value)
