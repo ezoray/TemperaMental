@@ -18,5 +18,18 @@ namespace TemperaMental.Settings
         public void OnClickClockTo(int directionValue) => settingsManager.StepClockTo(directionValue);
 
         public void OnClockSettingsClosed() => settingsManager.SaveClockSettings();
+
+        // the main view's Clock surface: each press steps the setting and saves it straight away
+        public void OnClickSurfaceClockMode()
+        {
+            settingsManager.StepClockMode(1);
+            settingsManager.SaveClockSettings();
+        }
+
+        public void OnClickSurfaceSendStartStop()
+        {
+            settingsManager.ToggleSendStartStop();
+            settingsManager.SaveClockSettings();
+        }
     }
 }

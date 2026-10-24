@@ -6,7 +6,7 @@ namespace TemperaMental.UI.State
 {
     public class UIStateManager : MonoBehaviour
     {
-        [Header("Order: Device, File, Frame, Transform, Direction, Record, Playback, Create, Select")]
+        [Header("Order: Device, File, Frame, Transform, Direction, Record, Playback, Create, Select, Clock")]
         [SerializeField] List<CanvasGroup> panels;
 
         private void ApplyState(UIStates uiState)

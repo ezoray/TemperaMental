@@ -18,5 +18,30 @@ namespace TemperaMental.Settings
         public void OnClickLength() => settingsManager.StepLength();
 
         public void OnRecordSettingsClosed() => settingsManager.SaveRecordSettings();
+
+        // the main view's Record surface: each press steps the setting and saves it straight away
+        public void OnClickSurfaceTrigger()
+        {
+            settingsManager.StepTrigger();
+            settingsManager.SaveRecordSettings();
+        }
+
+        public void OnClickSurfaceMode()
+        {
+            settingsManager.StepMode();
+            settingsManager.SaveRecordSettings();
+        }
+
+        public void OnClickSurfaceStartState()
+        {
+            settingsManager.StepStartState();
+            settingsManager.SaveRecordSettings();
+        }
+
+        public void OnClickSurfaceLength()
+        {
+            settingsManager.StepLength();
+            settingsManager.SaveRecordSettings();
+        }
     }
 }

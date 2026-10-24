@@ -16,15 +16,17 @@ namespace TemperaMental.UI.State
         Playback = 64,
         Creation = 128,
         Selection = 256,
+        Clock = 512,        // the main view's Clock surface
 
         // presets
-        All = Device | File | Frame | Transform | Direction | Record | Playback | Creation | Selection,
-        Playing = Playback | Device | Frame | Creation | Selection | Record,
-        Paused = Playback | Device | Frame | Creation | Selection | Record,
+        All = Device | File | Frame | Transform | Direction | Record | Playback | Creation | Selection | Clock,
+        Playing = Playback | Device | Frame | Creation | Selection | Record | Clock,
+        Paused = Playback | Device | Frame | Creation | Selection | Record | Clock,
 
         Recording = Device | File | Frame | Transform | Direction | Record | Creation | Selection,
 
-        // recording from the Tempera writes the frames, so frame edits, files and transforms wait
+        // recording from the Tempera writes the frames, so frame edits, files and transforms wait, and so does the clock
+        // mode (a change restarts the clock's position under the recording)
         TemperaRecording = Playback | Device | Frame | Record,
     }
 }

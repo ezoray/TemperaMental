@@ -38,6 +38,9 @@ namespace TemperaMental.Applications.Config
         // record settings view
         public string RecordLengthOffText = "Off";
 
+        // main view: the button row surface last shown (File, Clock, Record)
+        public string MainViewSurfacePrefsKey = "MainViewSurface";
+
         // clock devices view
         public string SameAsInText = "Same as In";
         public string SameAsOutText = "Same as Out";

@@ -15,6 +15,17 @@ namespace TemperaMental.UI.Display.MainView
         [SerializeField] TextMeshProUGUI emittersText;
         [SerializeField] TextMeshProUGUI logText;
 
+        // status line: the clock on the left, recording on the right
+        [SerializeField] TextMeshProUGUI clockStatusText;
+        [SerializeField] TextMeshProUGUI recordStatusText;
+
+        ClockMode clockMode;
+        bool isExternalClockPresent;
+        RecordState recordState;
+        RecordTrigger recordTrigger;
+        RecordMode recordMode;
+        bool isRecordingTransforms;
+
         float tempMessageDuration;
         float tempMessageFadeDuration;
 
@@ -107,6 +118,69 @@ namespace TemperaMental.UI.Display.MainView
         public void ActionOnBpmChanged(int bpm)
         {
             bpmText.text = bpm.ToString();
+        }
+
+        // --- status line ---
+
+        public void ActionOnClockModeChanged(ClockMode mode)
+        {
+            clockMode = mode;
+            RefreshClockStatus();
+        }
+
+        public void ActionOnExternalClockPresenceChanged(bool isPresent)
+        {
+            isExternalClockPresent = isPresent;
+            RefreshClockStatus();
+        }
+
+        public void ActionOnTemperaRecordStateChanged(RecordState state)
+        {
+            recordState = state;
+            RefreshRecordStatus();
+        }
+
+        public void ActionOnRecordTriggerChanged(RecordTrigger trigger)
+        {
+            recordTrigger = trigger;
+            RefreshRecordStatus();
+        }
+
+        public void ActionOnRecordModeChanged(RecordMode mode)
+        {
+            recordMode = mode;
+            RefreshRecordStatus();
+        }
+
+        // recording transform results
+        public void ActionOnRecordingStateChanged(bool isRecording)
+        {
+            isRecordingTransforms = isRecording;
+            RefreshRecordStatus();
+        }
+
+        private void RefreshClockStatus()
+        {
+            if (clockStatusText == null) return;
+
+            clockStatusText.text = clockMode switch
+            {
+                ClockMode.Send => "Sending clock",
+                ClockMode.Receive => isExternalClockPresent ? "External clock" : "No clock",
+                _ => "Internal clock"
+            };
+        }
+
+        private void RefreshRecordStatus()
+        {
+            if (recordStatusText == null) return;
+
+            recordStatusText.text = recordState switch
+            {
+                RecordState.Armed => $"Armed: {recordTrigger}",
+                RecordState.Recording => $"Rec {recordMode}",
+                _ => isRecordingTransforms ? "Rec transforms" : ""
+            };
         }
 
         private void SetRateTextLabel(int rate)

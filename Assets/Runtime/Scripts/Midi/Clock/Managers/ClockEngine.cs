@@ -46,6 +46,9 @@ namespace TemperaMental.Midi.Clock
         // tempo measured in Receive mode, rounded, raised on the main thread
         [SerializeField] UnityEvent<int> onExternalTempoChanged = new UnityEvent<int>();
 
+        // whether clock is arriving in Receive mode (false in the other modes), raised on the main thread when it changes
+        [SerializeField] UnityEvent<bool> onExternalClockPresenceChanged = new UnityEvent<bool>();
+
         int ticksPerBeat;
         int ticksPerPulse;
         int pulsesPerBeat;
@@ -377,6 +380,8 @@ namespace TemperaMental.Midi.Clock
         {
             if (clockMode != (int)ClockMode.Receive)
             {
+                if (wasExternalClockPresent) onExternalClockPresenceChanged?.Invoke(false);
+
                 wasExternalClockPresent = false;
                 return;
             }
@@ -386,6 +391,7 @@ namespace TemperaMental.Midi.Clock
             if (isPresent != wasExternalClockPresent)
             {
                 wasExternalClockPresent = isPresent;
+                onExternalClockPresenceChanged?.Invoke(isPresent);
 
                 if (isPresent)
                     LogMan.Log("MIDI clock found");

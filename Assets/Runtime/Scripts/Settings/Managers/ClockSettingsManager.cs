@@ -69,6 +69,8 @@ namespace TemperaMental.Settings
             onClockModeChanged?.Invoke(clockMode);
         }
 
+        public void ToggleSendStartStop() => SetSendStartStop(!isStartStopSent);
+
         public void SetSendStartStop(bool isSent)
         {
             if (isStartStopSent == isSent) return;
