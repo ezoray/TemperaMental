@@ -515,6 +515,8 @@ Each phase should leave the app working.
 Still open:
 - **Hardware tests with the Tempera** (section 1 list, especially 1–5 and 9–12), now possible with the monitor.
   A step-by-step session for the record, save and replay loop is in [TemperaHardwareTest.md](TemperaHardwareTest.md).
+- Notes, canvas recall and Hold, which make replays sound, are designed and built in
+  [TemperaVoicesAndCanvas.md](TemperaVoicesAndCanvas.md).
   Test 1 (echo) is now handled either way; tests 2, 3, 4 and 11 decide whether the decoder's assumptions hold.
 - Song Position isn't forwarded to the clock destination (it isn't a realtime message; the Tempera ignores it anyway).
 - Each restart (play, resume, seek) gives one shortened pulse interval; check whether the Tempera's tempo reading blips.

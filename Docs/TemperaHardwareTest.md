@@ -52,6 +52,19 @@ Stopped and not recording for steps 1–5: Follow Tempera mirrors each change on
   DAW's first beat *(9, 12)*.
 - Control channel on the **same** channel as the main channel: does anything clash? *(8)*
 
+## Notes, canvas and Hold (if those pass)
+
+Tempera: Overlay Keyboard on, **Send MIDI notes** on, keyboard channel not the Control channel.
+
+| # | Do this | Expect |
+|---|---|---|
+| 11 | Play a few notes on the Overlay Keyboard | The monitor shows `NoteOn`/`NoteOff` on the keyboard's channel, with velocity |
+| 12 | Use the keyboard's **Hold**, then **Clear** | One Note On per held note, and a Note Off for each on Clear (note what arrives) |
+| 13 | Record (Replace) while holding a note and placing emitters, stop, save, reload, play | The replay sounds: the held note starts with frame 1 and the emitters move as played |
+| 14 | On the Tempera surface, step **Canvas** to a number and wait | After a moment the Tempera loads that canvas (the nth in its current folder) |
+| 15 | Save with a canvas set, load another canvas on the Tempera, then load the file | The file's canvas loads on the Tempera |
+| 16 | Turn **Hold** on with emitters placed | The Tempera sounds without touching it; Hold off silences it |
+
 ## Report back
 
 - Pass or fail for each step, and what you saw where it differed.

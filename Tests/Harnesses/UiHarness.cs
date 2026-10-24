@@ -68,14 +68,14 @@ public static class UiHarness
         var sb = new StringBuilder();
         var mv = MainView;
         string Text(string p) { var t = mv.Find(p); return t == null ? "?" : t.GetComponentInChildren<TMPro.TextMeshProUGUI>(true).text.Replace("\n", " / "); }
-        foreach (var panel in new[] { "ButtonPanel", "ClockButtonPanel", "RecordButtonPanel" })
+        foreach (var panel in new[] { "ButtonPanel", "ClockButtonPanel", "RecordButtonPanel", "TemperaButtonPanel" })
         {
             var p = mv.Find(panel);
             var cg = p.GetComponent<CanvasGroup>();
             sb.AppendLine($"{panel}: active {p.gameObject.activeSelf}, interactable {cg.interactable}: " +
                 string.Join(" | ", p.Cast<Transform>().Select(b => b.GetComponentInChildren<TMPro.TextMeshProUGUI>(true).text.Replace("\n", " / "))));
         }
-        sb.AppendLine("status: [" + Text("DisplayCanvas/ClockStatus") + "] [" + Text("DisplayCanvas/RecordStatus") + "]  message: " + Text("DisplayCanvas/Message"));
+        sb.AppendLine("status: [" + Text("DisplayCanvas/ClockStatus") + "] [" + Text("DisplayCanvas/SoundStatus") + "] [" + Text("DisplayCanvas/RecordStatus") + "]  message: " + Text("DisplayCanvas/Message"));
         return sb.ToString();
     }
 }

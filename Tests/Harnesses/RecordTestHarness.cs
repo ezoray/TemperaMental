@@ -100,6 +100,15 @@ public static class RecordTestHarness
     }
 
     static void Select(int colour) { Mark("Tempera select " + Colours[colour]); Note(true, 96 + colour); }
+
+    // a note played on the Tempera's Overlay Keyboard (channel 1-16, not the Control channel 16)
+    static void Played(bool isOn, int channel, int note, int velocity = 100)
+    {
+        Mark($"Tempera note {(isOn ? "on" : "off")} ch{channel} {FrameEvent.NoteName(note)}");
+        var decoder = Find<TemperaControlDecoder>();
+        decoder.Decode(new MidiMessageData(Stopwatch.GetTimestamp(), isOn ? MidiMessageKind.NoteOn : MidiMessageKind.NoteOff,
+            (byte)(channel - 1), note, isOn ? velocity : 0));
+    }
     static void Place(int cell) { Mark("Tempera place @" + cell); Note(true, EmitterUtils.IndexToControlNote(cell)); }
     static void Remove(int cell) { Mark("Tempera remove @" + cell); Note(false, EmitterUtils.IndexToControlNote(cell)); }
 
@@ -166,7 +175,10 @@ public static class RecordTestHarness
         while (Captured.TryDequeue(out var m))
         {
             if (m.Kind == MidiMessageKind.TimingClock) continue;
-            string label = m.Kind == MidiMessageKind.ControlChange ? $"CC{m.Data1}={m.Data2}" : m.Kind.ToString();
+            string label = m.Kind == MidiMessageKind.ControlChange ? $"CC{m.Data1}={m.Data2}"
+                : m.Kind == MidiMessageKind.NoteOn ? $"NoteOn ch{m.Channel + 1} {FrameEvent.NoteName(m.Data1)}"
+                : m.Kind == MidiMessageKind.NoteOff ? $"NoteOff ch{m.Channel + 1} {FrameEvent.NoteName(m.Data1)}"
+                : m.Kind.ToString();
             if (line.Count > 0 && Ms(m.Timestamp - last) > 2)
             {
                 report.AppendLine($"    {Ms(lineStart - origin),8:F1} ms  {string.Join(" ", line)}");
@@ -332,6 +344,49 @@ public static class RecordTestHarness
         string result = Finish();
         StopAll();
         engine.SetClockMode(ClockMode.Internal);
+        return result;
+    }
+
+    // notes: a note held before arming and one played while armed start at the trigger; notes played are recorded at
+    // their ticks; notes still held when Record stops are ended there
+    public static string Notes()
+    {
+        SetFrames(new FrameSnapshot(Groups(), null));
+        Played(true, 1, 60);                    // held before arming
+        Begin("notes, replace by touch", RecordMode.Replace, RecordTrigger.Touch, RecordStartState.Clear, 0);
+
+        PressRecord();
+        At(100); Played(true, 1, 64, 90);       // while armed, before the trigger
+        At(150); Place(10);                     // trigger: frame 1 tick 0
+        At(400); Played(false, 1, 64);          // frame 1, tick ~48
+        At(700); Played(true, 2, 67, 80);       // frame 2, tick ~10
+        At(1100); PressRecord();                // C4 and G4 still held: ended at ~tick 86 of frame 2
+        At(1250);
+        string result = Finish();
+        StopAll();
+        Played(false, 1, 60);
+        Played(false, 2, 67);
+        return result;
+    }
+
+    // overdub on a loop: notes are added to the frame playing, and a note held from before starts at the trigger
+    public static string OverdubNotes()
+    {
+        var sequencer = Find<FrameSequenceManager>();
+        SetFrames(new FrameSnapshot(Groups((1, 18)), null), new FrameSnapshot(Groups((0, 3)), null));
+        if (!IsLooped()) sequencer.ToggleLooping();
+        Played(true, 1, 48);                    // held before arming (C3)
+        Begin("overdub notes, now, looping", RecordMode.Overdub, RecordTrigger.Now, RecordStartState.Clear, 0);
+
+        PressRecord();
+        At(200); Played(true, 1, 69);           // frame 1, tick ~38
+        At(600); Played(false, 1, 69);          // frame 2, tick ~19
+        At(800); Played(false, 1, 48);          // frame 2, tick ~57
+        At(1300); PressRecord();
+        At(1400);
+        string result = Finish();
+        StopAll();
+        if (IsLooped()) sequencer.ToggleLooping();
         return result;
     }
 

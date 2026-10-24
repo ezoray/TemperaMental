@@ -34,6 +34,8 @@ fake output) and `Cleanup` at the end. `screenshot.sh <out.png>` saves the Game 
   `game_view --save_path` screenshot, makes Unity recompile mid-play, which the app doesn't survive. Leave play mode
   first.
 - **Don't leave a settings page open when play mode ends**: it saves its settings to PlayerPrefs as it closes.
+- **Take screenshots in play mode only.** In edit mode the Game view render leaves a changed Main Camera rect in
+  memory, and the next scene save writes it.
 - Pressing surface or settings buttons saves settings. Afterwards, delete keys the session created (e.g.
   `MainViewSurface`, `ClockMode`, `ClockSendStartStop`, `ClockFromDevice`, `ClockToDevice`, `RecordSource`,
   `RecordTrigger`, `RecordMode`, `RecordStartState`, `RecordLength`, `MidiOutputDevice`, `MidiInputDevice`).
@@ -57,7 +59,8 @@ fake output) and `Cleanup` at the end. `screenshot.sh <out.png>` saves the Game 
 | `ReceiveTestHarness` | Following external clock (Receive mode) | `Setup`, `Master "<script>"` with tokens `bpm:N pulses:N start stop continue spp:N gap:MS play appstop`, `LatchShiftRight`, `ResetAll`, `Status`, `Cleanup` |
 | `TemperaTestHarness` | Tempera Control-channel input, Follow Tempera, loop protection | `Setup`, `Run "<script>"` with tokens `sel:N on:NOTE off:NOTE ch:N follow:0/1 pick:N newframe twolane:N play stop loop goto:N state`, `Cleanup` |
 | `EventsTestHarness` | Frame events: timing inside the beat, transforms, edits, file format 2 | `Setup`, `Play internal\|send`, `Reverse`, `Receive warm\|cold`, `Transforms`, `Edits`, `Files`, `PauseStart`/`PauseCheck`, `DisplayStart`/`DisplayCheck`, `LatchStart`/`LatchCheck`, `Cleanup` |
-| `RecordTestHarness` | Recording from the Tempera: triggers, Replace, Overdub, punch-in, following clock | `Setup`, `ReplaceTouch`, `ReplaceStartLength`, `OverdubNow`, `PunchIn`, `Receive start\|touch`, `Transforms`, `UiStates`, `Cleanup` |
+| `RecordTestHarness` | Recording from the Tempera: triggers, Replace, Overdub, punch-in, following clock | `Setup`, `ReplaceTouch`, `ReplaceStartLength`, `OverdubNow`, `PunchIn`, `Receive start\|touch`, `Notes`, `OverdubNotes`, `Transforms`, `UiStates`, `Cleanup` |
+| `VoiceTestHarness` | Notes, canvas recall and Hold | `Setup`, `PlayNotes`, `StartInside`, `PauseResume`, `Loop`, `CanvasStep` then `CanvasCheck` (Unity must run between them), `CanvasFile`, `Hold`, `QuitRelease`, `Transforms`, `Cleanup` |
 | `UiHarness` | Main view surfaces, status line, panel locking | `State`, `Press <path under MainView>` (e.g. `SurfaceNext`, `RecordButtonPanel/Trigger`), `Record`, `Play`, `StopPlayback`, `Pulses <seconds>`, `RecordColour` |
 
 In `TemperaTestHarness`, `play` reaches the frame manager through `Update`, so put `play` and the next step in
