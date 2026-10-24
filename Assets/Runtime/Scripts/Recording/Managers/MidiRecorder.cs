@@ -116,7 +116,7 @@ namespace TemperaMental.Recording
             pendingTimeoutTicks = (long)(Stopwatch.Frequency * PendingTimeoutSeconds);
         }
 
-        // --- settings (Record settings view) ---
+        // --- settings (the Record page row; the source comes from which Record button is pressed) ---
 
         public void SetSource(RecordSource newSource)
         {
@@ -140,8 +140,23 @@ namespace TemperaMental.Recording
 
         public RecordState State => state;
 
-        // --- Record button ---
+        // --- Record buttons ---
 
+        // the Record page's Record: arm, start or stop recording from the Tempera
+        public void ToggleRecordTempera()
+        {
+            SetSource(RecordSource.Tempera);
+            ToggleRecord();
+        }
+
+        // the Transform page's Rec results: each transform result becomes a new frame
+        public void ToggleRecordTransforms()
+        {
+            SetSource(RecordSource.Transforms);
+            ToggleRecord();
+        }
+
+        // toggles recording for the current source
         public void ToggleRecord()
         {
             if (source == RecordSource.Transforms)

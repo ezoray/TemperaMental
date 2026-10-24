@@ -38,8 +38,8 @@ namespace TemperaMental.Applications.Config
         // record settings
         public string RecordLengthOffText = "Off";
 
-        // the mode last shown (Play, Transform, Edit, Record, Sound, Settings)
-        public string AppModePrefsKey = "AppMode";
+        // the page last shown (Compose, Play, Transform, Record, Setup)
+        public string AppPagePrefsKey = "AppPage";
 
         // the canvas display when no canvas is chosen
         public string NoCanvasText = "-";

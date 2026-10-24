@@ -7,13 +7,10 @@ namespace TemperaMental.UI.Settings.App
 {
     public class RecordSettingsUIManager : MonoBehaviour
     {
-        [SerializeField] TextMeshProUGUI source;
         [SerializeField] TextMeshProUGUI trigger;
         [SerializeField] TextMeshProUGUI mode;
         [SerializeField] TextMeshProUGUI startState;
         [SerializeField] TextMeshProUGUI length;
-
-        public void ActionOnSourceChanged(RecordSource value) => source.text = value.ToString();
 
         public void ActionOnTriggerChanged(RecordTrigger value) => trigger.text = value.ToString();
 

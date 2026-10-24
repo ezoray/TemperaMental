@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace TemperaMental.Ui.Settings.App
 {
-    // 2-Lane per colour: Edit mode's colour buttons are dimmed while their 2-Lane is off. On / Off labels are optional
+    // 2-Lane per colour: the Setup page's colour buttons are dimmed while their 2-Lane is off. On / Off labels are optional
     public class EmitterSettingsUIManager : MonoBehaviour
     {
         [SerializeField] List<TextMeshProUGUI> twoLaneLabels = new List<TextMeshProUGUI>();

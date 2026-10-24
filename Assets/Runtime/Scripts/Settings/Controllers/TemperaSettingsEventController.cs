@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace TemperaMental.Settings
 {
-    // the Control channel (Settings mode) and Follow Tempera (Edit mode) are saved as soon as they change
+    // the Control channel (Setup page) and Follow Tempera (Compose page) are saved as soon as they change
     public class TemperaSettingsEventController : MonoBehaviour
     {
         [SerializeField] TemperaSettingsManager settingsManager;

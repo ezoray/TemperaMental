@@ -7,7 +7,7 @@ namespace TemperaMental.Settings
     {
         [SerializeField] ClockSettingsManager settingsManager;
 
-        // Play mode's Clock button steps through Internal, Send and Receive
+        // the Play page's Clock button steps through Internal, Send and Receive
         public void OnClickNextClockMode()
         {
             settingsManager.StepClockMode(1);
@@ -20,7 +20,7 @@ namespace TemperaMental.Settings
             settingsManager.SaveClockSettings();
         }
 
-        // -1 or +1 from the < and > buttons in Settings mode
+        // the Play page's To and From buttons step forward through the choices (+1)
         public void OnClickClockFrom(int directionValue)
         {
             settingsManager.StepClockFrom(directionValue);

@@ -24,6 +24,7 @@ namespace TemperaMental.UI.Display.MainView
         bool isHolding;
 
         ClockMode clockMode;
+        bool isClockToNone;
         bool isExternalClockPresent;
         RecordState recordState;
         RecordTrigger recordTrigger;
@@ -132,6 +133,13 @@ namespace TemperaMental.UI.Display.MainView
             RefreshClockStatus();
         }
 
+        // where the clock goes: "" is the Out device, ClockToNoneValue is nowhere
+        public void ActionOnClockToChanged(string choice)
+        {
+            isClockToNone = choice == ConfigRegistry.Midi.ClockToNoneValue;
+            RefreshClockStatus();
+        }
+
         public void ActionOnExternalClockPresenceChanged(bool isPresent)
         {
             isExternalClockPresent = isPresent;
@@ -192,7 +200,7 @@ namespace TemperaMental.UI.Display.MainView
 
             clockStatusText.text = clockMode switch
             {
-                ClockMode.Send => "Sending clock",
+                ClockMode.Send => isClockToNone ? "Clock to: none" : "Sending clock",
                 ClockMode.Receive => isExternalClockPresent ? "External clock" : "No clock",
                 _ => "Internal clock"
             };

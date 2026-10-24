@@ -10,8 +10,8 @@ namespace TemperaMental.UI.State
         [Header("Order: Device, File, Frame, Transform, Direction, Record, Playback, Create, Select, Clock")]
         [SerializeField] List<CanvasGroup> panels;
 
-        // more panels gated by one of the states above, e.g. Transform mode's Simple / Individual buttons sit apart
-        // from the transform column but follow its state
+        // more panels gated by one of the states above, e.g. the Transform page's row sits apart from the transform
+        // column but follows its state
         [Serializable]
         struct GatedPanel
         {

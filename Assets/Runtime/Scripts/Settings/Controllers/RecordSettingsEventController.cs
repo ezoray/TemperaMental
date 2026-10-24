@@ -2,16 +2,10 @@ using UnityEngine;
 
 namespace TemperaMental.Settings
 {
-    // each Record mode button steps its setting to the next choice and saves it straight away
+    // each button in the Record page's row steps its setting to the next choice and saves it straight away
     public class RecordSettingsEventController : MonoBehaviour
     {
         [SerializeField] RecordSettingsManager settingsManager;
-
-        public void OnClickSource()
-        {
-            settingsManager.StepSource();
-            settingsManager.SaveRecordSettings();
-        }
 
         public void OnClickTrigger()
         {

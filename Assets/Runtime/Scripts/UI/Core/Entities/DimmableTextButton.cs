@@ -13,7 +13,7 @@ namespace TemperaMental.UI.Core
         // hack this needs to be wired under Debug in the inspector as the field does not show normally
         [SerializeField] TextMeshProUGUI buttonText;
 
-        // optional small caption above the value (mode buttons show "CLOCK" over "Internal"); dims with it
+        // optional small caption beside the value (row buttons show "CLOCK" before "Send"); dims with it
         [SerializeField] TextMeshProUGUI captionText;
 
         float alphaValue;

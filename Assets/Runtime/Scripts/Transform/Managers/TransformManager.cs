@@ -225,6 +225,9 @@ namespace TemperaMental.Transforms
             }
         }
 
+        // the Transform page's Mode button: Simple or Individual for the selected transform
+        public void ChangeCurrentTransformMode() => ChangeTransformMode(currentTransformType);
+
         public void SetTransformType(TransformType transformType)
         {
             if (transformType != currentTransformType)

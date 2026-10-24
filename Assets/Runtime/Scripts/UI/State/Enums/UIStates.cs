@@ -16,7 +16,7 @@ namespace TemperaMental.UI.State
         Playback = 64,
         Creation = 128,
         Selection = 256,
-        Clock = 512,        // the clock mode and clock devices (Play and Settings modes)
+        Clock = 512,        // the Play page's clock row (clock mode, To, From, Start/Stop)
 
         // presets
         All = Device | File | Frame | Transform | Direction | Record | Playback | Creation | Selection | Clock,

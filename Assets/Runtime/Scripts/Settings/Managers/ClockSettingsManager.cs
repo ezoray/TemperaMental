@@ -51,6 +51,11 @@ namespace TemperaMental.Settings
             clockTo = PlayerPrefs.GetString(clockToPrefsKey, "");
         }
 
+        public ClockMode ClockMode => clockMode;
+
+        // Send with nowhere to send it
+        public bool IsClockToNone => clockTo == clockToNone;
+
         // raised in Start rather than Awake so every listener has finished its own Awake
         private void Start()
         {

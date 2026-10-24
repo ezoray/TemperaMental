@@ -67,20 +67,18 @@ namespace TemperaMental.Applications.Config
         public int ControlSelectFirstNote = 96; // 96–99 select emitter 1–4
         public int ControlArmFirstNote = 100; // 100–107 arm tracks 1–8
 
-        // Tempera settings view: the Control channel listened to, and whether the app follows the hardware
+        // the Tempera's Control channel listened to (Setup page), and whether the app follows the hardware (Compose page)
         public int DefaultControlChannel = 16;
         public bool DefaultFollowTempera = true;
         public string ControlChannelPrefsKey = "TemperaControlChannel";
         public string FollowTemperaPrefsKey = "FollowTempera";
 
-        // Record settings view: what the Record button records and how, saved when the view closes
-        public int DefaultRecordSource = 0; // Tempera
+        // recording from the Tempera (the Record page's row), saved as soon as they change
         public int DefaultRecordTrigger = 2; // Either
         public int DefaultRecordMode = 0; // Replace
         public int DefaultRecordStartState = 0; // Clear
         public int DefaultRecordLengthIndex = 0; // Off
         public int[] RecordLengths = { 0, 1, 2, 4, 8, 16, 32, 64 }; // frames; 0 is no limit
-        public string RecordSourcePrefsKey = "RecordSource";
         public string RecordTriggerPrefsKey = "RecordTrigger";
         public string RecordModePrefsKey = "RecordMode";
         public string RecordStartStatePrefsKey = "RecordStartState";

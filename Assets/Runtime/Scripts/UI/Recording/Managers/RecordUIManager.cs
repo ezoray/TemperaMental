@@ -1,21 +1,25 @@
 using System.Collections;
 using TemperaMental.Applications.Config;
 using TemperaMental.Core;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace TemperaMental.UI.Recording
 {
-    // the Record button: lit while recording (transform results or the Tempera), flashing while armed
+    // The Record page's Record button flashes while armed and is lit while recording from the Tempera. The Transform
+    // page's Rec results button is lit (and says ON) while transform results are recorded.
     public class RecordUIManager : MonoBehaviour
     {
         [SerializeField] Button recordButton;
+
+        [SerializeField] Button transformRecordButton;
+        [SerializeField] TextMeshProUGUI transformRecordValue;
 
         Color defaultOffColor;
         Color recordOnColor;
         float flashInterval;
 
-        bool isRecordingTransforms;
         RecordState temperaState;
         Coroutine flashing;
 
@@ -29,19 +33,15 @@ namespace TemperaMental.UI.Recording
         // recording transform results
         public void ActionOnRecordStateChanged(bool isOn)
         {
-            isRecordingTransforms = isOn;
-            Refresh();
+            if (transformRecordButton != null) transformRecordButton.image.color = isOn ? recordOnColor : defaultOffColor;
+            if (transformRecordValue != null) transformRecordValue.text = isOn ? ConfigRegistry.UI.OnText : ConfigRegistry.UI.OffText;
         }
 
         // recording from the Tempera
         public void ActionOnTemperaRecordStateChanged(RecordState state)
         {
             temperaState = state;
-            Refresh();
-        }
 
-        private void Refresh()
-        {
             if (flashing != null)
             {
                 StopCoroutine(flashing);
@@ -54,8 +54,7 @@ namespace TemperaMental.UI.Recording
                 return;
             }
 
-            bool isOn = isRecordingTransforms || temperaState == RecordState.Recording;
-            recordButton.image.color = isOn ? recordOnColor : defaultOffColor;
+            recordButton.image.color = temperaState == RecordState.Recording ? recordOnColor : defaultOffColor;
         }
 
         private IEnumerator Flash()

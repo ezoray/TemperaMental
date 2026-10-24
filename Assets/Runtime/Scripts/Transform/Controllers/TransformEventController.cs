@@ -11,6 +11,8 @@ namespace TemperaMental.Transforms
         [SerializeField] TransformManager transformManager;
         [SerializeField] FrameManager frameManager;
 
+        public void OnClickChangeCurrentTransformMode() => transformManager.ChangeCurrentTransformMode();
+
         public void OnClickChangeTransformMode(int transformType)
         {
             transformManager.ChangeTransformMode((TransformType)transformType);
